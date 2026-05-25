@@ -1,589 +1,433 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anchor — TasNetworks Relocation Companion</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          tn: { navy: '#002E5D', blue: '#00B4D8', cyan: '#48CAE4', light: '#CAF0F8', ink: '#0A1628', panel: '#0F2137' },
-        },
-        fontFamily: {
-          sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
-          display: ['Syne', 'system-ui', 'sans-serif'],
-        },
-      },
-    },
-  };
-</script>
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
+    --bs-primary: #002E5D;
+    --bs-primary-rgb: 0, 46, 93;
+    --bs-info: #00B4D8;
+    --bs-info-rgb: 0, 180, 216;
+    --bs-body-font-family: 'Nunito', system-ui, sans-serif;
+    --bs-body-bg: #f6f9fc;
+    --bs-border-color: #dee2e6;
     --navy: #002E5D;
     --blue: #00B4D8;
     --cyan: #48CAE4;
     --light: #CAF0F8;
-    --ink: #0A1628;
-    --muted: #5C6B7A;
-    --surface: #FFFFFF;
-    --shell: #F6F9FC;
-    --panel: #0F2137;
-    --panel-hover: #152A45;
-    --grad: linear-gradient(145deg, #001428 0%, #002E5D 38%, #0077B6 100%);
-    --accent-glow: 0 0 40px rgba(0, 180, 216, .35);
-    --radius: 14px;
-    --radius-lg: 20px;
+    --ink: #212529;
+    --muted: #6c757d;
+    --shell: #f6f9fc;
     --ease: cubic-bezier(.16, 1, .3, 1);
+    --sa-rail-w: 72px;
+    --sa-sub-w: 260px;
   }
-  * { box-sizing: border-box; }
-  html, body { overflow-x: hidden; max-width: 100vw; }
-  body {
-    font-family: 'DM Sans', system-ui, sans-serif;
-    background: var(--shell);
-    color: var(--ink);
-    -webkit-font-smoothing: antialiased;
-  }
-  .font-display { font-family: Syne, system-ui, sans-serif; letter-spacing: -0.03em; }
-  h1, h2, h3, .font-display { font-family: Syne, system-ui, sans-serif; }
+  html, body { height: 100%; margin: 0; overflow: hidden !important; max-width: 100vw; }
+  body { font-family: var(--bs-body-font-family); background: var(--shell); -webkit-font-smoothing: antialiased; }
+  body.body-lock { overflow: hidden !important; height: 100% !important; }
   [x-cloak] { display: none !important; }
 
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes popIn { 0% { transform: scale(.92); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-  @keyframes spinR { to { transform: rotate(360deg); } }
-  @keyframes spinL { to { transform: rotate(-360deg); } }
-  @keyframes glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,153,204,.35); } 50% { box-shadow: 0 0 0 14px rgba(0,153,204,0); } }
-  @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
-  @keyframes slide { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
-  @keyframes mesh { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(2%,-2%) scale(1.05); } }
-
-  .fu { animation: fadeUp .5s var(--ease) both; }
-  .fi { animation: fadeIn .35s var(--ease) both; }
-  .pop { animation: popIn .55s var(--ease) both; }
-  .r1 { animation: spinR 3.5s linear infinite; }
-  .r2 { animation: spinL 2.5s linear infinite; }
-  .r3 { animation: spinR 5s linear infinite; }
-  .glow { animation: glow 2.2s ease-in-out infinite; }
-  .bdot { animation: bounce 1.1s ease-in-out infinite; }
-  .msg { animation: slide .28s var(--ease) both; }
-  .toast { animation: fadeUp .35s var(--ease) both; }
-
-  /* Surfaces */
-  .grad { background: var(--grad); }
-  .grad-r { background: linear-gradient(135deg, #0099CC, #002E5D); }
-  .mesh-bg {
-    background: var(--grad);
-    position: relative;
-    overflow: hidden;
-  }
-  .mesh-bg::before,
-  .mesh-bg::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: .45;
-    animation: mesh 18s ease-in-out infinite;
-    pointer-events: none;
-  }
-  .mesh-bg::before { width: 480px; height: 480px; background: #00B4D8; top: -140px; right: -100px; opacity: .35; }
-  .mesh-bg::after { width: 400px; height: 400px; background: #023E8A; bottom: -120px; left: -80px; animation-delay: -9s; opacity: .5; }
-
-  .shell-bg {
-    background-color: var(--shell);
-    background-image:
-      radial-gradient(circle at 1px 1px, rgba(0,46,93,.04) 1px, transparent 0);
-    background-size: 24px 24px;
-  }
-
-  .glass {
-    background: rgba(255,255,255,.08);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,.12);
-  }
-
-  .card {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(10, 22, 40, .06);
-    box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 4px 24px -6px rgba(10, 22, 40, .08);
-    transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s;
-  }
-  .card-interactive:hover {
-    transform: translateY(-3px);
-    border-color: rgba(0, 180, 216, .25);
-    box-shadow: 0 12px 40px -10px rgba(0, 46, 93, .15);
-  }
-  .card-elevated { box-shadow: 0 24px 48px -16px rgba(10, 22, 40, .12); }
-
-  .hero-panel {
-    background: var(--grad);
-    border-radius: var(--radius-lg);
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 24px 60px -16px rgba(0, 30, 60, .45);
-  }
-  .hero-panel::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 60%;
-    height: 200%;
-    background: linear-gradient(105deg, transparent, rgba(72, 202, 228, .15), transparent);
-    transform: rotate(-12deg);
-    pointer-events: none;
-  }
-  .hero-panel::after {
-    content: '';
-    position: absolute;
+  /* Only ONE full screen visible at a time (not Alpine x-show — Bootstrap can override that) */
+  .screen-layer {
+    display: none !important;
+    position: fixed;
     inset: 0;
-    background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 32V0h2v30h30v2H0z' fill='%23fff' fill-opacity='.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-  }
-
-  /* App frame: dark dock + light stage */
-  .app-frame { display: flex; min-height: 100vh; max-height: 100vh; overflow: hidden; }
-  .dock {
-    width: 17rem;
-    flex-shrink: 0;
-    background: linear-gradient(180deg, #0A1628 0%, var(--panel) 100%);
-    border-right: 1px solid rgba(255,255,255,.06);
-    display: flex;
-    flex-direction: column;
-    color: #94A3B8;
-  }
-  .dock-brand {
-    padding: 1.35rem 1.25rem;
-    border-bottom: 1px solid rgba(255,255,255,.06);
-  }
-  .dock-logo {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--blue), #0077B6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--accent-glow);
-  }
-  .dock-link {
-    display: flex;
-    align-items: center;
-    gap: .75rem;
-    width: 100%;
-    padding: .7rem 1rem;
-    margin: 0 .65rem;
-    width: calc(100% - 1.3rem);
-    border-radius: 12px;
-    font-size: .875rem;
-    font-weight: 600;
-    color: #94A3B8;
-    transition: all .22s var(--ease);
-    border: 1px solid transparent;
-    cursor: pointer;
-    text-align: left;
-  }
-  .dock-link:hover { background: var(--panel-hover); color: #E2E8F0; }
-  .dock-link.on {
-    background: linear-gradient(90deg, rgba(0,180,216,.2), rgba(0,180,216,.05));
-    color: #fff;
-    border-color: rgba(0, 180, 216, .35);
-    box-shadow: inset 3px 0 0 var(--blue);
-  }
-  .dock-link.on .dock-svg { color: var(--cyan); }
-  .dock-svg { width: 1.25rem; height: 1.25rem; flex-shrink: 0; color: #64748B; display: flex; align-items: center; justify-content: center; }
-  .dock-svg svg { width: 1.25rem; height: 1.25rem; }
-  .dock-badge {
-    margin-left: auto;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #F43F5E;
-    box-shadow: 0 0 8px #F43F5E;
-  }
-  .main-stage { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--shell); }
-  .page-head {
-    flex-shrink: 0;
-    padding: 1.25rem 1.5rem;
-    background: rgba(255,255,255,.75);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(10, 22, 40, .06);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .main-scroll { flex: 1; overflow-y: auto; padding: 1.5rem; }
-  .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1rem; max-width: 72rem; margin: 0 auto; }
-  .span-12 { grid-column: span 12; }
-  .span-8 { grid-column: span 12; }
-  .span-6 { grid-column: span 12; }
-  .span-4 { grid-column: span 12; }
-  @media (min-width: 768px) {
-    .span-8 { grid-column: span 8; }
-    .span-6 { grid-column: span 6; }
-    .span-4 { grid-column: span 4; }
-  }
-  @media (min-width: 1024px) {
-    .span-4 { grid-column: span 4; }
-  }
-
-  /* Login split */
-  .login-split { display: grid; min-height: 100vh; }
-  @media (min-width: 1024px) { .login-split { grid-template-columns: 1.1fr 1fr; } }
-  .login-brand {
-    background: var(--grad);
-    position: relative;
+    z-index: 50;
     overflow: hidden;
+    background: var(--shell);
+  }
+  .screen-layer.screen-on { display: block !important; }
+  .screen-layer.login-layer.screen-on { display: grid !important; min-height: 100%; overflow-y: auto; }
+  .screen-layer.onboard-layer.screen-on { display: flex !important; min-height: 100%; overflow-y: auto; }
+  .screen-layer.match-layer.screen-on,
+  .screen-layer.buddy-layer.screen-on { display: flex !important; min-height: 100%; overflow-y: auto; }
+  .screen-layer.hr-layer.screen-on { overflow-y: auto; }
+  .screen-layer.outlook-frame.screen-on {
+    display: flex !important;
+    flex-direction: row;
+    z-index: 60;
+  }
+
+  /* Only ONE main tab in the grid cell; scroll inside the active panel only */
+  .main-pane-stack {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template: 1fr / 1fr;
+    overflow: hidden;
+  }
+  .sa-tab-panel {
+    grid-area: 1 / 1;
+    min-height: 0;
+    display: none !important;
+    visibility: hidden !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
+  .sa-tab-panel.panel-on {
+    display: flex !important;
+    flex-direction: column;
+    visibility: visible !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    pointer-events: auto !important;
+  }
+  .sa-tab-panel.panel-on > .sa-content { flex: 0 0 auto; }
+
+  /* Bootstrap display utilities override Alpine x-show — use step-on classes */
+  .onboard-step, .match-reveal-card { display: none !important; }
+  .onboard-step.step-on, .match-reveal-card.step-on { display: block !important; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popIn { 0% { transform: scale(.96); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes spinR { to { transform: rotate(360deg); } }
+  @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px); } }
+  .fu { animation: fadeUp .45s var(--ease) both; }
+  .fi { animation: fadeIn .3s var(--ease) both; }
+  .pop { animation: popIn .4s var(--ease) both; }
+  .r1 { animation: spinR 3s linear infinite; }
+  .bdot { animation: bounce 1s ease-in-out infinite; }
+  .msg { animation: fadeUp .25s var(--ease) both; }
+
+  .login-split { display: grid; min-height: 100vh; }
+  @media (min-width: 992px) { .login-split { grid-template-columns: 1.05fr 1fr; } }
+  .login-brand-panel {
+    background: linear-gradient(160deg, #001428 0%, #002E5D 45%, #0077B6 100%);
     padding: 3rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    color: #fff;
   }
-  .login-form-panel {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    background: #fff;
+  .login-form-panel { display: flex; align-items: center; justify-content: center; padding: 2rem; background: #fff; }
+  .brand-logo-box {
+    width: 3rem; height: 3rem; border-radius: .5rem;
+    background: linear-gradient(135deg, var(--blue), #0077B6);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .auth-panel-primary {
+    background: linear-gradient(160deg, #001428 0%, #002E5D 50%, #0077B6 100%);
+    color: #fff;
   }
 
-  .topbar { background: rgba(255,255,255,.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(10,22,40,.06); }
-  .brand-mark { background: linear-gradient(135deg, var(--blue), #0077B6); border-radius: 12px; padding: 6px; box-shadow: var(--accent-glow); }
-  .sidebar-panel { background: var(--panel); color: #94A3B8; }
-
-  .nav-item { display: flex; align-items: center; gap: .75rem; padding: .65rem .85rem; border-radius: 12px; font-size: .875rem; font-weight: 600; transition: all .2s var(--ease); width: 100%; text-align: left; cursor: pointer; }
-  .nav-on { background: linear-gradient(90deg, rgba(0,180,216,.25), transparent); color: #fff; box-shadow: inset 3px 0 0 var(--blue); }
-  .nav-off { color: #94A3B8; }
-  .nav-off:hover { background: var(--panel-hover); color: #E2E8F0; }
-  .nav-icon { width: 2.25rem; height: 2.25rem; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.06); flex-shrink: 0; }
-
-  /* Forms & buttons */
-  .input-field,
-  input[type=text], input[type=email], select {
+  .outlook-frame {
     width: 100%;
-    border: 1px solid #e2e8f0;
-    border-radius: .75rem;
-    padding: .7rem 1rem;
-    font-size: .875rem;
-    color: var(--ink);
-    background: #fff;
-    transition: border-color .2s, box-shadow .2s;
+    height: 100%;
+    max-height: 100vh;
+    overflow: hidden;
   }
-  .input-field:focus,
-  input[type=text]:focus, input[type=email]:focus, select:focus {
-    outline: none;
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(0,153,204,.18);
+  .icon-rail {
+    width: var(--sa-rail-w); flex-shrink: 0; background: #fff;
+    border-right: 1px solid var(--bs-border-color);
+    display: flex; flex-direction: column; align-items: center;
+    padding: .85rem .5rem; gap: .35rem;
   }
+  .rail-btn {
+    width: 52px; height: 52px; border-radius: .75rem; border: none; background: transparent;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    position: relative; transition: background .15s, transform .12s;
+  }
+  .rail-btn:hover { background: #f1f3f5; }
+  .rail-btn:active { transform: scale(.96); }
+  .rail-btn.active {
+    background: var(--bs-primary-bg-subtle, #e7f1ff);
+    box-shadow: inset 3px 0 0 var(--bs-primary);
+  }
+  .rail-btn.active .rail-icon {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--bs-primary), 0 4px 12px rgba(0,46,93,.2);
+  }
+  .rail-connected::after {
+    content: ''; position: absolute; bottom: 8px; right: 8px;
+    width: 9px; height: 9px; border-radius: 50%; background: #198754; border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .rail-icon {
+    width: 36px; height: 36px; border-radius: .625rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05rem; color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,.14);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .rail-btn:hover .rail-icon { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.18); }
+  .rail-icon--anchor { background: linear-gradient(145deg, #001428, #002E5D 45%, #00B4D8); }
+  .rail-icon--teams { background: linear-gradient(145deg, #464775, #6264A7); }
+  .rail-icon--whatsapp { background: linear-gradient(145deg, #128C7E, #25D366); }
+  .rail-icon--facebook { background: linear-gradient(145deg, #166FE5, #1877F2); }
+  .rail-icon--instagram { background: linear-gradient(145deg, #f77737, #e1306c 50%, #833ab4); }
+  .rail-icon--events { background: linear-gradient(145deg, #002E5D, #0077B6); }
+  .rail-icon--spiritual { background: linear-gradient(145deg, #5c4d7d, #7b68a6); }
+  .rail-icon--marketplace { background: linear-gradient(145deg, #d97706, #f59e0b); }
+  .rail-icon--connections { background: linear-gradient(145deg, #495057, #64748b); }
+  .rail-divider {
+    width: 28px; height: 1px; background: var(--bs-border-color); margin: .25rem 0;
+  }
+  .rail-btn-logout {
+    width: 44px; height: 44px; border-radius: .625rem;
+    color: #6c757d; transition: background .15s, color .15s;
+  }
+  .rail-btn-logout:hover { background: #f8f9fa; color: #dc3545; }
+  .sub-item-icon {
+    width: 1.75rem; height: 1.75rem; border-radius: .4rem; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .9rem; color: var(--navy); background: #f1f3f5;
+  }
+  .sub-item.on .sub-item-icon { background: rgba(var(--bs-primary-rgb), .12); color: var(--bs-primary); }
+  .sub-pane {
+    width: var(--sa-sub-w); flex-shrink: 0; background: #fff;
+    border-right: 1px solid var(--bs-border-color);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sub-pane-head { padding: 1.25rem 1rem 1rem; border-bottom: 1px solid var(--bs-border-color); }
+  .sub-pane-title { font-weight: 700; font-size: 1.05rem; color: var(--ink); margin: 0; }
+  .sub-item {
+    display: flex; align-items: center; gap: .65rem; width: 100%;
+    padding: .5rem 1rem; border: none; background: transparent; text-align: left;
+    font-size: .875rem; font-weight: 500; color: #495057; cursor: pointer;
+    transition: background .12s, color .12s;
+  }
+  .sub-item:hover { background: #f8f9fa; color: var(--navy); }
+  .sub-item.on { background: rgba(var(--bs-primary-rgb), .08); color: var(--navy); font-weight: 600; border-left: 3px solid var(--bs-primary); padding-left: calc(1rem - 3px); }
+  .sub-item .badge-count { margin-left: auto; }
 
-  .btn-primary {
-    background: linear-gradient(135deg, #0077B6, #00B4D8);
-    color: #fff;
-    font-weight: 700;
-    border-radius: 12px;
-    padding: .85rem 1.35rem;
-    box-shadow: 0 4px 20px rgba(0, 119, 182, .35);
-    transition: transform .25s var(--ease), box-shadow .25s;
-    border: none;
-    cursor: pointer;
+  .main-stage {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    background: var(--shell);
+    overflow: hidden;
   }
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(0, 180, 216, .4);
+  .sa-topbar { flex: 0 0 auto; background: #fff; border-bottom: 1px solid var(--bs-border-color); z-index: 2; }
+  .main-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
-  .btn-ghost {
-    background: #fff;
-    color: var(--navy);
-    font-weight: 600;
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
-    padding: .65rem 1rem;
-    cursor: pointer;
-    transition: all .22s var(--ease);
-  }
-  .btn-ghost:hover { border-color: var(--blue); background: var(--light); color: var(--ink); }
+  .sa-content { max-width: 1400px; width: 100%; }
 
-  .chip {
-    border-radius: 9999px;
-    font-size: .75rem;
-    font-weight: 600;
-    padding: .35rem .85rem;
-    border: 1px solid transparent;
-    transition: all .2s var(--ease);
+  .sa-stat-card .stat-icon {
+    width: 48px; height: 48px; border-radius: .5rem;
+    display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
   }
-  .chip-on {
-    background: linear-gradient(135deg, var(--navy), #0077B6);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 46, 93, .25);
-  }
-  .chip-off {
-    background: #f8fafc;
-    color: #475569;
-    border-color: #e2e8f0;
-  }
-  .chip-off:hover { border-color: #cbd5e1; background: #f1f5f9; }
+  .sa-stat-card .stat-value { font-size: 1.5rem; font-weight: 800; line-height: 1.2; color: var(--navy); }
+  .sa-stat-card .stat-label { font-size: .75rem; color: var(--muted); margin: 0; }
 
-  .pill-select {
-    border: 1.5px solid #e2e8f0;
-    border-radius: var(--radius);
-    transition: all .2s var(--ease);
-  }
-  .pill-select.active {
-    border-color: var(--blue);
-    background: rgba(0,153,204,.08);
-    box-shadow: 0 0 0 3px rgba(0,153,204,.12);
-    color: var(--navy);
-    font-weight: 700;
-  }
-
-  /* Chat */
-  .chat-shell {
-    background: linear-gradient(180deg, #fff 0%, #F8FBFD 100%);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(10, 22, 40, .06);
-    padding: 1.25rem;
-    min-height: 420px;
-  }
-  .bai {
-    background: #F1F5F9;
-    border: none;
-    color: var(--ink);
-    border-radius: 18px 18px 18px 4px;
-  }
-  .busr {
-    background: linear-gradient(135deg, #0077B6, #00B4D8);
-    color: #fff;
-    border-radius: 18px 18px 4px 18px;
-    box-shadow: 0 4px 16px rgba(0, 119, 182, .3);
-  }
-
-  .rlo { background: #D1FAE5; color: #065F46; }
-  .rmi { background: #FEF3C7; color: #92400E; }
-  .rhi { background: #FEE2E2; color: #991B1B; }
-
-  .scr { overflow-y: auto; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
-  .scr::-webkit-scrollbar { width: 5px; }
-  .scr::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-  input[type=range] { accent-color: var(--blue); height: 6px; }
-
-  .tag-health { background: #DBEAFE; color: #1E40AF; }
-  .tag-family { background: #FCE7F3; color: #9D174D; }
-  .tag-admin { background: #F1F5F9; color: #334155; }
-  .tag-people { background: #D1FAE5; color: #065F46; }
-  .tag-community { background: #EDE9FE; color: #4C1D95; }
-  .tag-work { background: #FEF3C7; color: #78350F; }
-  .tag-wellbeing { background: #ECFDF5; color: #065F46; }
-  .tag-benefits { background: #FFF7ED; color: #9A3412; }
-  .tag-logistics { background: #E0F2FE; color: #0369A1; }
-
-  .day-badge {
-    background: linear-gradient(135deg, var(--light), #fff);
-    color: var(--navy);
-    font-weight: 700;
-    border: 1px solid rgba(0, 180, 216, .3);
-    font-size: .75rem;
-  }
-  .stat-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: .35rem;
-    padding: .35rem .75rem;
-    border-radius: 999px;
-    font-size: .7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    background: rgba(0, 180, 216, .12);
-    color: var(--blue);
-    border: 1px solid rgba(0, 180, 216, .2);
-  }
   .wallet-card {
     background: linear-gradient(135deg, #001428, #002E5D 50%, #0077B6);
-    border-radius: 16px;
-    padding: 1.25rem;
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-    min-height: 140px;
+    border-radius: .5rem; padding: 1.25rem; color: #fff; position: relative; overflow: hidden; min-height: 140px;
   }
   .wallet-card::after {
-    content: '';
-    position: absolute;
-    right: -20%;
-    top: -40%;
-    width: 60%;
-    height: 120%;
+    content: ''; position: absolute; right: -20%; top: -40%; width: 60%; height: 120%;
     background: radial-gradient(circle, rgba(72, 202, 228, .25), transparent 70%);
   }
 
-  .life-phase {
-    border-left: 3px solid var(--blue);
-    border-radius: 0 .75rem .75rem 0;
-  }
+  .chat-shell { background: #fff; border-radius: .5rem; border: 1px solid var(--bs-border-color); padding: 1.25rem; min-height: 420px; }
+  .bai { background: #f1f3f5; color: var(--ink); border-radius: 1rem 1rem 1rem .25rem; }
+  .busr { background: var(--bs-primary); color: #fff; border-radius: 1rem 1rem .25rem 1rem; }
 
-  .service-tile {
-    transition: transform .2s var(--ease), box-shadow .2s;
-  }
-  .service-tile:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px -8px rgba(0,46,93,.15);
-  }
-  .service-tile:active { transform: translateY(0); }
+  .rlo { background: #d1e7dd; color: #0f5132; }
+  .rmi { background: #fff3cd; color: #664d03; }
+  .rhi { background: #f8d7da; color: #842029; }
 
-  .progress-track {
-    background: #e2e8f0;
-    border-radius: 9999px;
-    overflow: hidden;
-    height: 6px;
-  }
-  .progress-fill {
-    background: linear-gradient(90deg, var(--navy), var(--blue));
-    border-radius: 9999px;
-    height: 100%;
-    transition: width .5s var(--ease);
-  }
+  .scr { overflow-y: auto; scrollbar-width: thin; scrollbar-color: #ced4da transparent; }
+  .scr::-webkit-scrollbar { width: 5px; }
+  .scr::-webkit-scrollbar-thumb { background: #ced4da; border-radius: 4px; }
 
-  /* Outlook-style: icon rail + sub-pane */
-  .outlook-frame { display: flex; min-height: 100vh; max-height: 100vh; overflow: hidden; }
-  .icon-rail {
-    width: 52px;
-    flex-shrink: 0;
-    background: #F3F2F1;
-    border-right: 1px solid #E1DFDD;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: .5rem 0;
-    gap: 2px;
+  .tag-health { background: #cfe2ff; color: #084298; }
+  .tag-family { background: #f8d7da; color: #842029; }
+  .tag-admin { background: #e9ecef; color: #495057; }
+  .tag-people { background: #d1e7dd; color: #0f5132; }
+  .tag-community { background: #e2d9f3; color: #432874; }
+  .tag-work { background: #fff3cd; color: #664d03; }
+  .tag-wellbeing { background: #d1e7dd; color: #0f5132; }
+  .tag-benefits { background: #ffe5d0; color: #984c0c; }
+  .tag-logistics { background: #cff4fc; color: #055160; }
+
+  .life-phase { border-left: 3px solid var(--bs-info); }
+  .pill-select { border: 1px solid var(--bs-border-color); border-radius: .5rem; transition: all .15s; background: #fff; }
+  .pill-select.active { border-color: var(--bs-info); background: rgba(var(--bs-info-rgb), .08); box-shadow: 0 0 0 .2rem rgba(var(--bs-info-rgb), .15); color: var(--navy); font-weight: 700; }
+  .chip-on.btn, .chip-off.btn { font-size: .75rem; padding: .35rem .75rem; }
+  .chip-on { background: var(--bs-primary); color: #fff; border-color: var(--bs-primary); }
+  .chip-off { background: #fff; color: #495057; border-color: var(--bs-border-color); }
+
+  .service-tile { transition: transform .15s, box-shadow .15s; }
+  .service-tile:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important; }
+
+  .listing-card { border: 1px solid var(--bs-border-color); border-radius: .5rem; overflow: hidden; transition: box-shadow .2s; background: #fff; }
+  .listing-card:hover { box-shadow: 0 .5rem 1rem rgba(0,0,0,.08); cursor: pointer; }
+
+  .sa-panel-primary { background: linear-gradient(135deg, #002E5D, #0077B6); color: #fff; border: none; }
+  .card-interactive { transition: transform .15s, box-shadow .15s; }
+  .card-interactive:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1.25rem rgba(0,46,93,.1)!important; }
+
+  /* Social hub pages */
+  .hub-hero {
+    border-radius: .75rem; padding: 1.5rem 1.75rem; color: #fff; margin-bottom: 1.25rem;
+    position: relative; overflow: hidden; border: 0;
   }
-  .rail-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    transition: background .15s;
+  .hub-hero::after {
+    content: ''; position: absolute; right: -8%; top: -35%; width: 42%; height: 130%;
+    background: radial-gradient(circle, rgba(255,255,255,.14), transparent 68%); pointer-events: none;
   }
-  .rail-btn:hover { background: rgba(0,0,0,.06); }
-  .rail-btn.active { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
-  .rail-btn.active::before {
-    content: '';
-    position: absolute;
-    left: -4px;
-    top: 8px;
-    bottom: 8px;
-    width: 3px;
-    border-radius: 0 2px 2px 0;
-    background: var(--rail-accent, var(--blue));
+  .hub-hero-icon {
+    width: 3.25rem; height: 3.25rem; border-radius: .75rem; background: rgba(255,255,255,.22);
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
   }
-  .rail-connected::after {
-    content: '';
-    position: absolute;
-    bottom: 4px;
-    right: 4px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #22C55E;
-    border: 2px solid #F3F2F1;
+  .hub-hero--anchor { background: linear-gradient(135deg, #001428, #002E5D 55%, #0077B6); }
+  .hub-hero--teams { background: linear-gradient(135deg, #464775, #6264A7); }
+  .hub-hero--whatsapp { background: linear-gradient(135deg, #128C7E, #25D366); }
+  .hub-hero--facebook { background: linear-gradient(135deg, #166FE5, #1877F2); }
+  .hub-hero--instagram { background: linear-gradient(135deg, #f77737, #e1306c 45%, #833ab4); }
+  .hub-hero--events { background: linear-gradient(135deg, #002E5D, #00B4D8); }
+  .hub-hero--spiritual { background: linear-gradient(135deg, #5c4d7d, #7b68a6); }
+  .hub-hero--marketplace { background: linear-gradient(135deg, #0f5132, #198754); }
+  .hub-hero--connections { background: linear-gradient(135deg, #495057, #002E5D); }
+  .hub-stat-pill {
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.25);
+    border-radius: 2rem; padding: .3rem .75rem; font-size: .75rem; font-weight: 600;
   }
-  .rail-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff; }
-  .sub-pane {
-    width: 240px;
-    flex-shrink: 0;
-    background: #FAF9F8;
-    border-right: 1px solid #EDEBE9;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  .hub-card { border: 0; border-radius: .625rem; box-shadow: 0 .125rem .625rem rgba(0,46,93,.07); }
+  .hub-card .card-header { background: #fff; border-bottom: 1px solid var(--bs-border-color); font-weight: 700; font-size: .9rem; }
+  .social-group-card {
+    display: flex; align-items: center; gap: 1rem; padding: 1rem 1.15rem;
+    text-decoration: none; color: inherit; background: #fff; border-radius: .625rem;
+    border: 1px solid var(--bs-border-color); transition: transform .15s, box-shadow .15s, border-color .15s;
   }
-  .sub-pane-head { padding: 1rem 1rem .75rem; border-bottom: 1px solid #EDEBE9; }
-  .sub-pane-title { font-family: Syne, sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--ink); }
-  .sub-new-btn {
-    width: 100%;
-    margin-top: .75rem;
-    padding: .6rem 1rem;
-    border-radius: 8px;
-    border: none;
-    font-weight: 600;
-    font-size: .875rem;
+  .social-group-card:hover {
+    transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,46,93,.08);
+    border-color: rgba(var(--bs-info-rgb), .45); color: inherit;
+  }
+  .social-group-icon {
+    width: 3rem; height: 3rem; border-radius: .625rem; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 800; color: #fff;
+  }
+  .social-group-icon--fb { background: #1877F2; }
+  .social-group-icon--ig { background: linear-gradient(135deg, #f77737, #e1306c, #833ab4); }
+  .social-group-icon--wa { background: #25D366; }
+  .social-group-icon--ms { background: #6264A7; }
+  .events-toolbar .btn-filter { font-size: .8rem; font-weight: 600; border-radius: 2rem; }
+  .events-toolbar .btn-filter.active { background: var(--bs-primary); color: #fff; border-color: var(--bs-primary); }
+  .event-featured {
+    display: grid; grid-template-columns: 1fr; border-radius: .75rem; overflow: hidden;
+    background: #fff; box-shadow: 0 .35rem 1.25rem rgba(0,46,93,.1); border: 1px solid rgba(0,46,93,.06);
+  }
+  @media (min-width: 768px) {
+    .event-featured { grid-template-columns: 11rem 1fr; }
+  }
+  .event-featured-visual {
+    min-height: 10rem; padding: 1.25rem; display: flex; flex-direction: column; justify-content: flex-end;
+    color: #fff; position: relative;
+  }
+  .event-featured-visual .event-cat-icon {
+    width: 2.75rem; height: 2.75rem; border-radius: .625rem; background: rgba(255,255,255,.22);
+    display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: .75rem;
+  }
+  .event-featured-body { padding: 1.35rem 1.5rem; }
+  .event-card-v2 {
+    border: 0; border-radius: .75rem; overflow: hidden; background: #fff;
+    box-shadow: 0 .125rem .5rem rgba(0,46,93,.06); transition: transform .15s, box-shadow .15s;
+    height: 100%; display: flex; flex-direction: column;
+  }
+  .event-card-v2:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1.25rem rgba(0,46,93,.12); }
+  .event-card-v2-head {
+    height: 5rem; padding: 0 1.1rem; display: flex; align-items: center; justify-content: space-between;
     color: #fff;
-    cursor: pointer;
-    background: var(--sub-accent, var(--navy));
   }
-  .sub-item {
-    display: flex;
-    align-items: center;
-    gap: .65rem;
-    width: 100%;
-    padding: .55rem 1rem;
-    border: none;
-    background: transparent;
-    text-align: left;
-    font-size: .8125rem;
-    font-weight: 500;
-    color: #323130;
-    cursor: pointer;
-    transition: background .12s;
+  .event-card-v2-head .event-when-chip {
+    text-align: right; font-size: .75rem; font-weight: 700; line-height: 1.2;
+    background: rgba(255,255,255,.2); border-radius: .5rem; padding: .35rem .55rem;
   }
-  .sub-item:hover { background: #F3F2F1; }
-  .sub-item.on { background: #EDE9FE; font-weight: 600; }
-  .sub-item .badge-count {
-    margin-left: auto;
-    background: #C50F1F;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 10px;
+  .event-card-v2-head .event-when-chip .big { display: block; font-size: 1rem; }
+  .event-card-v2-body { padding: 1.1rem 1.15rem 1.15rem; flex: 1; display: flex; flex-direction: column; }
+  .event-card-v2-title { font-size: 1rem; font-weight: 800; color: var(--navy); line-height: 1.3; margin-bottom: .5rem; }
+  .event-meta-line { font-size: .8rem; color: var(--muted); display: flex; align-items: flex-start; gap: .4rem; margin-bottom: .35rem; }
+  .event-meta-line i { color: var(--bs-info); margin-top: .1rem; }
+  .event-cat-pill {
+    font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    padding: .2rem .5rem; border-radius: 2rem; background: rgba(var(--bs-primary-rgb), .08); color: var(--navy);
   }
-  .listing-card {
-    border: 1px solid #EDEBE9;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: box-shadow .2s;
+  .event-cat--food .event-featured-visual,
+  .event-cat--food .event-card-v2-head { background: linear-gradient(135deg, #c2410c, #f59e0b); }
+  .event-cat--outdoor .event-featured-visual,
+  .event-cat--outdoor .event-card-v2-head { background: linear-gradient(135deg, #0f5132, #20c997); }
+  .event-cat--community .event-featured-visual,
+  .event-cat--community .event-card-v2-head { background: linear-gradient(135deg, #002E5D, #00B4D8); }
+  .event-cat--arts .event-featured-visual,
+  .event-cat--arts .event-card-v2-head { background: linear-gradient(135deg, #5b21b6, #a855f7); }
+  .event-cat--sport .event-featured-visual,
+  .event-cat--sport .event-card-v2-head { background: linear-gradient(135deg, #b91c1c, #f97316); }
+  .event-cat--default .event-featured-visual,
+  .event-cat--default .event-card-v2-head { background: linear-gradient(135deg, #334155, #64748b); }
+  .hub-tag { font-size: .7rem; font-weight: 600; text-transform: capitalize; padding: .2rem .55rem; border-radius: 2rem; background: rgba(var(--bs-info-rgb), .12); color: var(--navy); }
+  .hub-list-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: .85rem 0; border-bottom: 1px solid var(--bs-border-color);
   }
-  .listing-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); }
-  @media (max-width: 1023px) {
-    .app-frame, .outlook-frame { flex-direction: row; max-height: none; min-height: 100vh; }
+  .hub-list-row:last-child { border-bottom: 0; }
+  .hub-empty {
+    text-align: center; padding: 2.5rem 1.5rem; background: #fff; border-radius: .625rem;
+    border: 1px dashed var(--bs-border-color);
+  }
+  .hub-empty-icon {
+    width: 4rem; height: 4rem; margin: 0 auto 1rem; border-radius: 50%;
+    background: var(--bs-primary-bg-subtle, #e7f1ff); color: var(--bs-primary);
+    display: flex; align-items: center; justify-content: center; font-size: 1.75rem;
+  }
+  .connect-cta {
+    border-radius: .75rem; padding: 2rem; text-align: center;
+    background: linear-gradient(180deg, #fff 0%, #f8f9fa 100%);
+    border: 1px solid var(--bs-border-color); box-shadow: 0 .25rem 1rem rgba(0,46,93,.06);
+  }
+  .connect-cta-icon {
+    width: 4rem; height: 4rem; border-radius: 1rem; margin: 0 auto 1rem;
+    display: flex; align-items: center; justify-content: center; font-size: 1.75rem; color: #fff;
+  }
+  .place-card { border: 0; border-radius: .625rem; box-shadow: 0 .125rem .625rem rgba(0,46,93,.07); }
+  .place-card .place-emoji {
+    width: 3.25rem; height: 3.25rem; border-radius: .625rem; background: var(--bs-primary-bg-subtle);
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+  }
+  .account-row {
+    display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: .5rem;
+    background: #fff; border: 1px solid var(--bs-border-color); margin-bottom: .75rem;
+  }
+  .account-row-icon {
+    width: 2.75rem; height: 2.75rem; border-radius: .5rem; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem;
+  }
+  .chat-feed { max-height: 14rem; overflow-y: auto; }
+  .chat-bubble { padding: .5rem .75rem; border-radius: .75rem; background: #f8f9fa; margin-bottom: .5rem; }
+  .chat-bubble .who { font-weight: 700; color: var(--navy); font-size: .8rem; }
+
+  .outlook-backdrop { position: fixed; inset: 0; z-index: 1040; background: rgba(0,0,0,.4); }
+  @media (max-width: 991.98px) {
+    .outlook-frame { height: 100vh; max-height: 100vh; }
     .sub-pane {
-      position: fixed;
-      left: 52px;
-      top: 0;
-      bottom: 0;
-      z-index: 45;
-      transform: translateX(-100%);
-      transition: transform .28s var(--ease);
-      box-shadow: 8px 0 24px rgba(0,0,0,.1);
+      position: fixed; left: var(--sa-rail-w); top: 0; bottom: 0; z-index: 1050;
+      width: var(--sa-sub-w);
+      transform: translateX(-100%); transition: transform .25s var(--ease);
+      box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
     }
     .sub-pane.open { transform: translateX(0); }
-    .dock-backdrop, .outlook-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 40;
-      background: rgba(10, 22, 40, .4);
-      backdrop-filter: blur(4px);
-    }
-    .main-stage { min-height: 100vh; width: 100%; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://alcdn.msauth.net/browser/2.38.4/js/msal-browser.min.js"></script>
 <script src="social-config.js"></script>
 </head>
-<body x-data="app()" x-cloak class="min-h-screen overflow-x-hidden w-full"
+<body x-data="app()" x-cloak
+      :class="{ 'body-lock': screen==='app' || screen==='hr-portal' }"
       @keydown.window="if($event.shiftKey && $event.key==='H') screen='hr-portal'">
 
 <!-- ══ Tassie Devil SVG Symbol Library ══ -->
@@ -666,80 +510,79 @@
 </svg>
 
 <!-- ═══════════════════════════════ LOGIN ════════════════════════════════ -->
-<div x-show="screen==='login'" class="login-split fu">
-  <section class="login-brand mesh-bg hidden lg:flex">
-    <div class="relative z-10 max-w-md">
-      <div class="dock-logo mb-8">
-        <svg viewBox="0 0 200 185" class="w-12 h-11" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
+<div id="screen-login" class="screen-layer login-layer login-split fu" :class="{ 'screen-on': screen==='login' }">
+  <section class="login-brand-panel d-none d-lg-flex">
+    <div class="max-w-md">
+      <div class="brand-logo-box mb-4">
+        <svg viewBox="0 0 200 185" width="48" height="44" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
       </div>
-      <h1 class="font-display text-5xl xl:text-6xl font-extrabold text-white leading-[1.05]">Settle into<br><span class="text-[#48CAE4]">lutruwita</span></h1>
-      <p class="text-white/70 mt-5 text-lg leading-relaxed max-w-sm">Your relocation companion — buddy community, local life map, and confidential pulse checks from day one.</p>
-      <div class="mt-10 flex flex-wrap gap-3">
-        <span class="stat-pill !bg-white/10 !text-white !border-white/20">847 peers</span>
-        <span class="stat-pill !bg-white/10 !text-white !border-white/20">Bedrock AI</span>
-        <span class="stat-pill !bg-white/10 !text-white !border-white/20">TasNetworks</span>
+      <h1 class="display-5 fw-bold mb-3">Settle into<br><span class="text-info">lutruwita</span></h1>
+      <p class="text-white-50 lead mb-4">Your relocation companion — buddy community, local life map, and confidential pulse checks from day one.</p>
+      <div class="d-flex flex-wrap gap-2">
+        <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25">847 peers</span>
+        <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25">Bedrock AI</span>
+        <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25">TasNetworks</span>
       </div>
     </div>
   </section>
   <section class="login-form-panel">
-    <div class="w-full max-w-md">
-      <div class="lg:hidden flex justify-center mb-6">
-        <div class="dock-logo"><svg viewBox="0 0 200 185" class="w-10 h-9" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg></div>
+    <div class="w-100" style="max-width:28rem">
+      <div class="d-lg-none d-flex justify-content-center mb-4">
+        <div class="brand-logo-box"><svg viewBox="0 0 200 185" width="40" height="36" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg></div>
       </div>
-      <p class="stat-pill mb-4">Employee sign-in</p>
-      <h2 class="font-display text-3xl font-bold text-[var(--ink)]">Welcome to Anchor</h2>
-      <p class="text-[var(--muted)] mt-2 mb-8">Sign in to start your personalised relocation journey.</p>
-      <div class="space-y-5 mb-8">
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Full name</label>
-          <input x-model="loginName" type="text" placeholder="Sarah Mitchell" class="input-field">
+      <div class="card shadow-sm border-0 p-4 p-md-5">
+        <span class="badge bg-primary-subtle text-primary mb-3">Employee sign-in</span>
+        <h2 class="h3 fw-bold mb-2">Welcome to Anchor</h2>
+        <p class="text-muted mb-4">Sign in to start your personalised relocation journey.</p>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold text-uppercase text-muted">Full name</label>
+          <input x-model="loginName" type="text" placeholder="Sarah Mitchell" class="form-control">
         </div>
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Work email</label>
-          <input x-model="loginEmail" type="email" placeholder="you@tasnetworks.com.au" class="input-field">
+        <div class="mb-4">
+          <label class="form-label small fw-semibold text-uppercase text-muted">Work email</label>
+          <input x-model="loginEmail" type="email" placeholder="you@tasnetworks.com.au" class="form-control">
         </div>
+        <button @click="loginAsEmployee()" class="btn btn-primary w-100">Continue with TasNetworks SSO <i class="bi bi-arrow-right ms-1"></i></button>
+        <p class="text-center text-muted small mt-4 mb-0">HR dashboard · press <kbd class="bg-light border rounded px-1">Shift+H</kbd></p>
+        <p class="text-center text-muted small mt-3 mb-0">TasNetworks × UTAS × AWS Hackathon 2026</p>
       </div>
-      <button @click="loginAsEmployee()" class="w-full btn-primary text-base">Continue with TasNetworks SSO →</button>
-      <p class="text-center text-slate-400 text-xs mt-6">HR dashboard · press <kbd class="px-1.5 py-0.5 rounded-md bg-slate-100 font-mono text-[10px]">Shift+H</kbd></p>
-      <p class="text-center text-slate-300 text-[11px] mt-8">TasNetworks × UTAS × AWS Hackathon 2026</p>
     </div>
   </section>
 </div>
 
 <!-- ═══════════════════════════════ ONBOARDING ════════════════════════════ -->
-<div x-show="screen==='onboarding'" class="min-h-screen shell-bg flex flex-col lg:flex-row">
+<div id="screen-onboard" class="screen-layer onboard-layer d-flex flex-column flex-lg-row" :class="{ 'screen-on': screen==='onboarding' }">
 
-  <div class="mesh-bg lg:w-[42%] shrink-0 px-8 py-12 lg:py-16 flex flex-col justify-center relative min-h-[200px]">
-    <button @click="logout()" class="absolute top-4 left-4 z-10 text-white/60 text-sm font-medium hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10 transition">← Back</button>
-    <div class="relative z-10 mb-3 flex justify-center">
-      <div class="w-16 h-16 rounded-2xl glass flex items-center justify-center">
-        <svg viewBox="0 0 200 185" class="w-14 h-13" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
+  <div class="auth-panel-primary col-lg-5 px-4 py-5 d-flex flex-column justify-content-center position-relative min-vh-25">
+    <button @click="logout()" class="btn btn-sm btn-link text-white-50 position-absolute top-0 start-0 m-3 text-decoration-none">← Back</button>
+    <div class="text-center mb-3">
+      <div class="brand-logo-box mx-auto">
+        <svg viewBox="0 0 200 185" width="48" height="44" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
       </div>
     </div>
-    <h2 class="relative z-10 font-display text-3xl font-bold text-white">Set up your Anchor</h2>
-    <p class="relative z-10 text-white/75 text-sm mt-2 font-medium max-w-sm">Make settling down in Tasmania easier — we'll match your community next.</p>
-    <div class="relative z-10 mt-5 max-w-xs mx-auto progress-track h-2">
-      <div class="progress-fill" :style="`width:${onboardStep===1?50:100}%`"></div>
+    <h2 class="h3 fw-bold text-center">Set up your Anchor</h2>
+    <p class="text-white-50 text-center small mx-auto" style="max-width:20rem">Make settling down in Tasmania easier — we'll match your community next.</p>
+    <div class="progress mt-4 mx-auto" style="max-width:16rem;height:6px">
+      <div class="progress-bar bg-info" role="progressbar" :style="`width:${onboardStep===1?50:100}%`"></div>
     </div>
-    <p class="relative z-10 text-white/50 text-xs mt-2 font-semibold">Step <span x-text="onboardStep"></span> of 2</p>
+    <p class="text-white-50 small text-center mt-2 fw-semibold">Step <span x-text="onboardStep"></span> of 2</p>
   </div>
 
-  <div class="flex-1 flex items-center justify-center p-6 lg:p-12">
-  <div class="card card-elevated p-6 sm:p-8 w-full max-w-lg fu">
+  <div class="flex-grow-1 d-flex align-items-center justify-content-center p-4 p-lg-5 bg-body-secondary">
+  <div class="card shadow border-0 p-4 p-md-5 w-100 fu" style="max-width:32rem">
 
     <!-- ── Step 1 ── -->
-    <div x-show="onboardStep===1">
-      <h3 class="text-lg font-bold text-slate-900 mb-4">Tell us about yourself</h3>
-      <div class="space-y-4">
+    <div class="onboard-step" :class="onboardStep===1 ? 'step-on' : ''">
+      <h3 class="h5 fw-bold mb-4">Tell us about yourself</h3>
 
-        <div>
-          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1">Your first name</label>
-          <input x-model="form.name" type="text" placeholder="e.g. Sarah" class="input-field">
+        <div class="mb-3">
+          <label class="form-label small fw-semibold text-muted text-uppercase">Your first name</label>
+          <input x-model="form.name" type="text" placeholder="e.g. Sarah" class="form-control">
         </div>
 
-        <div>
-          <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-1">Moving from</label>
-          <select x-model="form.origin" class="input-field">
+        <div class="mb-3">
+          <label class="form-label small fw-semibold text-muted text-uppercase">Moving from</label>
+          <select x-model="form.origin" class="form-select">
             <option value="">Select city…</option>
             <option value="Melbourne">Melbourne, VIC</option>
             <option value="Sydney">Sydney, NSW</option>
@@ -751,895 +594,1252 @@
           </select>
         </div>
 
-        <!-- Country field — only shown for international -->
-        <div x-show="form.origin==='Overseas'" x-transition class="rounded-xl p-4 border border-[#0099CC]/20 bg-gradient-to-br from-[#E6F4FA] to-white">
-          <label class="text-xs font-semibold text-[#002E5D] uppercase tracking-wide block mb-1">
-            Which country? <span class="text-gray-400 font-normal normal-case">(optional — helps us find the best buddy match)</span>
+        <div x-show="form.origin==='Overseas'" x-transition class="alert alert-info py-3 mb-3">
+          <label class="form-label small fw-semibold text-primary text-uppercase mb-1">
+            Which country? <span class="text-muted fw-normal text-capitalize">(optional)</span>
           </label>
-          <input x-model="form.country" type="text" placeholder="e.g. India, Philippines, UK, Germany…" class="input-field">
+          <input x-model="form.country" type="text" placeholder="e.g. India, Philippines, UK, Germany…" class="form-control">
         </div>
 
-        <div>
-          <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-2">Who's making the move?</label>
-          <div class="grid grid-cols-3 gap-2">
+        <div class="mb-3">
+          <label class="form-label small fw-semibold text-muted text-uppercase">Who's making the move?</label>
+          <div class="row g-2">
             <template x-for="f in [{v:'single',e:'🧑',l:'Just me'},{v:'couple',e:'👫',l:'Me & partner'},{v:'family',e:'👨‍👩‍👧',l:'Family'}]" :key="f.v">
+              <div class="col-4">
               <button @click="form.family=f.v"
                       :class="form.family===f.v?'active':''"
-                      class="pill-select py-3 text-sm flex flex-col items-center gap-1 text-slate-600">
-                <span x-text="f.e" class="text-2xl"></span>
-                <span x-text="f.l" class="text-xs"></span>
+                      class="pill-select w-100 py-3 btn text-center d-flex flex-column align-items-center gap-1">
+                <span x-text="f.e" class="fs-4"></span>
+                <span x-text="f.l" class="small"></span>
               </button>
+              </div>
             </template>
           </div>
         </div>
 
-        <div>
-          <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-2">Interests & hobbies</label>
-          <div class="flex flex-wrap gap-2">
+        <div class="mb-4">
+          <label class="form-label small fw-semibold text-muted text-uppercase">Interests & hobbies</label>
+          <div class="d-flex flex-wrap gap-2">
             <template x-for="h in hobbies" :key="h.id">
               <button @click="toggleHobby(h.id)"
                       :class="form.hobbies.includes(h.id)?'chip-on':'chip-off'"
-                      class="chip">
+                      class="btn btn-sm rounded-pill">
                 <span x-text="h.e+' '+h.l"></span>
               </button>
             </template>
           </div>
         </div>
-      </div>
-      <button @click="onboardStep=2" class="w-full btn-primary mt-6">Continue →</button>
+      <button @click="onboardStep=2" class="btn btn-primary w-100">Continue <i class="bi bi-arrow-right"></i></button>
     </div>
 
     <!-- ── Step 2 ── -->
-    <div x-show="onboardStep===2">
-      <h3 class="text-lg font-bold text-gray-800 mb-1">What services would you use the most?</h3>
-      <p class="text-sm text-gray-400 mb-4">This will let us help you tailor your experience</p>
-      <div class="space-y-2">
+    <div class="onboard-step" :class="onboardStep===2 ? 'step-on' : ''">
+      <h3 class="h5 fw-bold mb-1">What services would you use the most?</h3>
+      <p class="text-muted small mb-4">This will let us help you tailor your experience</p>
+      <div class="d-flex flex-column gap-2">
         <template x-for="n in needs" :key="n.id">
           <button @click="toggleNeed(n.id)"
                   :class="form.needs.includes(n.id)?'active':''"
-                  class="pill-select w-full flex items-center gap-3 p-3.5 text-left">
-            <span class="text-2xl shrink-0" x-text="n.e"></span>
-            <div class="flex-1">
-              <div class="font-semibold text-gray-800 text-sm" x-text="n.l"></div>
-              <div class="text-gray-400 text-xs" x-text="n.d"></div>
+                  class="pill-select w-100 d-flex align-items-center gap-3 p-3 text-start btn">
+            <span class="fs-4 flex-shrink-0" x-text="n.e"></span>
+            <div class="flex-grow-1">
+              <div class="fw-semibold small" x-text="n.l"></div>
+              <div class="text-muted small" x-text="n.d"></div>
             </div>
-            <div :class="form.needs.includes(n.id)?'border-[#0099CC] bg-[#0099CC]':'border-gray-300'"
-                 class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all">
-              <span x-show="form.needs.includes(n.id)" class="text-white text-xs font-bold">✓</span>
-            </div>
+            <span :class="form.needs.includes(n.id)?'bg-primary border-primary text-white':'border-secondary'"
+                 class="rounded-circle border d-flex align-items-center justify-content-center flex-shrink-0"
+                 style="width:1.25rem;height:1.25rem;font-size:.65rem">
+              <span x-show="form.needs.includes(n.id)">✓</span>
+            </span>
           </button>
         </template>
       </div>
-      <button @click="startMatching()" class="w-full btn-primary mt-6">Find My Anchor Community →</button>
+      <button @click="startMatching()" class="btn btn-primary w-100 mt-4">Find My Anchor Community <i class="bi bi-arrow-right"></i></button>
     </div>
   </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════ MATCHING ══════════════════════════════ -->
-<div x-show="screen==='matching'" class="min-h-screen mesh-bg flex flex-col items-center justify-center p-8 relative">
-  <div class="text-center relative z-10">
-    <div class="relative w-48 h-48 mx-auto mb-8">
-      <div class="absolute inset-0 border-4 border-white/15 rounded-full r1"></div>
-      <div class="absolute inset-5 border-4 border-white/25 rounded-full r2"></div>
-      <div class="absolute inset-10 border-4 border-white/35 rounded-full r3"></div>
-      <div class="absolute inset-0 flex items-center justify-center">
-        <div class="w-28 h-28 bg-white/20 rounded-full flex items-center justify-center glow">
-          <span style="font-size:54px">🤝</span>
-        </div>
-      </div>
+<div id="screen-match" class="screen-layer match-layer auth-panel-primary d-flex align-items-center justify-content-center p-4" :class="{ 'screen-on': screen==='matching' }">
+  <div class="text-center text-white" style="max-width:24rem">
+    <div class="position-relative mx-auto mb-4" style="width:10rem;height:10rem">
+      <div class="position-absolute top-0 start-0 w-100 h-100 border border-2 border-white border-opacity-25 rounded-circle r1"></div>
+      <div class="position-absolute top-0 start-0 w-100 h-100 border border-2 border-white border-opacity-50 rounded-circle r1" style="inset:12%!important;width:76%!important;height:76%!important"></div>
+      <div class="position-absolute top-50 start-50 translate-middle bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center" style="width:5rem;height:5rem;font-size:2.5rem">🤝</div>
     </div>
-    <h2 class="font-display text-3xl font-bold text-white mb-1">Finding your community</h2>
-    <p class="text-white/60 text-sm mb-8">Bedrock · 847 employee profiles</p>
-    <div class="space-y-3 text-left max-w-xs mx-auto">
-      <div x-show="matchStep>=1" class="glass rounded-xl px-4 py-3 flex items-center gap-3 fi text-white">
-        <span class="text-green-300 font-bold">✓</span>
-        <span class="text-white text-sm">Origin: <span x-text="form.origin||'Melbourne'"></span> relocators found (23 profiles)</span>
+    <h2 class="h3 fw-bold mb-1">Finding your community</h2>
+    <p class="text-white-50 small mb-4">Bedrock · 847 employee profiles</p>
+    <div class="d-flex flex-column gap-2 text-start">
+      <div class="match-reveal-card card bg-white bg-opacity-10 border-white border-opacity-25 text-white fi" :class="matchStep>=1 ? 'step-on' : ''">
+        <div class="card-body py-2 px-3 d-flex gap-2 small"><span class="text-success">✓</span><span>Origin: <span x-text="form.origin||'Melbourne'"></span> relocators found (23 profiles)</span></div>
       </div>
-      <div x-show="matchStep>=2" class="glass rounded-xl px-4 py-3 flex items-center gap-3 fi text-white">
-        <span class="text-green-300 font-bold">✓</span>
-        <span class="text-white text-sm"><span x-text="familyLabel()"></span> situation aligned (11 matches)</span>
+      <div class="match-reveal-card card bg-white bg-opacity-10 border-white border-opacity-25 text-white fi" :class="matchStep>=2 ? 'step-on' : ''">
+        <div class="card-body py-2 px-3 d-flex gap-2 small"><span class="text-success">✓</span><span><span x-text="familyLabel()"></span> situation aligned (11 matches)</span></div>
       </div>
-      <div x-show="matchStep>=3" class="glass rounded-xl px-4 py-3 flex items-center gap-3 fi text-white">
-        <span class="text-green-300 font-bold">✓</span>
-        <span class="text-white text-sm">Shared interests &amp; hobbies matched (6 matches)</span>
+      <div class="match-reveal-card card bg-white bg-opacity-10 border-white border-opacity-25 text-white fi" :class="matchStep>=3 ? 'step-on' : ''">
+        <div class="card-body py-2 px-3 d-flex gap-2 small"><span class="text-success">✓</span><span>Shared interests &amp; hobbies matched (6 matches)</span></div>
       </div>
-      <div x-show="matchStep>=4" class="glass rounded-xl px-4 py-3 flex items-center gap-3 fi text-white">
-        <span class="text-green-300 font-bold">✓</span>
-        <span class="text-white text-sm">Relocation needs — knowledge confirmed (4 matches)</span>
+      <div class="match-reveal-card card bg-white bg-opacity-10 border-white border-opacity-25 text-white fi" :class="matchStep>=4 ? 'step-on' : ''">
+        <div class="card-body py-2 px-3 d-flex gap-2 small"><span class="text-success">✓</span><span>Relocation needs — knowledge confirmed (4 matches)</span></div>
       </div>
-      <div x-show="matchStep>=5" class="glass rounded-xl px-4 py-3 flex items-center gap-3 fi text-white border border-white/30 shadow-glow">
-        <span class="text-yellow-300 text-xl">🫂</span>
-        <span class="text-white text-sm font-bold">3 community members found — your best match is ready!</span>
+      <div class="match-reveal-card card bg-white bg-opacity-25 border border-warning border-opacity-50 text-white fi" :class="matchStep>=5 ? 'step-on' : ''">
+        <div class="card-body py-2 px-3 d-flex gap-2 small fw-bold"><span>🫂</span><span>3 community members found — your best match is ready!</span></div>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════ BUDDY REVEAL ═════════════════════════════ -->
-<div x-show="screen==='buddy-reveal'" class="min-h-screen mesh-bg flex flex-col items-center justify-center p-6 overflow-y-auto relative">
-  <div class="text-center mb-5 fu relative z-10">
-    <p class="text-white/85 text-lg font-medium">🫂 Your Anchor community is ready!</p>
-    <h2 class="text-3xl font-extrabold text-white tracking-tight">1 primary buddy + 2 community members</h2>
-    <p class="text-white/60 text-sm mt-1">One friend to get started — a whole community to belong to</p>
+<div id="screen-buddy" class="screen-layer buddy-layer auth-panel-primary d-flex flex-column align-items-center justify-content-center p-4" :class="{ 'screen-on': screen==='buddy-reveal' }">
+  <div class="text-center text-white mb-4 fu">
+    <p class="lead mb-1">🫂 Your Anchor community is ready!</p>
+    <h2 class="h3 fw-bold">1 primary buddy + 2 community members</h2>
+    <p class="text-white-50 small">One friend to get started — a whole community to belong to</p>
   </div>
 
-  <!-- Primary buddy card -->
-  <div class="card card-elevated p-6 w-full max-w-lg pop mb-4 relative z-10">
-    <div class="flex items-start gap-4 mb-4">
-      <div class="w-20 h-20 grad-r rounded-2xl flex items-center justify-center text-5xl shadow-xl shrink-0" x-text="getBestBuddy().avatar"></div>
-      <div class="flex-1">
-        <div class="flex items-center gap-2 flex-wrap mb-1">
-          <h3 class="text-xl font-black text-gray-800" x-text="getBestBuddy().name"></h3>
-          <span class="bg-[#0099CC] text-white text-xs font-bold px-2 py-0.5 rounded-full">⭐ Best match</span>
+  <div class="card shadow-lg border-0 w-100 pop mb-3" style="max-width:32rem">
+    <div class="card-body p-4">
+    <div class="d-flex gap-3 mb-3">
+      <div class="rounded bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:5rem;height:5rem;font-size:2.5rem" x-text="getBestBuddy().avatar"></div>
+      <div class="flex-grow-1">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+          <h3 class="h5 fw-bold mb-0" x-text="getBestBuddy().name"></h3>
+          <span class="badge bg-info">⭐ Best match</span>
         </div>
-        <p class="text-[#0099CC] font-semibold text-sm" x-text="getBestBuddy().role+' · TasNetworks'"></p>
-        <p class="text-gray-400 text-xs mt-1">📍 From <span x-text="form.origin||'Melbourne'"></span> · <span x-text="getBestBuddy().months"></span> months in Hobart · <span x-text="getBestBuddy().tag"></span></p>
+        <p class="text-info fw-semibold small mb-0" x-text="getBestBuddy().role+' · TasNetworks'"></p>
+        <p class="text-muted small mb-0">📍 From <span x-text="form.origin||'Melbourne'"></span> · <span x-text="getBestBuddy().months"></span> months in Hobart · <span x-text="getBestBuddy().tag"></span></p>
       </div>
     </div>
-    <div class="flex flex-wrap gap-2 mb-3">
-      <span class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Same origin</span>
-      <span x-show="getBestBuddy().family===form.family" class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full" x-text="'✓ '+getBestBuddy().tag"></span>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <span class="badge bg-primary-subtle text-primary">✓ Same origin</span>
+      <span x-show="getBestBuddy().family===form.family" class="badge bg-primary-subtle text-primary" x-text="'✓ '+getBestBuddy().tag"></span>
       <template x-for="n in form.needs.filter(nd=>getBestBuddy().needs.includes(nd)).slice(0,2)">
-        <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-full" x-text="'✓ Knows: '+n"></span>
+        <span class="badge bg-success-subtle text-success" x-text="'✓ Knows: '+n"></span>
       </template>
     </div>
-    <div class="bg-[#F0F6FB] rounded-2xl p-4 mb-4 border-l-4 border-[#0099CC] text-sm text-gray-700 italic" x-text="buddyMessage()"></div>
-    <div class="flex gap-3">
-      <button class="flex-1 btn-primary py-3">💬 Say Hello</button>
-      <button class="flex-1 btn-ghost py-3 font-bold">📞 Call</button>
+    <div class="alert alert-info border-start border-info border-4 small fst-italic mb-3" x-text="buddyMessage()"></div>
+    <div class="row g-2">
+      <div class="col-6"><button class="btn btn-primary w-100">💬 Say Hello</button></div>
+      <div class="col-6"><button class="btn btn-outline-primary w-100 fw-semibold">📞 Call</button></div>
+    </div>
     </div>
   </div>
 
-  <!-- Community members -->
-  <div class="w-full max-w-lg mb-4 fu">
-    <p class="text-white/70 text-sm font-semibold mb-3 text-center">👥 Your broader Anchor community</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+  <div class="w-100 mb-3 fu" style="max-width:32rem">
+    <p class="text-white-50 small fw-semibold mb-2 text-center">👥 Your broader Anchor community</p>
+    <div class="row g-2">
       <template x-for="b in communityBuddies()" :key="b.id">
-        <div class="card p-4 flex items-center gap-3 cursor-pointer hover:-translate-y-0.5 transition-transform">
-          <div class="w-12 h-12 bg-[#E6F4FA] rounded-xl flex items-center justify-center text-2xl shrink-0" x-text="b.avatar"></div>
-          <div class="flex-1 min-w-0">
-            <div class="font-bold text-gray-800 text-sm" x-text="b.name"></div>
-            <div class="text-gray-400 text-xs truncate" x-text="b.role"></div>
-            <div class="text-[#0099CC] text-xs font-semibold" x-text="b.tag+' · '+b.months+'mo in Hobart'"></div>
+        <div class="col-sm-6">
+        <div class="card h-100 card-interactive">
+          <div class="card-body p-3 d-flex align-items-center gap-2">
+          <div class="rounded bg-info-subtle d-flex align-items-center justify-content-center flex-shrink-0" style="width:3rem;height:3rem;font-size:1.25rem" x-text="b.avatar"></div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="fw-bold small" x-text="b.name"></div>
+            <div class="text-muted small text-truncate" x-text="b.role"></div>
+            <div class="text-info small fw-semibold" x-text="b.tag+' · '+b.months+'mo in Hobart'"></div>
           </div>
-          <button class="text-xs btn-primary px-3 py-1.5 shrink-0">Connect</button>
+          <button class="btn btn-primary btn-sm flex-shrink-0">Connect</button>
+          </div>
+        </div>
         </div>
       </template>
     </div>
   </div>
 
-  <button @click="goToApp()" class="w-full max-w-lg btn-ghost font-extrabold py-4 text-lg shadow-lg fu border-0 bg-white/95 hover:bg-white">
-    Go to my Dashboard →
+  <button @click="goToApp()" class="btn btn-light btn-lg fw-bold w-100 fu shadow" style="max-width:32rem">
+    Go to my Dashboard <i class="bi bi-arrow-right"></i>
   </button>
 </div>
 
 <!-- ═══════════════════════════ MAIN APP ══════════════════════════════════ -->
-<div x-show="screen==='app'" class="outlook-frame w-full overflow-x-hidden" x-init="initApp()">
-  <div x-show="subPaneOpen" @click="subPaneOpen=false" class="outlook-backdrop lg:hidden" x-transition></div>
+<div id="screen-app" class="screen-layer outlook-frame" :class="{ 'screen-on': screen==='app' }">
+  <div x-show="subPaneOpen" @click="subPaneOpen=false" class="outlook-backdrop d-lg-none" x-transition></div>
 
-  <!-- Icon rail (Outlook app launcher) -->
-  <nav class="icon-rail shrink-0" aria-label="Apps">
-    <button @click="selectRail('anchor')" :class="activeRail==='anchor'?'active':''" class="rail-btn" style="--rail-accent:#002E5D" title="Anchor">
-      <span class="rail-icon" style="background:linear-gradient(135deg,#002E5D,#00B4D8)">⚓</span>
+  <!-- Icon rail -->
+  <nav class="icon-rail flex-shrink-0" aria-label="Apps">
+    <button @click="selectRail('anchor')" :class="activeRail==='anchor'?'active':''" class="rail-btn" title="Anchor" aria-label="Anchor">
+      <span class="rail-icon rail-icon--anchor"><i class="bi bi-house-heart-fill" aria-hidden="true"></i></span>
     </button>
+    <div class="rail-divider" aria-hidden="true"></div>
     <template x-for="app in railApps" :key="app.id">
-      <button @click="selectRail(app.id)" :class="[activeRail===app.id?'active':'', isConnected(app.id)?'rail-connected':'']" class="rail-btn" :style="'--rail-accent:'+app.color" :title="app.label">
-        <span class="rail-icon" :style="'background:'+app.color" x-text="app.short"></span>
+      <button @click="selectRail(app.id)" :class="[activeRail===app.id?'active':'', isConnected(app.id)?'rail-connected':'']" class="rail-btn" :title="app.label" :aria-label="app.label">
+        <span class="rail-icon" :class="'rail-icon--'+app.id"><i class="bi" :class="app.icon" aria-hidden="true"></i></span>
       </button>
     </template>
-    <div class="flex-1"></div>
-    <button @click="logout()" class="rail-btn" title="Sign out">
-      <svg class="w-5 h-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    <div class="flex-grow-1"></div>
+    <div class="rail-divider" aria-hidden="true"></div>
+    <button @click="logout()" class="rail-btn rail-btn-logout border-0 bg-transparent d-flex align-items-center justify-content-center" title="Sign out" aria-label="Sign out">
+      <i class="bi bi-box-arrow-right fs-5"></i>
     </button>
   </nav>
 
   <!-- Sub-navigation pane -->
   <aside :class="subPaneOpen?'open':''" class="sub-pane">
     <div class="sub-pane-head">
-      <div class="sub-pane-title" x-text="subPaneTitle()"></div>
-      <button x-show="activeRail==='marketplace'" @click="runMarketplaceSearch()" class="sub-new-btn" style="--sub-accent:#1877F2">Search listings</button>
-      <button x-show="activeRail==='teams' && !connections.microsoft" @click="connectMicrosoft()" class="sub-new-btn" style="--sub-accent:#6264A7">Connect Microsoft</button>
-      <button x-show="activeRail==='facebook' && !connections.facebook" @click="connectFacebook()" class="sub-new-btn" style="--sub-accent:#1877F2">Connect Facebook</button>
+      <h6 class="sub-pane-title" x-text="subPaneTitle()"></h6>
+      <button x-show="activeRail==='marketplace'" @click="runMarketplaceSearch()" class="btn btn-primary btn-sm w-100 mt-2">Search listings</button>
+      <button x-show="activeRail==='teams' && !connections.microsoft" @click="connectMicrosoft()" class="btn btn-sm w-100 mt-2 text-white" style="background:#6264A7">Connect Microsoft</button>
+      <button x-show="activeRail==='facebook' && !connections.facebook" @click="connectFacebook()" class="btn btn-sm w-100 mt-2 text-white" style="background:#1877F2">Connect Facebook</button>
     </div>
-    <div class="flex-1 overflow-y-auto scr py-1">
+    <div class="flex-grow-1 overflow-y-auto scr py-1">
       <template x-if="activeRail==='anchor'">
         <template x-for="t in navTabs" :key="t.id">
           <button @click="selectAnchorTab(t.id)" :class="activeTab===t.id?'on':''" class="sub-item">
-            <span x-html="t.icon" class="w-4 h-4 opacity-60"></span>
+            <span class="sub-item-icon"><i class="bi" :class="t.icon" aria-hidden="true"></i></span>
             <span x-text="t.label"></span>
-            <span x-show="t.badge" class="badge-count">!</span>
+            <span x-show="t.badge" class="badge bg-danger rounded-pill badge-count">!</span>
           </button>
         </template>
       </template>
       <template x-if="activeRail!=='anchor'">
         <template x-for="item in currentSubItems()" :key="item.id">
           <button @click="selectSocialSub(item.id)" :class="socialSubView===item.id?'on':''" class="sub-item">
-            <span x-text="item.icon||'•'"></span>
+            <span class="sub-item-icon"><i class="bi" :class="item.icon||'bi-dot'" aria-hidden="true"></i></span>
             <span x-text="item.label"></span>
           </button>
         </template>
       </template>
     </div>
-    <div x-show="connectedCount()>0" class="p-3 border-t border-[#EDEBE9] text-xs text-[var(--muted)]">
+    <div x-show="connectedCount()>0" class="p-3 border-top small text-muted">
       <span x-text="connectedCount()"></span> account(s) connected
     </div>
   </aside>
 
-  <div class="main-stage flex-1 min-w-0">
-    <header class="page-head">
-      <div class="flex items-center gap-3 min-w-0">
-        <button @click="subPaneOpen=!subPaneOpen" class="lg:hidden w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-600 shrink-0">☰</button>
-        <div class="min-w-0">
-          <h1 class="font-display text-xl sm:text-2xl font-bold text-[var(--ink)] truncate" x-text="pageTitle()"></h1>
-          <p class="text-[var(--muted)] text-sm truncate" x-text="pageSubtitle()"></p>
+  <div class="main-stage flex-grow-1 min-w-0 min-h-0">
+    <header class="sa-topbar navbar navbar-expand px-3 py-2">
+      <button @click="subPaneOpen=!subPaneOpen" class="btn btn-outline-secondary btn-sm d-lg-none me-2"><i class="bi bi-list"></i></button>
+      <nav aria-label="breadcrumb" class="flex-grow-1 min-w-0">
+        <ol class="breadcrumb mb-0 small">
+          <li class="breadcrumb-item"><a href="#" class="text-decoration-none" @click.prevent="selectRail('anchor')">Anchor</a></li>
+          <li class="breadcrumb-item active" aria-current="page" x-text="pageTitle()"></li>
+        </ol>
+        <p class="text-muted small mb-0 text-truncate d-none d-md-block" x-text="pageSubtitle()"></p>
+      </nav>
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+        <div class="d-none d-md-flex input-group input-group-sm" style="width:12rem">
+          <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" placeholder="Search…" disabled>
         </div>
-      </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <span class="day-badge hidden sm:inline-flex px-3 py-1.5 rounded-full">Day 14</span>
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0077B6] to-[#00B4D8] flex items-center justify-center text-white font-bold text-sm shadow-md">
+        <button class="btn btn-light btn-sm position-relative" type="button"><i class="bi bi-bell"></i></button>
+        <span class="badge bg-primary-subtle text-primary d-none d-sm-inline">Day 14</span>
+        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width:2.5rem;height:2.5rem;font-size:.75rem">
           <span x-text="(form.name||'SA').substring(0,2).toUpperCase()"></span>
         </div>
       </div>
     </header>
 
-    <div class="main-scroll scr shell-bg">
+    <div class="main-scroll">
+      <div class="main-pane-stack">
       <!-- ===== ANCHOR: DASHBOARD ===== -->
-      <div x-show="activeRail==='anchor' && activeTab==='home'" class="fi bento">
-        <div class="span-12 hero-panel p-6 sm:p-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-0">
-          <div class="relative z-10">
-            <span class="stat-pill !bg-white/15 !text-[#48CAE4] !border-white/20 mb-3">Week 2 · lutruwita</span>
-            <h2 class="font-display text-3xl sm:text-4xl font-extrabold">Hey <span x-text="form.name||'Sarah'"></span> 👋</h2>
-            <p class="text-white/80 text-sm mt-2 max-w-md"><span x-text="getBestBuddy().name.split(' ')[0]"></span> is online · Pulse check waiting for you</p>
-          </div>
-          <div class="relative z-10 hidden sm:flex w-24 h-24 rounded-2xl glass items-center justify-center shrink-0">
-            <svg viewBox="0 0 200 185" class="w-16 h-15" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
-          </div>
-        </div>
-
-        <div class="span-8 card card-interactive p-5 sm:p-6">
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Digital pass</p>
-          <div class="flex flex-col sm:flex-row gap-5 items-start">
-            <div class="wallet-card flex-1 w-full sm:max-w-[220px] relative z-10">
-              <p class="text-[10px] uppercase tracking-[.2em] text-white/50">TasNetworks</p>
-              <p class="font-display font-bold text-xl mt-2" x-text="form.name||'New Starter'"></p>
-              <p class="text-xs text-white/70 mt-1">Relocator · Day 14</p>
-              <p class="text-[10px] text-white/50 mt-3 font-mono">TN-<span x-text="(form.name||'SA').substring(0,3).toUpperCase()"></span>-2026</p>
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('anchor','home') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+              <span class="badge bg-info-subtle text-info mb-2">Week 2 · lutruwita</span>
+              <h2 class="h3 fw-bold mb-1">Hey <span x-text="form.name||'Sarah'"></span> 👋</h2>
+              <p class="text-muted small mb-0"><span x-text="getBestBuddy().name.split(' ')[0]"></span> is online · Pulse check waiting for you</p>
             </div>
-            <div class="flex-1 text-sm text-[var(--muted)]">
-              <p class="font-semibold text-[var(--ink)] mb-2">Employee card — active from Day 1</p>
-              <p class="leading-relaxed">GP visits, partner venues, gym access. One tap to add to your wallet.</p>
-              <button @click="showToast('Added to Apple Wallet (demo)')" class="btn-primary mt-4 text-sm">Add to Wallet</button>
+            <div class="d-none d-md-flex brand-logo-box">
+              <svg viewBox="0 0 200 185" width="40" height="36" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
             </div>
           </div>
         </div>
 
-        <div class="span-4 card card-interactive p-5 flex flex-col justify-between bg-gradient-to-br from-[#CAF0F8]/40 to-white">
-          <div>
-            <span class="stat-pill mb-3">Due today</span>
-            <h4 class="font-display font-bold text-lg text-[var(--ink)]">Pulse Check</h4>
-            <p class="text-[var(--muted)] text-xs mt-1">2 questions · confidential</p>
-          </div>
-          <button @click="goToPulse()" class="btn-primary w-full mt-4">Start check-in</button>
-        </div>
-
-        <div class="span-6 card card-interactive p-5">
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Anchor buddy</p>
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#00B4D8] to-[#0077B6] flex items-center justify-center text-3xl shadow-lg" x-text="getBestBuddy().avatar"></div>
-            <div class="flex-1 min-w-0">
-              <h5 class="font-display font-bold text-[var(--ink)] truncate" x-text="getBestBuddy().name"></h5>
-              <p class="text-[var(--muted)] text-xs truncate" x-text="getBestBuddy().role"></p>
-              <p class="text-emerald-600 text-xs font-semibold mt-0.5">Active · 2h ago</p>
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-lg-3">
+            <div class="card sa-stat-card h-100 border-0 shadow-sm">
+              <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-primary-subtle text-primary"><i class="bi bi-calendar-check"></i></div>
+                <div><div class="stat-value">14<span class="fs-6 text-muted fw-normal">/90</span></div><p class="stat-label">Relocation day</p></div>
+              </div>
             </div>
-            <button class="btn-ghost text-sm shrink-0">Chat</button>
           </div>
-          <p class="text-sm text-[var(--muted)] italic leading-relaxed bg-slate-50 rounded-xl p-3 border border-slate-100" x-text="buddyLatestMsg()"></p>
+          <div class="col-6 col-lg-3">
+            <div class="card sa-stat-card h-100 border-0 shadow-sm card-interactive" style="cursor:pointer" @click="goToPulse()">
+              <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-warning-subtle text-warning"><i class="bi bi-heart-pulse"></i></div>
+                <div><div class="stat-value">Due</div><p class="stat-label">Pulse check</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="card sa-stat-card h-100 border-0 shadow-sm">
+              <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-success-subtle text-success"><i class="bi bi-people"></i></div>
+                <div><div class="stat-value">Online</div><p class="stat-label" x-text="getBestBuddy().name.split(' ')[0]+' · buddy'"></p></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="card sa-stat-card h-100 border-0 shadow-sm card-interactive" style="cursor:pointer" @click="selectRail('events')">
+              <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-info-subtle text-info"><i class="bi bi-link-45deg"></i></div>
+                <div><div class="stat-value" x-text="connectedCount()"></div><p class="stat-label"><span x-text="filteredEvents().length"></span> events</p></div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="span-6 card card-interactive p-5 border-l-4 border-[#00B4D8] cursor-pointer" @click="selectRail('events')">
-          <p class="text-xs font-bold text-[var(--navy)] uppercase tracking-wide mb-2">Stay connected</p>
-          <p class="text-[var(--muted)] text-sm leading-relaxed"><span x-text="connectedCount()"></span> apps linked · <span x-text="filteredEvents().length"></span> events match your hobbies</p>
-          <p class="text-[#00B4D8] text-xs font-bold mt-2">Open social hub →</p>
+        <div class="row g-3 mb-4">
+          <div class="col-lg-8">
+            <div class="card shadow-sm h-100 card-interactive">
+              <div class="card-header bg-white border-bottom"><span class="small fw-bold text-muted text-uppercase">Digital pass</span></div>
+              <div class="card-body d-flex flex-column flex-sm-row gap-4">
+                <div class="wallet-card flex-shrink-0" style="max-width:220px;width:100%">
+                  <p class="small text-uppercase text-white-50 mb-1" style="letter-spacing:.15em">TasNetworks</p>
+                  <p class="h5 fw-bold mb-1" x-text="form.name||'New Starter'"></p>
+                  <p class="small text-white-50 mb-0">Relocator · Day 14</p>
+                  <p class="small text-white-50 mt-2 font-monospace mb-0">TN-<span x-text="(form.name||'SA').substring(0,3).toUpperCase()"></span>-2026</p>
+                </div>
+                <div>
+                  <p class="fw-semibold mb-2">Employee card — active from Day 1</p>
+                  <p class="text-muted small">GP visits, partner venues, gym access. One tap to add to your wallet.</p>
+                  <button @click="showToast('Added to Apple Wallet (demo)')" class="btn btn-primary btn-sm mt-2">Add to Wallet</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card shadow-sm h-100 bg-info-subtle border-0">
+              <div class="card-body d-flex flex-column">
+                <span class="badge bg-warning text-dark align-self-start mb-2">Due today</span>
+                <h4 class="h5 fw-bold">Pulse Check</h4>
+                <p class="text-muted small flex-grow-1">2 questions · confidential</p>
+                <button @click="goToPulse()" class="btn btn-primary w-100">Start check-in</button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="span-12 card p-5 sm:p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h4 class="font-display font-bold text-[var(--ink)]">90-Day Checklist</h4>
-            <span class="stat-pill">Day 14 / 90</span>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100 card-interactive">
+              <div class="card-header bg-white"><span class="small fw-bold text-muted text-uppercase">Anchor buddy</span></div>
+              <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                  <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center fs-3" style="width:3.5rem;height:3.5rem" x-text="getBestBuddy().avatar"></div>
+                  <div class="flex-grow-1 min-w-0">
+                    <h5 class="fw-bold mb-0 text-truncate" x-text="getBestBuddy().name"></h5>
+                    <p class="text-muted small mb-0 text-truncate" x-text="getBestBuddy().role"></p>
+                    <p class="text-success small fw-semibold mb-0">Active · 2h ago</p>
+                  </div>
+                  <button class="btn btn-outline-primary btn-sm flex-shrink-0">Chat</button>
+                </div>
+                <p class="small text-muted fst-italic bg-light rounded p-3 mb-0 border" x-text="buddyLatestMsg()"></p>
+              </div>
+            </div>
           </div>
-          <!-- Progress bar -->
-          <div class="progress-track h-2.5 mb-5">
-            <div class="progress-fill" style="width:15.5%"></div>
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100 card-interactive border-start border-info border-4" style="cursor:pointer" @click="selectRail('events')">
+              <div class="card-body">
+                <p class="small fw-bold text-primary text-uppercase mb-2">Stay connected</p>
+                <p class="text-muted small mb-2"><span x-text="connectedCount()"></span> apps linked · <span x-text="filteredEvents().length"></span> events match your hobbies</p>
+                <span class="text-info small fw-bold">Open social hub <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <!-- Tailored items -->
-          <div class="space-y-3">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h4 class="h6 fw-bold mb-0">90-Day Checklist</h4>
+            <span class="badge bg-primary-subtle text-primary">Day 14 / 90</span>
+          </div>
+          <div class="card-body">
+            <div class="progress mb-4" style="height:8px">
+              <div class="progress-bar bg-primary" style="width:15.5%"></div>
+            </div>
+            <div class="list-group list-group-flush">
             <template x-for="m in getTailoredJourney()" :key="m.id">
-              <div class="flex items-start gap-3">
-                <div :class="m.done?'bg-gradient-to-br from-[#0077B6] to-[#00B4D8]':m.active?'bg-amber-400':'bg-slate-200'"
-                     class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold"
-                     :style="m.done||m.active?'color:white':''">
+              <div class="list-group-item px-0 border-0 d-flex gap-3">
+                <div :class="m.done?'bg-primary':m.active?'bg-warning':'bg-secondary bg-opacity-25'"
+                     class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white small fw-bold"
+                     style="width:1.5rem;height:1.5rem;font-size:.65rem">
                   <span x-text="m.done?'✓':m.active?'⟳':'○'"></span>
                 </div>
-                <div class="flex-1">
-                  <div :class="m.done?'text-gray-500':m.active?'text-gray-800 font-semibold':'text-gray-400'"
-                       class="text-sm" x-text="m.label"></div>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full" :class="'tag-'+m.tag" x-text="m.tag"></span>
-                    <span :class="m.done?'text-gray-300':m.active?'text-amber-500 font-semibold':'text-gray-300'"
-                          class="text-xs" x-text="m.when"></span>
+                <div class="flex-grow-1">
+                  <div :class="m.done?'text-muted text-decoration-line-through':m.active?'fw-semibold':''" class="small" x-text="m.label"></div>
+                  <div class="d-flex gap-2 mt-1">
+                    <span class="badge rounded-pill small" :class="'tag-'+m.tag" x-text="m.tag"></span>
+                    <span :class="m.active?'text-warning fw-semibold':'text-muted'" class="small" x-text="m.when"></span>
                   </div>
                 </div>
               </div>
             </template>
+            </div>
           </div>
+        </div>
         </div>
       </div>
 
       <!-- ===== LIFE MAP ===== -->
-      <div x-show="activeRail==='anchor' && activeTab==='lifemap'" class="fi max-w-5xl mx-auto w-full space-y-4">
-        <div class="card p-5 mb-4">
-          <h4 class="font-bold text-gray-800 mb-1">🗺️ Tasmania Life Map — 3 to 6 month journey</h4>
-          <p class="text-gray-400 text-sm">The human, personal side of settling in · Crowdsourced by 847 employees · Personalised for
-            <span class="text-[#0099CC] font-semibold" x-text="form.name||'you'"></span></p>
-          <div class="mt-4 space-y-3">
-            <template x-for="ph in lifePhases" :key="ph.id">
-              <div class="life-phase pl-4 py-2 rounded-r-xl" :class="ph.current?'bg-[#E6F4FA]':'bg-gray-50'">
-                <div class="flex items-center gap-2">
-                  <span class="text-lg" x-text="ph.e"></span>
-                  <span class="font-bold text-sm text-gray-800" x-text="ph.title"></span>
-                  <span x-show="ph.current" class="text-xs bg-[#0099CC] text-white px-2 py-0.5 rounded-full font-bold">You are here</span>
-                </div>
-                <p class="text-xs text-gray-500 mt-1" x-text="ph.desc"></p>
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('anchor','lifemap') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--anchor mb-4">
+          <div class="position-relative" style="z-index:1">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="hub-hero-icon"><i class="bi bi-map"></i></div>
+              <div>
+                <h2 class="h4 fw-bold mb-1">Tasmania Life Map</h2>
+                <p class="small mb-0 text-white-50">3–6 month journey · Crowdsourced by 847 employees</p>
               </div>
-            </template>
-          </div>
-          <div class="flex gap-2 mt-2 flex-wrap">
-            <span class="bg-[#E6F4FA] text-[#002E5D] text-xs font-semibold px-3 py-1 rounded-full">✨ Tailored to your needs</span>
-            <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full" x-text="(form.family==='family'?'👨‍👩‍👧 Family':form.family==='couple'?'👫 Couple':'🧑 Solo')+' · '+(form.origin||'Your city')"></span>
+            </div>
+            <p class="small text-white-50 mb-3">Personalised for <span class="fw-semibold text-white" x-text="form.name||'you'"></span> — the human side of settling in.</p>
+            <div class="d-flex flex-column gap-2">
+              <template x-for="ph in lifePhases" :key="ph.id">
+                <div class="life-phase ps-3 py-2 rounded" :class="ph.current?'bg-white bg-opacity-25':'bg-white bg-opacity-10'">
+                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="fs-5" x-text="ph.e"></span>
+                    <span class="fw-bold small" x-text="ph.title"></span>
+                    <span x-show="ph.current" class="badge bg-info">You are here</span>
+                  </div>
+                  <p class="small text-white-50 mb-0 mt-1" x-text="ph.desc"></p>
+                </div>
+              </template>
+            </div>
+            <div class="d-flex gap-2 mt-3 flex-wrap">
+              <span class="hub-stat-pill">Tailored to your needs</span>
+              <span class="hub-stat-pill" x-text="(form.family==='family'?'Family':form.family==='couple'?'Couple':'Solo')+' · '+(form.origin||'Your city')"></span>
+            </div>
           </div>
         </div>
-        <!-- Category pills -->
-        <div class="flex gap-2 overflow-x-auto pb-2 mb-4">
+        <div class="d-flex gap-2 overflow-x-auto pb-2 mb-4">
           <template x-for="cat in lifeMapCats" :key="cat.id">
             <button @click="lmCat=cat.id"
                     :class="lmCat===cat.id?'chip-on':'chip-off'"
-                    class="chip shrink-0">
+                    class="btn btn-sm rounded-pill flex-shrink-0">
               <span x-text="cat.e+' '+cat.l"></span>
             </button>
           </template>
         </div>
-        <!-- Items grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-4">
+        <div class="row g-3 pb-4">
           <template x-for="item in getLmItems()" :key="item.id">
-            <div class="card p-4 cursor-pointer hover:-translate-y-0.5 transition-transform">
-              <div class="flex items-start gap-3">
-                <span class="text-2xl shrink-0" x-text="item.e"></span>
-                <div class="flex-1">
-                  <h5 class="font-bold text-gray-800 text-sm leading-snug" x-text="item.t"></h5>
-                  <p class="text-gray-400 text-xs mt-1 leading-relaxed" x-text="item.d"></p>
-                  <div class="flex items-center gap-2 mt-2">
-                    <span class="text-yellow-500 text-xs font-bold" x-text="'⭐ '+item.r""></span>
-                    <span class="text-gray-200 text-xs">·</span>
-                    <span class="text-gray-400 text-xs" x-text="item.v+' employees'"></span>
-                  </div>
+            <div class="col-md-6">
+            <div class="card shadow-sm h-100 card-interactive">
+              <div class="card-body d-flex gap-3">
+                <span class="fs-4 flex-shrink-0" x-text="item.e"></span>
+                <div>
+                  <h5 class="fw-bold small mb-1" x-text="item.t"></h5>
+                  <p class="text-muted small mb-2" x-text="item.d"></p>
+                  <span class="badge bg-warning-subtle text-warning me-1" x-text="'⭐ '+item.r"></span>
+                  <span class="text-muted small" x-text="item.v+' employees'"></span>
                 </div>
               </div>
             </div>
+            </div>
           </template>
+        </div>
         </div>
       </div>
 
       <!-- ===== PULSE CHECK ===== -->
-      <div x-show="activeRail==='anchor' && activeTab==='pulse'" class="fi max-w-2xl mx-auto w-full">
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('anchor','pulse') }">
+        <div class="container-fluid py-4 sa-content">
         <div class="chat-shell">
-          <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0077B6] to-[#00B4D8] flex items-center justify-center shadow-lg overflow-hidden">
-              <svg viewBox="0 0 130 115" class="w-10 h-9 text-white" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg>
+          <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+            <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style="width:3rem;height:3rem">
+              <svg viewBox="0 0 130 115" width="36" height="32" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg>
             </div>
             <div>
-              <h4 class="font-display font-bold text-[var(--ink)]">Anchor AI</h4>
-              <p class="text-xs text-[var(--muted)]">Fortnightly · <span class="text-[#00B4D8] font-semibold">Bedrock</span> · Confidential</p>
+              <h4 class="fw-bold mb-0">Anchor AI</h4>
+              <p class="small text-muted mb-0">Fortnightly · <span class="text-info fw-semibold">Bedrock</span> · Confidential</p>
             </div>
           </div>
 
-        <div class="space-y-3 mb-4 min-h-[200px]" id="chat-box">
+        <div class="mb-4" style="min-height:200px" id="chat-box">
           <template x-for="msg in chatMsgs" :key="msg.id">
-            <div :class="msg.role==='ai'?'justify-start':'justify-end'" class="flex msg">
-              <div :class="msg.role==='ai'?'bai rounded-2xl rounded-tl-sm max-w-sm':'busr rounded-2xl rounded-tr-sm max-w-xs'"
-                   class="px-4 py-3 shadow-sm">
-                <p class="text-sm leading-relaxed" x-text="msg.text"></p>
+            <div :class="msg.role==='ai'?'justify-content-start':'justify-content-end'" class="d-flex mb-2 msg">
+              <div :class="msg.role==='ai'?'bai':'busr'" class="px-3 py-2 shadow-sm" style="max-width:85%">
+                <p class="small mb-0" x-text="msg.text"></p>
                 <div x-show="msg.type==='slider'&&!msg.done" class="mt-3">
-                  <input type="range" min="1" max="10" x-model="pulseVal" class="w-full">
-                  <div class="flex justify-between text-xs text-gray-400 mt-1">
+                  <input type="range" min="1" max="10" x-model="pulseVal" class="form-range">
+                  <div class="d-flex justify-content-between small text-muted mt-1">
                     <span>1 — Really tough</span>
-                    <strong class="text-[#0099CC]" x-text="pulseVal+' / 10'"></strong>
+                    <strong class="text-info" x-text="pulseVal+' / 10'"></strong>
                     <span>10 — Loving it</span>
                   </div>
-                  <button @click="submitScore()" class="w-full mt-3 btn-primary text-sm py-2.5">
-                    That's where I'm at
-                  </button>
+                  <button @click="submitScore()" class="btn btn-primary btn-sm w-100 mt-2">That's where I'm at</button>
                 </div>
               </div>
             </div>
           </template>
-          <div x-show="aiTyping" class="flex justify-start msg">
-            <div class="bai rounded-2xl rounded-tl-sm px-5 py-3.5 shadow-sm flex gap-1.5 items-center">
-              <div class="w-2 h-2 bg-[#0099CC]/60 rounded-full bdot" style="animation-delay:0s"></div>
-              <div class="w-2 h-2 bg-[#0099CC]/60 rounded-full bdot" style="animation-delay:.18s"></div>
-              <div class="w-2 h-2 bg-[#0099CC]/60 rounded-full bdot" style="animation-delay:.36s"></div>
+          <div x-show="aiTyping" class="d-flex justify-content-start msg">
+            <div class="bai px-4 py-3 shadow-sm d-flex gap-1">
+              <span class="rounded-circle bg-info bdot d-inline-block" style="width:8px;height:8px;animation-delay:0s"></span>
+              <span class="rounded-circle bg-info bdot d-inline-block" style="width:8px;height:8px;animation-delay:.18s"></span>
+              <span class="rounded-circle bg-info bdot d-inline-block" style="width:8px;height:8px;animation-delay:.36s"></span>
             </div>
           </div>
         </div>
 
-        <div x-show="showTxt" class="space-y-2 mb-4">
-          <div class="flex flex-wrap gap-2">
+        <div x-show="showTxt" class="mb-4">
+          <div class="d-flex flex-wrap gap-2 mb-2">
             <template x-for="chip in pulseChips" :key="chip">
-              <button @click="txtInput=chip; submitTxt()" class="chip chip-off hover:border-[#0099CC]/40" x-text="chip"></button>
+              <button @click="txtInput=chip; submitTxt()" class="btn btn-sm btn-outline-secondary rounded-pill" x-text="chip"></button>
             </template>
           </div>
-          <div class="card p-3 flex gap-2">
-            <input x-model="txtInput" type="text" placeholder="Tell me honestly — or tap a suggestion above…"
-                   class="flex-1 text-sm text-gray-800 focus:outline-none"
+          <div class="card p-2">
+            <div class="input-group">
+            <input x-model="txtInput" type="text" placeholder="Tell me honestly…" class="form-control border-0"
                    @keydown.enter="submitTxt()">
-            <button @click="submitTxt()" class="btn-primary px-4 py-2 text-sm">Send</button>
+            <button @click="submitTxt()" class="btn btn-primary">Send</button>
+            </div>
           </div>
         </div>
 
-        <div x-show="chatMsgs.length===0" class="text-center py-16">
-          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#CAF0F8] to-white flex items-center justify-center mx-auto mb-4 text-3xl border border-[#00B4D8]/20">💚</div>
-          <h4 class="font-display font-bold text-[var(--ink)] mb-2">Ready when you are</h4>
-          <p class="text-[var(--muted)] text-sm mb-6 max-w-xs mx-auto">Two honest questions. About 60 seconds. Never shared with your manager.</p>
-          <button @click="startPulse()" class="btn-primary px-8 py-3.5">Start check-in</button>
+        <div x-show="chatMsgs.length===0" class="text-center py-5">
+          <div class="rounded-circle bg-info-subtle d-inline-flex align-items-center justify-content-center mb-3 fs-2 border border-info" style="width:4rem;height:4rem">💚</div>
+          <h4 class="fw-bold mb-2">Ready when you are</h4>
+          <p class="text-muted small mb-4 mx-auto" style="max-width:16rem">Two honest questions. About 60 seconds. Never shared with your manager.</p>
+          <button @click="startPulse()" class="btn btn-primary">Start check-in</button>
+        </div>
         </div>
         </div>
       </div>
 
       <!-- ===== SERVICES ===== -->
-      <div x-show="activeRail==='anchor' && activeTab==='services'" class="fi max-w-6xl mx-auto w-full space-y-4">
-        <div class="card p-5 mb-4">
-          <h4 class="font-bold text-gray-800">🛎️ All Your Support Services — Centralised</h4>
-          <p class="text-gray-400 text-sm mt-1">Everything you need to settle into Tasmania, in one place. Active from Day 1.</p>
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('anchor','services') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--anchor mb-4 d-flex align-items-center gap-3">
+          <div class="hub-hero-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+          <div class="position-relative" style="z-index:1">
+            <h2 class="h4 fw-bold mb-1">Support services</h2>
+            <p class="small mb-0 text-white-50">Everything to settle into lutruwita — active from Day 1</p>
+          </div>
         </div>
 
-        <!-- Highlighted: Transport Assistance (ongoing) -->
-        <div class="card p-5 mb-4 border border-[#0099CC]/25 bg-gradient-to-br from-[#E6F4FA]/80 to-white shadow-glow">
-          <div class="flex items-start gap-4">
-            <div class="w-14 h-14 grad rounded-2xl flex items-center justify-center text-3xl shrink-0">✈️</div>
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <h5 class="font-black text-gray-800">Transport Assistance</h5>
-                <span class="bg-[#0099CC] text-white text-xs font-bold px-2 py-0.5 rounded-full">Ongoing</span>
+        <div class="card shadow-sm mb-4 border border-info bg-info-subtle">
+          <div class="card-body d-flex gap-3">
+            <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center fs-3 flex-shrink-0" style="width:3.5rem;height:3.5rem">✈️</div>
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h5 class="fw-bold mb-0">Transport Assistance</h5>
+                <span class="badge bg-info">Ongoing</span>
               </div>
-              <p class="text-gray-600 text-sm">Not just for Day 1. Book airport pickups for family members arriving later, medical appointments, first office run — anytime you need it.</p>
-              <div class="flex gap-2 mt-3 flex-wrap">
-                <button @click="bookService(22)" class="btn-primary text-xs px-4 py-2">Book a pickup</button>
-                <button @click="bookService(22)" class="btn-ghost text-xs px-4 py-2">Family arrival</button>
-                <button @click="bookService(22)" class="btn-ghost text-xs px-4 py-2">Medical transport</button>
+              <p class="text-muted small">Not just for Day 1. Book airport pickups for family members arriving later, medical appointments, first office run — anytime you need it.</p>
+              <div class="d-flex gap-2 mt-2 flex-wrap">
+                <button @click="bookService(22)" class="btn btn-primary btn-sm">Book a pickup</button>
+                <button @click="bookService(22)" class="btn btn-outline-primary btn-sm">Family arrival</button>
+                <button @click="bookService(22)" class="btn btn-outline-primary btn-sm">Medical transport</button>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Office & airport automation -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <div class="card p-4 border border-[#B3DFF0]">
-            <h5 class="font-bold text-gray-800 text-sm mb-1">🏢 First office drop-off</h5>
-            <p class="text-gray-500 text-xs mb-3">Auto-request to TasNetworks transport partner — Maria St HQ induction day.</p>
-            <button @click="bookService('office')" class="btn-primary text-xs px-4 py-2">Request drop-off</button>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="card hub-card h-100 border-start border-info border-4">
+              <div class="card-body">
+                <h5 class="fw-bold mb-1"><i class="bi bi-building me-1 text-info"></i> First office drop-off</h5>
+                <p class="text-muted small mb-3">Auto-request to TasNetworks transport partner — Maria St HQ induction day.</p>
+                <button @click="bookService('office')" class="btn btn-primary btn-sm">Request drop-off</button>
+              </div>
+            </div>
           </div>
-          <div class="card p-4 border border-[#B3DFF0]">
-            <h5 class="font-bold text-gray-800 text-sm mb-1">♿ Accessibility services</h5>
-            <p class="text-gray-500 text-xs mb-3">Workplace adjustments, accessible transport, building access support.</p>
-            <button @click="bookService('accessibility')" class="btn-primary text-xs px-4 py-2">Get support</button>
+          <div class="col-md-6">
+            <div class="card hub-card h-100 border-start border-primary border-4">
+              <div class="card-body">
+                <h5 class="fw-bold mb-1"><i class="bi bi-universal-access me-1 text-primary"></i> Accessibility services</h5>
+                <p class="text-muted small mb-3">Workplace adjustments, accessible transport, building access support.</p>
+                <button @click="bookService('accessibility')" class="btn btn-primary btn-sm">Get support</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Services grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+        <div class="row g-3 mb-4">
           <template x-for="s in services" :key="s.id">
-            <button @click="bookService(s.id)"
-                    class="card service-tile p-4 text-left cursor-pointer">
-              <span class="text-3xl block mb-2" x-text="s.e"></span>
-              <h5 class="font-bold text-gray-800 text-sm" x-text="s.t"></h5>
-              <p class="text-gray-400 text-xs mt-1 leading-tight" x-text="s.d"></p>
+            <div class="col-6 col-md-4 col-lg-3">
+            <button @click="bookService(s.id)" class="card service-tile shadow-sm h-100 w-100 p-3 text-start border-0">
+              <span class="fs-3 d-block mb-2" x-text="s.e"></span>
+              <h5 class="fw-bold small" x-text="s.t"></h5>
+              <p class="text-muted small mt-1 mb-0" x-text="s.d"></p>
             </button>
+            </div>
           </template>
         </div>
 
-        <!-- Human support CTA -->
-        <div class="hero-panel p-5 sm:p-6 text-white relative">
-          <div class="flex items-start gap-4 mb-4">
-            <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl shrink-0">📞</div>
-            <div class="flex-1">
-              <h5 class="font-bold text-lg">Need a real human?</h5>
-              <p class="text-white/80 text-sm">Our Anchor team answers directly — no bots, no call centres, no hold music. 8 am – 8 pm AEST.</p>
+        <div class="card sa-panel-primary text-white">
+          <div class="card-body">
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <span class="fs-3">📞</span>
+            <div>
+              <h5 class="fw-bold">Need a real human?</h5>
+              <p class="small text-white-50 mb-0">Our Anchor team answers directly — 8 am – 8 pm AEST.</p>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-3">
-            <a href="tel:+61489180129"
-               class="bg-white text-[#002E5D] font-bold py-3 px-4 rounded-xl hover:opacity-90 transition text-center text-sm flex items-center justify-center gap-2">
-              📞 Call Samin<br><span class="text-xs text-[#0099CC]">+61 489 180 129</span>
+          <div class="row g-2">
+            <div class="col-sm-6">
+            <a href="tel:+61489180129" class="btn btn-light w-100 text-primary fw-bold small py-3">
+              📞 Call Samin<br><span class="text-info">+61 489 180 129</span>
             </a>
-            <a href="tel:+61424861396"
-               class="bg-white/20 border border-white/40 text-white font-bold py-3 px-4 rounded-xl hover:bg-white/30 transition text-center text-sm flex items-center justify-center gap-2">
-              📞 Call Team<br><span class="text-xs text-white/70">+61 424 861 396</span>
+            </div>
+            <div class="col-sm-6">
+            <a href="tel:+61424861396" class="btn btn-outline-light w-100 fw-bold small py-3">
+              📞 Call Team<br><span class="text-white-50">+61 424 861 396</span>
             </a>
+            </div>
           </div>
+          </div>
+        </div>
         </div>
       </div>
 
       <!-- ===== COMMUNITY ===== -->
-      <div x-show="activeRail==='anchor' && activeTab==='community'" class="fi max-w-5xl mx-auto w-full space-y-4">
-        <div class="card p-5">
-          <h4 class="font-bold text-gray-800">💬 Community Chat</h4>
-          <p class="text-gray-400 text-sm">#relocators-hobart · New starters &amp; buddies · Not monitored by managers</p>
-          <div class="mt-4 space-y-2 max-h-48 overflow-y-auto scr">
-            <template x-for="c in communityChat" :key="c.id">
-              <div class="flex gap-2 text-sm">
-                <span class="font-bold text-[#002E5D] shrink-0" x-text="c.who+':'"></span>
-                <span class="text-gray-600" x-text="c.msg"></span>
-              </div>
-            </template>
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('anchor','community') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--anchor d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1">
+            <div class="hub-hero-icon"><i class="bi bi-chat-dots-fill"></i></div>
+            <div>
+              <h2 class="h4 fw-bold mb-1">Community</h2>
+              <p class="small mb-0 text-white-50">#relocators-hobart · Buddies &amp; new starters · Not manager-monitored</p>
+            </div>
           </div>
-          <div class="flex gap-2 mt-3">
-            <input x-model="communityInput" type="text" placeholder="Say hi to your community…" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" @keydown.enter="postCommunity()">
-            <button @click="postCommunity()" class="btn-primary px-4 py-2 text-sm">Send</button>
+          <span class="hub-stat-pill position-relative" style="z-index:1"><i class="bi bi-people-fill"></i> 847 relocators</span>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-lg-7">
+            <div class="card hub-card h-100">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-chat-left-text me-1"></i> Live channel</span>
+                <span class="badge bg-success-subtle text-success">Active</span>
+              </div>
+              <div class="card-body">
+                <div class="chat-feed scr mb-3">
+                  <template x-for="c in communityChat" :key="c.id">
+                    <div class="chat-bubble">
+                      <span class="who" x-text="c.who"></span>
+                      <span class="small text-secondary d-block" x-text="c.msg"></span>
+                    </div>
+                  </template>
+                </div>
+                <div class="input-group">
+                  <input x-model="communityInput" type="text" placeholder="Say hi to your community…" class="form-control" @keydown.enter="postCommunity()">
+                  <button @click="postCommunity()" class="btn btn-primary"><i class="bi bi-send-fill"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="card hub-card h-100">
+              <div class="card-header"><i class="bi bi-calendar3 me-1"></i> Your schedule</div>
+              <div class="card-body d-flex flex-column gap-2">
+                <div class="d-flex justify-content-between align-items-center p-2 rounded bg-light">
+                  <span class="small fw-semibold">Induction · Maria St</span>
+                  <span class="badge bg-primary-subtle text-primary">Mon 9:00</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center p-2 rounded bg-light">
+                  <span class="small fw-semibold">Buddy coffee · <span x-text="getBestBuddy().name.split(' ')[0]"></span></span>
+                  <span class="badge bg-secondary-subtle text-secondary">Wed 12:30</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center p-2 rounded border border-warning bg-warning-subtle">
+                  <span class="small fw-semibold">Pulse check · Anchor AI</span>
+                  <span class="badge bg-warning text-dark">Due today</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="card p-5">
-            <h5 class="font-bold text-gray-800 mb-3">👥 Groups &amp; social</h5>
-            <template x-for="g in socialGroups" :key="g.n">
-              <a :href="g.url" target="_blank" rel="noopener" class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0 hover:bg-[#F0F6FB] rounded-lg px-2 -mx-2">
-                <span x-text="g.e"></span>
-                <span class="text-sm font-semibold text-[#0099CC]" x-text="g.n"></span>
-              </a>
-            </template>
-          </div>
-          <div class="card p-5">
-            <h5 class="font-bold text-gray-800 mb-3">📅 Events</h5>
-            <template x-for="ev in events" :key="ev.id">
-              <div class="py-2 border-b border-gray-50 last:border-0">
-                <div class="font-semibold text-sm text-gray-800" x-text="ev.title"></div>
-                <div class="text-xs text-[#0099CC]" x-text="ev.when"></div>
-                <button @click="showToast('Registered for '+ev.title+' (demo)')" class="text-xs text-[#002E5D] font-bold mt-1 hover:underline">Register →</button>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card hub-card h-100">
+              <div class="card-header">Groups &amp; social</div>
+              <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                  <template x-for="g in socialGroups" :key="g.n">
+                    <a :href="g.url" target="_blank" rel="noopener" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3">
+                      <span class="fs-4" x-text="g.e"></span>
+                      <span class="fw-semibold small flex-grow-1" x-text="g.n"></span>
+                      <i class="bi bi-box-arrow-up-right text-muted"></i>
+                    </a>
+                  </template>
+                </div>
               </div>
-            </template>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card hub-card h-100">
+              <div class="card-header">Upcoming TasNetworks events</div>
+              <div class="card-body p-0">
+                <template x-for="ev in events" :key="ev.id">
+                  <div class="px-3 py-3 border-bottom">
+                    <div class="fw-semibold small" x-text="ev.title"></div>
+                    <div class="text-info small" x-text="ev.when"></div>
+                    <button @click="showToast('Registered for '+ev.title+' (demo)')" class="btn btn-link btn-sm text-primary p-0 mt-1">Register <i class="bi bi-arrow-right"></i></button>
+                  </div>
+                </template>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="card p-5">
-          <h5 class="font-bold text-gray-800 mb-2">📆 Your schedule</h5>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between bg-[#F0F6FB] rounded-xl px-3 py-2"><span class="font-semibold">Induction · Maria St</span><span class="text-gray-500">Mon 9:00</span></div>
-            <div class="flex justify-between bg-[#F0F6FB] rounded-xl px-3 py-2"><span class="font-semibold">Buddy coffee · <span x-text="getBestBuddy().name.split(' ')[0]"></span></span><span class="text-gray-500">Wed 12:30</span></div>
-            <div class="flex justify-between bg-[#F0F6FB] rounded-xl px-3 py-2"><span class="font-semibold">Pulse check · Anchor AI</span><span class="text-amber-600 font-semibold">Due today</span></div>
-          </div>
         </div>
       </div>
 
       <!-- ===== SOCIAL: TEAMS ===== -->
-      <div x-show="activeRail==='teams'" class="fi max-w-3xl mx-auto w-full space-y-4">
-        <div class="card p-6" x-show="!connections.microsoft">
-          <h3 class="font-display font-bold text-lg mb-2">Microsoft Teams</h3>
-          <p class="text-sm text-[var(--muted)] mb-4">Connect your Microsoft account. Work Teams (TasNetworks tenant) unlocks full chats when SSO is enabled.</p>
-          <button @click="connectMicrosoft()" class="btn-primary" style="background:#6264A7">Connect Microsoft account</button>
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('teams') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--teams d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1">
+            <div class="hub-hero-icon"><i class="bi bi-microsoft"></i></div>
+            <div>
+              <h2 class="h4 fw-bold mb-1">Microsoft Teams</h2>
+              <p class="small mb-0 text-white-50">Work channels &amp; TasNetworks relocator community</p>
+            </div>
+          </div>
+          <span class="hub-stat-pill position-relative" style="z-index:1" x-show="connections.microsoft"><i class="bi bi-check-circle-fill"></i> Connected</span>
         </div>
-        <div x-show="connections.microsoft" class="space-y-4">
-          <div class="card p-5 flex items-center gap-4">
-            <img x-show="msProfile.photo" :src="msProfile.photo" class="w-14 h-14 rounded-full" alt="">
-            <div x-show="!msProfile.photo" class="w-14 h-14 rounded-full bg-[#6264A7] text-white flex items-center justify-center text-xl font-bold" x-text="(msProfile.name||'?').charAt(0)"></div>
-            <div class="flex-1">
-              <h4 class="font-bold" x-text="msProfile.name"></h4>
-              <p class="text-sm text-[var(--muted)]" x-text="msProfile.email"></p>
-              <button @click="disconnectMicrosoft()" class="text-xs text-rose-500 mt-1 font-semibold">Disconnect</button>
+
+        <div class="connect-cta mb-4" x-show="!connections.microsoft">
+          <div class="connect-cta-icon" style="background:#6264A7"><i class="bi bi-microsoft"></i></div>
+          <h3 class="h5 fw-bold mb-2">Connect your Microsoft account</h3>
+          <p class="text-muted small mb-3 mx-auto" style="max-width:22rem">Unlock Teams channels when TasNetworks SSO is enabled. Your profile syncs for suggested relocator groups.</p>
+          <button @click="connectMicrosoft()" class="btn btn-lg text-white fw-semibold px-4" style="background:#6264A7"><i class="bi bi-plug me-1"></i> Connect account</button>
+        </div>
+
+        <div x-show="connections.microsoft">
+          <div class="card hub-card mb-4">
+            <div class="card-body d-flex align-items-center gap-3">
+              <img x-show="msProfile.photo" :src="msProfile.photo" class="rounded-circle border" width="64" height="64" alt="">
+              <div x-show="!msProfile.photo" class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0 fs-4" style="width:64px;height:64px;background:#6264A7" x-text="(msProfile.name||'?').charAt(0)"></div>
+              <div class="flex-grow-1 min-w-0">
+                <h4 class="fw-bold mb-0 text-truncate" x-text="msProfile.name"></h4>
+                <p class="small text-muted mb-2 text-truncate" x-text="msProfile.email"></p>
+                <span class="badge bg-success-subtle text-success me-2">Signed in</span>
+                <button @click="disconnectMicrosoft()" class="btn btn-link btn-sm text-danger p-0 align-baseline">Disconnect</button>
+              </div>
             </div>
           </div>
-          <div class="card p-5 border-l-4 border-amber-400 bg-amber-50/50">
-            <p class="text-sm text-amber-900"><strong>Personal account:</strong> Teams work chats need TasNetworks Azure AD. Your profile is connected — channels appear when HR enables SSO.</p>
+          <div class="alert alert-warning border-0 shadow-sm mb-4 d-flex gap-2">
+            <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+            <p class="small mb-0"><strong>Personal account:</strong> Work Teams chats need TasNetworks Azure AD. Channels below appear when HR enables SSO.</p>
           </div>
-          <div class="card p-5">
-            <h5 class="font-bold mb-3">Suggested channels</h5>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between py-2 border-b border-slate-100"><span>#relocators-hobart</span><span class="text-[var(--muted)]">TasNetworks</span></div>
-              <div class="flex justify-between py-2 border-b border-slate-100"><span>#new-starters-2026</span><span class="text-[var(--muted)]">HR</span></div>
+          <div class="card hub-card">
+            <div class="card-header">Suggested channels</div>
+            <div class="card-body">
+              <div class="hub-list-row">
+                <div><span class="fw-semibold">#relocators-hobart</span><div class="small text-muted">General · newcomers &amp; buddies</div></div>
+                <span class="badge bg-primary-subtle text-primary">TasNetworks</span>
+              </div>
+              <div class="hub-list-row">
+                <div><span class="fw-semibold">#new-starters-2026</span><div class="small text-muted">HR announcements &amp; induction</div></div>
+                <span class="badge bg-secondary-subtle text-secondary">HR</span>
+              </div>
+              <div class="hub-list-row">
+                <div><span class="fw-semibold">#hobart-social</span><div class="small text-muted">Weekend plans &amp; meetups</div></div>
+                <span class="badge bg-info-subtle text-info">Social</span>
+              </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
 
       <!-- ===== SOCIAL: WHATSAPP ===== -->
-      <div x-show="activeRail==='whatsapp'" class="fi max-w-3xl mx-auto w-full space-y-4">
-        <div class="card p-6">
-          <h3 class="font-display font-bold text-lg mb-2">WhatsApp</h3>
-          <p class="text-sm text-[var(--muted)] mb-4">Personal WhatsApp cannot be linked via API. Message your buddy or join community groups via invite links.</p>
-          <a :href="'https://wa.me/61400000000?text=Hi%20'+encodeURIComponent(getBestBuddy().name.split(' ')[0])" target="_blank" rel="noopener" class="btn-primary inline-block text-center" style="background:#25D366">Message <span x-text="getBestBuddy().name.split(' ')[0]"></span></a>
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('whatsapp') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--whatsapp d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1">
+            <div class="hub-hero-icon"><i class="bi bi-whatsapp"></i></div>
+            <div>
+              <h2 class="h4 fw-bold mb-1">WhatsApp</h2>
+              <p class="small mb-0 text-white-50">Message your buddy &amp; join hobby groups via invite links</p>
+            </div>
+          </div>
+          <span class="hub-stat-pill position-relative" style="z-index:1"><i class="bi bi-link-45deg"></i> Invite links</span>
         </div>
-        <div class="card p-5">
-          <h5 class="font-bold mb-3">Community groups</h5>
+
+        <div class="card hub-card mb-4 border-start border-success border-4">
+          <div class="card-body d-flex flex-column flex-sm-row align-items-sm-center gap-3">
+            <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center flex-shrink-0 fs-2" style="width:3.5rem;height:3.5rem" x-text="getBestBuddy().avatar"></div>
+            <div class="flex-grow-1">
+              <h5 class="fw-bold mb-1">Message your Anchor buddy</h5>
+              <p class="text-muted small mb-0"><span x-text="getBestBuddy().name"></span> · usually replies within a few hours</p>
+            </div>
+            <a :href="'https://wa.me/61400000000?text=Hi%20'+encodeURIComponent(getBestBuddy().name.split(' ')[0])" target="_blank" rel="noopener" class="btn text-white fw-semibold flex-shrink-0" style="background:#25D366"><i class="bi bi-whatsapp me-1"></i> Chat now</a>
+          </div>
+        </div>
+
+        <h5 class="fw-bold small text-uppercase text-muted mb-3">Community groups</h5>
+        <div class="row g-3">
           <template x-for="g in getHobbyGroups().whatsapp" :key="g.name">
-            <a :href="g.url" target="_blank" rel="noopener" class="flex items-center justify-between py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 px-2 -mx-2 rounded-lg">
-              <span class="font-semibold text-sm" x-text="g.name"></span>
-              <span class="text-xs text-[#25D366]">Open →</span>
-            </a>
+            <div class="col-md-6">
+              <a :href="g.url" target="_blank" rel="noopener" class="social-group-card h-100">
+                <span class="social-group-icon social-group-icon--wa"><i class="bi bi-whatsapp"></i></span>
+                <div class="flex-grow-1 min-w-0">
+                  <div class="fw-bold text-truncate" x-text="g.name"></div>
+                  <div class="small text-muted">Open group invite</div>
+                </div>
+                <span class="badge bg-success-subtle text-success">Join <i class="bi bi-arrow-right"></i></span>
+              </a>
+            </div>
           </template>
+        </div>
+        <div class="hub-empty mt-3" x-show="getHobbyGroups().whatsapp.length===0">
+          <div class="hub-empty-icon"><i class="bi bi-whatsapp"></i></div>
+          <p class="fw-semibold mb-1">No group links yet</p>
+          <p class="small text-muted mb-0">Add hobbies in onboarding to unlock WhatsApp communities.</p>
+        </div>
         </div>
       </div>
 
       <!-- ===== SOCIAL: FACEBOOK ===== -->
-      <div x-show="activeRail==='facebook'" class="fi max-w-3xl mx-auto w-full space-y-4">
-        <div class="card p-5 flex items-center justify-between">
-          <div>
-            <h3 class="font-display font-bold text-lg">Facebook groups</h3>
-            <p class="text-sm text-[var(--muted)]">Matched to your hobbies from onboarding</p>
-          </div>
-          <span x-show="connections.facebook" class="stat-pill">Connected</span>
-        </div>
-        <template x-for="g in getHobbyGroups().facebook" :key="g.name">
-          <a :href="g.url" target="_blank" rel="noopener" class="card card-interactive p-4 flex gap-3 block">
-            <span class="text-2xl">📘</span>
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('facebook') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--facebook d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1">
+            <div class="hub-hero-icon"><i class="bi bi-facebook"></i></div>
             <div>
-              <div class="font-bold text-sm" x-text="g.name"></div>
-              <div class="text-xs text-[var(--muted)]" x-text="g.desc"></div>
-              <div class="text-xs text-[#1877F2] mt-1" x-text="g.members"></div>
+              <h2 class="h4 fw-bold mb-1">Facebook groups</h2>
+              <p class="small mb-0 text-white-50">Matched to your hobbies from onboarding</p>
             </div>
-          </a>
-        </template>
-        <p x-show="getHobbyGroups().facebook.length===0" class="text-sm text-[var(--muted)]">Add hobbies in onboarding to see group suggestions.</p>
+          </div>
+          <div class="d-flex flex-wrap gap-2 position-relative" style="z-index:1">
+            <span class="hub-stat-pill"><span x-text="getHobbyGroups().facebook.length"></span> groups</span>
+            <span class="hub-stat-pill" x-show="connections.facebook"><i class="bi bi-check-circle-fill"></i> Linked</span>
+            <button x-show="!connections.facebook" @click="connectFacebook()" class="btn btn-sm btn-light fw-semibold">Connect Facebook</button>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <template x-for="g in getHobbyGroups().facebook" :key="g.name">
+            <div class="col-md-6">
+              <a :href="g.url" target="_blank" rel="noopener" class="social-group-card h-100">
+                <span class="social-group-icon social-group-icon--fb"><i class="bi bi-facebook"></i></span>
+                <div class="flex-grow-1 min-w-0">
+                  <div class="fw-bold" x-text="g.name"></div>
+                  <div class="small text-muted" x-text="g.desc"></div>
+                  <div class="small text-primary fw-semibold mt-1" x-text="g.members"></div>
+                </div>
+                <i class="bi bi-box-arrow-up-right text-muted"></i>
+              </a>
+            </div>
+          </template>
+        </div>
+        <div class="hub-empty mt-3" x-show="getHobbyGroups().facebook.length===0">
+          <div class="hub-empty-icon"><i class="bi bi-facebook"></i></div>
+          <p class="fw-semibold mb-1">No groups matched yet</p>
+          <p class="small text-muted mb-0">Add hobbies in onboarding to see Facebook group suggestions.</p>
+        </div>
+        </div>
       </div>
 
       <!-- ===== SOCIAL: INSTAGRAM ===== -->
-      <div x-show="activeRail==='instagram'" class="fi max-w-3xl mx-auto w-full space-y-4">
-        <div class="card p-5">
-          <h3 class="font-display font-bold text-lg mb-2">Instagram</h3>
-          <p class="text-sm text-[var(--muted)] mb-4">Follow local accounts and hobby communities in Hobart.</p>
-        </div>
-        <template x-for="g in getHobbyGroups().instagram" :key="g.name">
-          <a :href="g.url" target="_blank" rel="noopener" class="card card-interactive p-4 flex gap-3 block">
-            <span class="text-2xl">📷</span>
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('instagram') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--instagram d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1">
+            <div class="hub-hero-icon"><i class="bi bi-instagram"></i></div>
             <div>
-              <div class="font-bold text-sm" x-text="g.name"></div>
-              <div class="text-xs text-[var(--muted)]" x-text="g.desc"></div>
+              <h2 class="h4 fw-bold mb-1">Instagram</h2>
+              <p class="small mb-0 text-white-50">Local accounts &amp; hobby tags in Hobart &amp; lutruwita</p>
             </div>
-          </a>
-        </template>
+          </div>
+          <span class="hub-stat-pill position-relative" style="z-index:1"><span x-text="getHobbyGroups().instagram.length"></span> accounts</span>
+        </div>
+
+        <div class="row g-3">
+          <template x-for="g in getHobbyGroups().instagram" :key="g.name">
+            <div class="col-md-6 col-lg-4">
+              <a :href="g.url" target="_blank" rel="noopener" class="social-group-card flex-column align-items-stretch text-center h-100 py-4">
+                <span class="social-group-icon social-group-icon--ig mx-auto mb-3"><i class="bi bi-instagram"></i></span>
+                <div class="fw-bold" x-text="g.name"></div>
+                <div class="small text-muted mt-1" x-text="g.desc"></div>
+                <span class="btn btn-sm btn-outline-primary mt-3">Follow <i class="bi bi-arrow-right"></i></span>
+              </a>
+            </div>
+          </template>
+        </div>
+        <div class="hub-empty mt-3" x-show="getHobbyGroups().instagram.length===0">
+          <div class="hub-empty-icon"><i class="bi bi-instagram"></i></div>
+          <p class="fw-semibold mb-1">No accounts matched yet</p>
+          <p class="small text-muted mb-0">Add hobbies like hiking, food, or sports in onboarding.</p>
+        </div>
+        </div>
       </div>
 
       <!-- ===== SOCIAL: EVENTS ===== -->
-      <div x-show="activeRail==='events'" class="fi max-w-4xl mx-auto w-full space-y-4">
-        <div class="card p-5">
-          <p class="text-xs text-[var(--muted)] mb-2" x-text="eventsSource"></p>
-          <div class="flex flex-wrap gap-2">
-            <template x-for="tag in hobbyEventTags()" :key="tag">
-              <span class="chip chip-on text-xs" x-text="tag"></span>
-            </template>
-          </div>
-        </div>
-        <template x-for="ev in filteredEvents()" :key="ev.id">
-          <div class="card p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-            <div class="flex-1">
-              <h5 class="font-bold text-sm" x-text="ev.title"></h5>
-              <p class="text-xs text-[var(--muted)]" x-text="ev.when"></p>
-              <p class="text-xs text-[#00B4D8] mt-1" x-text="ev.venue"></p>
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('events') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--events d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+          <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1">
+            <div class="hub-hero-icon"><i class="bi bi-calendar-event-fill"></i></div>
+            <div>
+              <h2 class="h4 fw-bold mb-1">What's on in lutruwita</h2>
+              <p class="small mb-0 text-white-50" x-text="eventsSource"></p>
             </div>
-            <a x-show="ev.url" :href="ev.url" target="_blank" rel="noopener" class="btn-ghost text-sm shrink-0">View →</a>
           </div>
-        </template>
-        <p x-show="filteredEvents().length===0" class="text-sm text-center text-[var(--muted)] py-8">No events found — try adding more hobbies.</p>
-      </div>
-
-      <!-- ===== SOCIAL: SPIRITUAL ===== -->
-      <div x-show="activeRail==='spiritual'" class="fi max-w-3xl mx-auto w-full space-y-4">
-        <div class="card p-5">
-          <h3 class="font-display font-bold text-lg mb-1">Spiritual &amp; cultural places</h3>
-          <p class="text-sm text-[var(--muted)]">Near Hobart — crowdsourced for newcomers</p>
+          <div class="d-flex flex-wrap gap-2 position-relative" style="z-index:1">
+            <span class="hub-stat-pill"><i class="bi bi-stars"></i> <span x-text="displayedEvents().length"></span> for you</span>
+            <button @click="loadEventbriteEvents()" class="btn btn-sm btn-light fw-semibold"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
+          </div>
         </div>
-        <template x-for="p in filteredSpiritual()" :key="p.id">
-          <div class="card p-4">
-            <div class="flex gap-3">
-              <span class="text-2xl" x-text="p.e"></span>
-              <div>
-                <h5 class="font-bold text-sm" x-text="p.name"></h5>
-                <p class="text-xs text-[var(--muted)]" x-text="p.type+' · '+p.address"></p>
-                <p class="text-xs mt-1" x-text="p.note"></p>
+
+        <div class="card hub-card events-toolbar mb-4">
+          <div class="card-body py-3">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+              <div class="d-flex flex-wrap gap-2">
+                <button @click="selectSocialSub('week')" :class="socialSubView==='week'?'active':''" class="btn btn-sm btn-outline-secondary btn-filter">This week</button>
+                <button @click="selectSocialSub('month')" :class="socialSubView==='month'?'active':''" class="btn btn-sm btn-outline-secondary btn-filter">All upcoming</button>
+                <button @click="selectSocialSub('hobby')" :class="socialSubView==='hobby'?'active':''" class="btn btn-sm btn-outline-secondary btn-filter">My hobbies</button>
+              </div>
+              <div class="d-flex flex-wrap gap-1" x-show="hobbyEventTags().length">
+                <template x-for="tag in hobbyEventTags()" :key="tag">
+                  <span class="hub-tag" x-text="tag"></span>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <template x-if="featuredEvent()">
+          <div class="event-featured mb-4" :class="eventCategory(featuredEvent()).cls">
+            <div class="event-featured-visual">
+              <span class="event-cat-icon"><i class="bi" :class="eventCategory(featuredEvent()).icon"></i></span>
+              <span class="event-cat-pill bg-white bg-opacity-25 text-white border-0" x-text="eventCategory(featuredEvent()).label"></span>
+            </div>
+            <div class="event-featured-body d-flex flex-column">
+              <span class="badge bg-warning-subtle text-warning align-self-start mb-2">Top pick for you</span>
+              <h3 class="h5 fw-bold mb-2" x-text="featuredEvent().title"></h3>
+              <p class="event-meta-line mb-1"><i class="bi bi-clock"></i><span x-text="featuredEvent().when"></span></p>
+              <p class="event-meta-line mb-3"><i class="bi bi-geo-alt-fill"></i><span x-text="featuredEvent().venue"></span></p>
+              <div class="d-flex flex-wrap gap-2 mt-auto">
+                <a x-show="featuredEvent().url && featuredEvent().url!=='#'" :href="featuredEvent().url" target="_blank" rel="noopener" class="btn btn-primary">View details <i class="bi bi-arrow-right ms-1"></i></a>
+                <button x-show="!featuredEvent().url || featuredEvent().url==='#'" @click="showToast('Saved '+featuredEvent().title+' to your calendar (demo)')" class="btn btn-primary">Add to calendar</button>
+                <button @click="showToast('Shared '+featuredEvent().title+' with your buddy (demo)')" class="btn btn-outline-primary">Share with buddy</button>
               </div>
             </div>
           </div>
         </template>
+
+        <p class="small fw-bold text-muted text-uppercase mb-3" x-show="otherEvents().length" style="letter-spacing:.06em">More events</p>
+        <div class="row g-3">
+          <template x-for="ev in otherEvents()" :key="ev.id">
+            <div class="col-md-6 col-xl-4">
+              <article class="event-card-v2" :class="eventCategory(ev).cls">
+                <div class="event-card-v2-head">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi fs-5" :class="eventCategory(ev).icon"></i>
+                    <span class="event-cat-pill bg-white bg-opacity-25 text-white border-0" x-text="eventCategory(ev).label"></span>
+                  </div>
+                  <div class="event-when-chip">
+                    <span class="big" x-text="eventWhenShort(ev.when).day"></span>
+                    <span x-text="eventWhenShort(ev.when).sub"></span>
+                  </div>
+                </div>
+                <div class="event-card-v2-body">
+                  <h4 class="event-card-v2-title" x-text="ev.title"></h4>
+                  <p class="event-meta-line"><i class="bi bi-clock"></i><span x-text="ev.when"></span></p>
+                  <p class="event-meta-line mb-3"><i class="bi bi-geo-alt"></i><span x-text="ev.venue"></span></p>
+                  <div class="mt-auto pt-2">
+                    <a x-show="ev.url && ev.url!=='#'" :href="ev.url" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary w-100">Open event</a>
+                    <button x-show="!ev.url || ev.url==='#'" @click="showToast('Saved '+ev.title+' to your calendar (demo)')" class="btn btn-sm btn-outline-primary w-100">Save to calendar</button>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </template>
+        </div>
+
+        <div class="hub-empty mt-4" x-show="displayedEvents().length===0">
+          <div class="hub-empty-icon"><i class="bi bi-calendar-x"></i></div>
+          <p class="fw-semibold mb-1">No events in this view</p>
+          <p class="small text-muted mb-3">Try <strong>All upcoming</strong> or add hobbies in onboarding for better matches.</p>
+          <button @click="selectSocialSub('month'); loadEventbriteEvents()" class="btn btn-primary btn-sm">Show all events</button>
+        </div>
+        </div>
       </div>
 
-      <!-- ===== SOCIAL: MARKETPLACE ===== -->
-      <div x-show="activeRail==='marketplace'" class="fi max-w-5xl mx-auto w-full space-y-4">
-        <div class="card p-5">
-          <div class="flex flex-wrap gap-2 mb-4">
-            <button @click="mktCondition='new'" :class="mktCondition==='new'?'chip-on':'chip-off'" class="chip">New</button>
-            <button @click="mktCondition='used'" :class="mktCondition==='used'?'chip-on':'chip-off'" class="chip">Used</button>
+      <!-- ===== SOCIAL: SPIRITUAL ===== -->
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('spiritual') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--spiritual d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1">
+            <div class="hub-hero-icon"><i class="bi bi-heart"></i></div>
+            <div>
+              <h2 class="h4 fw-bold mb-1">Spiritual &amp; cultural</h2>
+              <p class="small mb-0 text-white-50">Places near Hobart — crowdsourced for newcomers</p>
+            </div>
           </div>
-          <div class="flex flex-wrap gap-2 mb-3">
-            <template x-for="cat in ['home','office','clothes','kids']" :key="cat">
-              <button @click="mktCategory=cat" :class="mktCategory===cat?'chip-on':'chip-off'" class="chip capitalize" x-text="cat"></button>
-            </template>
-          </div>
-          <div class="flex gap-2">
-            <input x-model="mktQuery" type="text" placeholder="Search e.g. desk, heater, bike…" class="input-field flex-1" @keydown.enter="runMarketplaceSearch()">
-            <select x-model="mktSort" class="input-field w-auto min-w-[140px]">
-              <option value="price-asc">Price ↑</option>
-              <option value="price-desc">Price ↓</option>
-              <option value="newest">Newest</option>
-              <option value="distance">Nearest</option>
-            </select>
-          </div>
-          <p class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mt-3">Sample listings below. Live search opens Facebook Marketplace &amp; Gumtree (no public API).</p>
-          <div class="flex gap-2 mt-3 flex-wrap">
-            <a :href="marketplaceFbUrl()" target="_blank" rel="noopener" class="btn-ghost text-xs">Search Facebook →</a>
-            <a :href="marketplaceGumtreeUrl()" target="_blank" rel="noopener" class="btn-ghost text-xs">Search Gumtree →</a>
-          </div>
+          <span class="hub-stat-pill position-relative" style="z-index:1"><span x-text="filteredSpiritual().length"></span> places</span>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <template x-for="item in sortedMarketplace()" :key="item.id">
-            <div class="listing-card bg-white cursor-pointer" @click="openListing(item)">
-              <div class="h-32 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-4xl" x-text="item.emoji"></div>
-              <div class="p-3">
-                <div class="font-bold text-sm line-clamp-2" x-text="item.title"></div>
-                <div class="text-lg font-black text-[var(--navy)] mt-1" x-text="'$'+item.price"></div>
-                <div class="text-xs text-[var(--muted)]" x-text="item.location+' · '+item.source"></div>
-                <span class="text-[10px] uppercase font-bold text-slate-400" x-text="item.condition"></span>
+
+        <div class="row g-3">
+          <template x-for="p in filteredSpiritual()" :key="p.id">
+            <div class="col-md-6">
+              <div class="card place-card h-100">
+                <div class="card-body d-flex gap-3">
+                  <div class="place-emoji" x-text="p.e"></div>
+                  <div>
+                    <h5 class="fw-bold mb-1" x-text="p.name"></h5>
+                    <p class="small text-muted mb-1"><span class="badge bg-secondary-subtle text-secondary me-1" x-text="p.type"></span><span x-text="p.address"></span></p>
+                    <p class="small mb-0" x-text="p.note"></p>
+                  </div>
+                </div>
               </div>
             </div>
           </template>
         </div>
-      </div>
-
-      <!-- ===== SOCIAL: CONNECTIONS ===== -->
-      <div x-show="activeRail==='connections'" class="fi max-w-lg mx-auto w-full space-y-3">
-        <div class="card p-5">
-          <h3 class="font-display font-bold text-lg mb-4">Connected accounts</h3>
-          <div class="flex items-center justify-between py-3 border-b border-slate-100">
-            <span>Microsoft</span>
-            <span :class="connections.microsoft?'text-emerald-600':'text-slate-400'" class="text-sm font-semibold" x-text="connections.microsoft?'Connected':'Not connected'"></span>
-          </div>
-          <div class="flex items-center justify-between py-3 border-b border-slate-100">
-            <span>Facebook</span>
-            <span :class="connections.facebook?'text-emerald-600':'text-slate-400'" class="text-sm font-semibold" x-text="connections.facebook?'Connected':'Not connected'"></span>
-          </div>
-          <div class="flex items-center justify-between py-3">
-            <span>WhatsApp</span>
-            <span class="text-slate-400 text-sm font-semibold">Via invite links</span>
-          </div>
         </div>
       </div>
 
+      <!-- ===== SOCIAL: MARKETPLACE ===== -->
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('marketplace') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--marketplace d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+          <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1">
+            <div class="hub-hero-icon"><i class="bi bi-bag-check"></i></div>
+            <div>
+              <h2 class="h4 fw-bold mb-1">Marketplace</h2>
+              <p class="small mb-0 text-white-50">Settling-in essentials · Gumtree &amp; Facebook</p>
+            </div>
+          </div>
+          <span class="hub-stat-pill position-relative" style="z-index:1"><span x-text="sortedMarketplace().length"></span> listings</span>
+        </div>
+
+        <div class="card hub-card mb-4">
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button @click="mktCondition='new'" :class="mktCondition==='new'?'chip-on':'chip-off'" class="btn btn-sm rounded-pill">New</button>
+              <button @click="mktCondition='used'" :class="mktCondition==='used'?'chip-on':'chip-off'" class="btn btn-sm rounded-pill">Used</button>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <template x-for="cat in ['home','office','clothes','kids']" :key="cat">
+                <button @click="mktCategory=cat" :class="mktCategory===cat?'chip-on':'chip-off'" class="btn btn-sm rounded-pill text-capitalize" x-text="cat"></button>
+              </template>
+            </div>
+            <div class="row g-2">
+              <div class="col-md-8">
+                <div class="input-group">
+                  <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                  <input x-model="mktQuery" type="text" placeholder="Search desk, heater, bike…" class="form-control" @keydown.enter="runMarketplaceSearch()">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <select x-model="mktSort" class="form-select">
+                  <option value="price-asc">Price ↑</option>
+                  <option value="price-desc">Price ↓</option>
+                  <option value="newest">Newest</option>
+                  <option value="distance">Nearest</option>
+                </select>
+              </div>
+            </div>
+            <div class="alert alert-warning border-0 small mt-3 mb-0 py-2">
+              <i class="bi bi-info-circle me-1"></i> Sample listings below. Live search opens Facebook Marketplace &amp; Gumtree.
+            </div>
+            <div class="d-flex gap-2 mt-3 flex-wrap">
+              <a :href="marketplaceFbUrl()" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary"><i class="bi bi-facebook me-1"></i> Facebook</a>
+              <a :href="marketplaceGumtreeUrl()" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary">Gumtree <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="row g-3">
+          <template x-for="item in sortedMarketplace()" :key="item.id">
+            <div class="col-sm-6 col-lg-4">
+            <div class="listing-card h-100" @click="openListing(item)">
+              <div class="bg-light d-flex align-items-center justify-content-center fs-1" style="height:8rem" x-text="item.emoji"></div>
+              <div class="p-3">
+                <div class="fw-bold small" x-text="item.title"></div>
+                <div class="fs-5 fw-bold text-primary mt-1" x-text="'$'+item.price"></div>
+                <div class="small text-muted" x-text="item.location+' · '+item.source"></div>
+                <span class="badge bg-secondary-subtle text-secondary text-uppercase mt-1" x-text="item.condition"></span>
+              </div>
+            </div>
+            </div>
+          </template>
+        </div>
+        </div>
+      </div>
+
+      <!-- ===== SOCIAL: CONNECTIONS ===== -->
+      <div class="sa-tab-panel fi" :class="{ 'panel-on': panelActive('connections') }">
+        <div class="container-fluid py-4 sa-content">
+        <div class="hub-hero hub-hero--connections d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1">
+            <div class="hub-hero-icon"><i class="bi bi-link-45deg"></i></div>
+            <div>
+              <h2 class="h4 fw-bold mb-1">Connected accounts</h2>
+              <p class="small mb-0 text-white-50">Manage apps linked to your Anchor hub</p>
+            </div>
+          </div>
+          <span class="hub-stat-pill position-relative" style="z-index:1"><span x-text="connectedCount()"></span> active</span>
+        </div>
+
+        <div class="account-row">
+          <span class="account-row-icon" style="background:#6264A7"><i class="bi bi-microsoft"></i></span>
+          <div class="flex-grow-1">
+            <div class="fw-bold">Microsoft Teams</div>
+            <div class="small text-muted">Work profile &amp; suggested channels</div>
+          </div>
+          <span :class="connections.microsoft?'badge bg-success-subtle text-success':'badge bg-secondary-subtle text-secondary'" x-text="connections.microsoft?'Connected':'Not connected'"></span>
+          <button x-show="!connections.microsoft" @click="connectMicrosoft()" class="btn btn-sm btn-primary ms-2">Connect</button>
+          <button x-show="connections.microsoft" @click="disconnectMicrosoft()" class="btn btn-sm btn-outline-danger ms-2">Disconnect</button>
+        </div>
+        <div class="account-row">
+          <span class="account-row-icon social-group-icon--fb"><i class="bi bi-facebook"></i></span>
+          <div class="flex-grow-1">
+            <div class="fw-bold">Facebook</div>
+            <div class="small text-muted">Group discovery &amp; marketplace search</div>
+          </div>
+          <span :class="connections.facebook?'badge bg-success-subtle text-success':'badge bg-secondary-subtle text-secondary'" x-text="connections.facebook?'Connected':'Not connected'"></span>
+          <button x-show="!connections.facebook" @click="connectFacebook()" class="btn btn-sm btn-primary ms-2">Connect</button>
+        </div>
+        <div class="account-row">
+          <span class="account-row-icon social-group-icon--wa"><i class="bi bi-whatsapp"></i></span>
+          <div class="flex-grow-1">
+            <div class="fw-bold">WhatsApp</div>
+            <div class="small text-muted">Buddy chat &amp; community invite links</div>
+          </div>
+          <span class="badge bg-info-subtle text-info">Invite links</span>
+        </div>
+        <div class="account-row mb-0">
+          <span class="account-row-icon" style="background:linear-gradient(135deg,#f77737,#e1306c)"><i class="bi bi-instagram"></i></span>
+          <div class="flex-grow-1">
+            <div class="fw-bold">Instagram</div>
+            <div class="small text-muted">Public accounts &amp; hobby tags — no login required</div>
+          </div>
+          <span class="badge bg-secondary-subtle text-secondary">Browse only</span>
+        </div>
+        </div>
+      </div>
+
+      </div><!-- main-pane-stack -->
     </div><!-- main-scroll -->
   </div><!-- main-stage -->
 
   <!-- Global toast -->
-  <div x-show="toastMsg" x-transition class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 toast max-w-sm pointer-events-none">
-    <div class="bg-[var(--ink)] text-white text-sm font-semibold px-5 py-3.5 rounded-2xl shadow-2xl text-center" x-text="toastMsg"></div>
+  <div x-show="toastMsg" x-transition class="position-fixed bottom-0 start-50 translate-middle-x mb-4 z-3" style="pointer-events:none">
+    <div class="toast show align-items-center text-white bg-dark border-0 shadow" role="alert">
+      <div class="d-flex"><div class="toast-body fw-semibold" x-text="toastMsg"></div></div>
+    </div>
   </div>
 </div><!-- end app -->
 
 <!-- ═══════════════════════════ HR PORTAL ═════════════════════════════════ -->
-<div x-show="screen==='hr-portal'" class="min-h-screen shell-bg">
-  <div class="topbar px-6 py-4 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="brand-mark"><svg viewBox="0 0 130 115" class="w-7 h-7" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg></div>
-      <span class="font-extrabold text-lg text-slate-900">Anchor</span>
-      <span class="bg-[#E6F4FA] text-[#002E5D] text-xs px-3 py-1 rounded-full font-bold border border-[#0099CC]/20">HR Portal</span>
+<div id="screen-hr" class="screen-layer hr-layer bg-body-secondary" :class="{ 'screen-on': screen==='hr-portal' }">
+  <nav class="navbar bg-white border-bottom px-3 py-3">
+    <div class="d-flex align-items-center gap-2">
+      <div class="brand-logo-box"><svg viewBox="0 0 130 115" width="28" height="24" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg></div>
+      <span class="fw-bold">Anchor</span>
+      <span class="badge bg-primary-subtle text-primary">HR Portal</span>
     </div>
-    <button @click="screen='login'" class="btn-ghost text-sm">← Sign out</button>
-  </div>
+    <button @click="screen='login'" class="btn btn-outline-secondary btn-sm ms-auto">← Sign out</button>
+  </nav>
 
-  <div class="p-6 max-w-5xl mx-auto space-y-5">
-    <!-- KPIs -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div class="card p-4 text-center"><div class="text-3xl font-black text-[#002E5D]">37</div><div class="text-gray-400 text-xs mt-1">Interstate/int'l hires since Mar 2025</div></div>
-      <div class="card p-4 text-center border-l-4 border-red-400"><div class="text-3xl font-black text-red-500">3</div><div class="text-gray-400 text-xs mt-1">At-risk this fortnight 🔴</div></div>
-      <div class="card p-4 text-center border-l-4 border-amber-400"><div class="text-3xl font-black text-amber-500">71%</div><div class="text-gray-400 text-xs mt-1">Got a buddy under current system ⚠️</div></div>
-      <div class="card p-4 text-center border-l-4 border-green-400"><div class="text-3xl font-black text-green-600">100%</div><div class="text-gray-400 text-xs mt-1">Anchor buddy match rate ✓</div></div>
+  <div class="container-fluid py-4 sa-content">
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="card shadow-sm text-center p-3"><div class="display-6 fw-bold text-primary">37</div><div class="small text-muted">Interstate/int'l hires since Mar 2025</div></div></div>
+      <div class="col-6 col-lg-3"><div class="card shadow-sm text-center p-3 border-start border-danger border-4"><div class="display-6 fw-bold text-danger">3</div><div class="small text-muted">At-risk this fortnight</div></div></div>
+      <div class="col-6 col-lg-3"><div class="card shadow-sm text-center p-3 border-start border-warning border-4"><div class="display-6 fw-bold text-warning">71%</div><div class="small text-muted">Got a buddy under current system</div></div></div>
+      <div class="col-6 col-lg-3"><div class="card shadow-sm text-center p-3 border-start border-success border-4"><div class="display-6 fw-bold text-success">100%</div><div class="small text-muted">Anchor buddy match rate</div></div></div>
     </div>
 
-    <!-- At-risk alerts -->
-    <div class="card p-5 border-l-4 border-red-500">
-      <h4 class="font-bold text-gray-800 mb-3">🚨 At-Risk Alerts — Immediate Action</h4>
-      <div class="space-y-3">
-        <div class="bg-red-50 rounded-2xl p-4 flex items-center gap-3">
-          <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-2xl shrink-0">👩‍💼</div>
-          <div class="flex-1">
-            <div class="font-bold text-gray-800">Aisha Al-Rashid</div>
-            <div class="text-gray-400 text-xs">8 weeks · Dubai · Pulse: 3.8/10 · International hire</div>
-            <div class="text-red-500 text-xs font-semibold mt-0.5">⚠️ Isolation flagged · No GP registered · Mentioned missing family</div>
+    <div class="card shadow-sm mb-4 border-start border-danger border-4">
+      <div class="card-header bg-white fw-bold">🚨 At-Risk Alerts — Immediate Action</div>
+      <div class="card-body d-flex flex-column gap-3 p-0">
+        <div class="alert alert-danger m-3 mb-0 d-flex align-items-center gap-3">
+          <span class="fs-4 flex-shrink-0">👩‍💼</span>
+          <div class="flex-grow-1">
+            <div class="fw-bold">Aisha Al-Rashid</div>
+            <div class="small text-muted">8 weeks · Dubai · Pulse: 3.8/10 · International hire</div>
+            <div class="small fw-semibold">⚠️ Isolation flagged · No GP registered · Mentioned missing family</div>
           </div>
-          <button class="bg-red-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 hover:bg-red-600 transition">Reach Out</button>
+          <button class="btn btn-danger btn-sm flex-shrink-0">Reach Out</button>
         </div>
-        <div class="bg-red-50 rounded-2xl p-4 flex items-center gap-3">
-          <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-2xl shrink-0">👨‍💼</div>
-          <div class="flex-1">
-            <div class="font-bold text-gray-800">Marcus Osei</div>
-            <div class="text-gray-400 text-xs">4 weeks · Brisbane · Pulse: 4.2/10</div>
-            <div class="text-red-500 text-xs font-semibold mt-0.5">⚠️ Housing stress · Hasn't used Life Map · No community connections yet</div>
+        <div class="alert alert-danger m-3 d-flex align-items-center gap-3">
+          <span class="fs-4 flex-shrink-0">👨‍💼</span>
+          <div class="flex-grow-1">
+            <div class="fw-bold">Marcus Osei</div>
+            <div class="small text-muted">4 weeks · Brisbane · Pulse: 4.2/10</div>
+            <div class="small fw-semibold">⚠️ Housing stress · Hasn't used Life Map · No community connections yet</div>
           </div>
-          <button class="bg-red-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 hover:bg-red-600 transition">Reach Out</button>
+          <button class="btn btn-danger btn-sm flex-shrink-0">Reach Out</button>
         </div>
       </div>
     </div>
 
     <!-- CultureAmp Survey Insights -->
     <div class="card p-5">
-      <div class="flex items-center justify-between mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-          <h4 class="font-bold text-gray-800">📊 CultureAmp Survey Data — The Engagement Cliff</h4>
-          <p class="text-gray-400 text-xs mt-0.5">Real TasNetworks data · 155 Week 1 surveys · 133 Month 3 surveys · 53 exit surveys</p>
+          <h4 class="fw-bold">📊 CultureAmp Survey Data — The Engagement Cliff</h4>
+          <p class="text-muted text-xs mt-0.5">Real TasNetworks data · 155 Week 1 surveys · 133 Month 3 surveys · 53 exit surveys</p>
         </div>
-        <span class="bg-[#E6F4FA] text-[#002E5D] text-xs font-bold px-3 py-1 rounded-full">Anchor's evidence base</span>
+        <span class="bg-info-subtle text-primary text-xs font-bold px-3 py-1 rounded-full">Anchor's evidence base</span>
       </div>
 
-      <!-- Week 1 → Month 3 cliff -->
-      <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-4 items-center">
-        <div class="sm:col-span-2 bg-green-50 rounded-2xl p-4 border border-green-200">
-          <div class="text-xs font-black text-green-700 uppercase tracking-wide mb-3">😊 Week 1 (n=155, 80% response)</div>
-          <div class="space-y-2">
-            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">Feeling welcome</span><span class="font-black text-green-600 text-sm">97%</span></div>
-            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">Right decision to join</span><span class="font-black text-green-600 text-sm">95%</span></div>
-            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">Pre-arrival comms</span><span class="font-black text-green-600 text-sm">97%</span></div>
-            <div class="flex justify-between items-center border-t border-green-200 pt-2"><span class="text-gray-700 text-xs font-bold">Buddy assigned</span><span class="font-black text-amber-600 text-sm">71% ⚠️</span></div>
+      <div class="row g-3 mb-4 align-items-center">
+        <div class="col-lg-5">
+          <div class="card border-success bg-success-subtle h-100">
+            <div class="card-body small">
+              <div class="fw-bold text-success text-uppercase mb-2">😊 Week 1 (n=155)</div>
+              <div class="d-flex justify-content-between"><span>Feeling welcome</span><span class="fw-bold text-success">97%</span></div>
+              <div class="d-flex justify-content-between"><span>Right decision to join</span><span class="fw-bold text-success">95%</span></div>
+              <div class="d-flex justify-content-between"><span>Pre-arrival comms</span><span class="fw-bold text-success">97%</span></div>
+              <div class="d-flex justify-content-between border-top pt-2 mt-2"><span class="fw-semibold">Buddy assigned</span><span class="fw-bold text-warning">71%</span></div>
+            </div>
           </div>
         </div>
-        <div class="hidden sm:flex flex-col items-center gap-1 text-gray-300">
-          <div class="text-2xl">→</div>
-          <div class="text-xs text-gray-400 text-center font-semibold">Weeks 2–12</div>
-          <div class="text-xs text-red-400 text-center">The silent drift</div>
+        <div class="col-lg-2 d-none d-lg-flex flex-column align-items-center text-muted small text-center">
+          <span class="fs-4">→</span><span>Weeks 2–12</span><span class="text-danger">The silent drift</span>
         </div>
-        <div class="sm:col-span-2 bg-amber-50 rounded-2xl p-4 border border-amber-200">
-          <div class="text-xs font-black text-amber-700 uppercase tracking-wide mb-3">😐 Month 3 (n=133, 73% response)</div>
-          <div class="space-y-2">
-            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">Overall engagement</span><span class="font-black text-amber-600 text-sm">82% ↓</span></div>
-            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">Systems confidence</span><span class="font-black text-red-500 text-sm">68% ↓</span></div>
-            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">A+D process clarity</span><span class="font-black text-red-500 text-sm">53% ↓</span></div>
-            <div class="flex justify-between items-center border-t border-amber-200 pt-2"><span class="text-gray-700 text-xs font-bold">Onboarding quality</span><span class="font-black text-amber-600 text-sm">74% ↓</span></div>
+        <div class="col-lg-5">
+          <div class="card border-warning bg-warning-subtle h-100">
+            <div class="card-body small">
+              <div class="fw-bold text-warning text-uppercase mb-2">😐 Month 3 (n=133)</div>
+              <div class="d-flex justify-content-between"><span>Overall engagement</span><span class="fw-bold text-warning">82% ↓</span></div>
+              <div class="d-flex justify-content-between"><span>Systems confidence</span><span class="fw-bold text-danger">68% ↓</span></div>
+              <div class="d-flex justify-content-between"><span>A+D process clarity</span><span class="fw-bold text-danger">53% ↓</span></div>
+              <div class="d-flex justify-content-between border-top pt-2 mt-2"><span class="fw-semibold">Onboarding quality</span><span class="fw-bold text-warning">74% ↓</span></div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Exit survey insights row -->
-      <div class="bg-red-50 rounded-2xl p-4 border border-red-100 mb-3">
-        <div class="text-xs font-black text-red-700 uppercase tracking-wide mb-3">🚪 Exit Survey (n=53, 65% participation) — What the data says about why people leave</div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-          <div class="bg-white rounded-xl p-3 border border-red-100">
-            <div class="text-2xl font-black text-red-500">29%</div>
-            <div class="text-gray-500 text-xs mt-1 leading-tight">had been considering leaving <strong>3–6 months</strong> — Anchor's exact window</div>
-          </div>
-          <div class="bg-white rounded-xl p-3 border border-red-100">
-            <div class="text-2xl font-black text-red-500">43%</div>
-            <div class="text-gray-500 text-xs mt-1 leading-tight">felt motivated to go beyond their role — <strong>18pts below</strong> industry benchmark</div>
-          </div>
-          <div class="bg-white rounded-xl p-3 border border-red-100">
-            <div class="text-2xl font-black text-amber-500">21%</div>
-            <div class="text-gray-500 text-xs mt-1 leading-tight">left for <strong>personal reasons</strong> unrelated to job — proxy for relocation hardship</div>
-          </div>
-          <div class="bg-white rounded-xl p-3 border border-red-100">
-            <div class="text-2xl font-black text-amber-500">45%</div>
-            <div class="text-gray-500 text-xs mt-1 leading-tight">felt leaders communicated a motivating vision — <strong>14pts below</strong> benchmark</div>
-          </div>
+      <div class="bg-red-50 rounded-3 p-4 border border-red-100 mb-3">
+        <div class="text-xs fw-bold text-red-700 uppercase tracking-wide mb-3">🚪 Exit Survey (n=53, 65% participation) — What the data says about why people leave</div>
+        <div class="row g-3 text-center">
+          <div class="col-6 col-md-3"><div class="card p-3 border-danger-subtle">
+            <div class="fs-4 fw-bold text-danger">29%</div>
+            <div class="small text-muted">had been considering leaving <strong>3–6 months</strong></div>
+          </div></div>
+          <div class="col-6 col-md-3"><div class="card p-3 border-danger-subtle">
+            <div class="fs-4 fw-bold text-danger">43%</div>
+            <div class="small text-muted">felt motivated beyond their role — <strong>18pts below</strong> benchmark</div>
+          </div></div>
+          <div class="col-6 col-md-3"><div class="card p-3 border-warning-subtle">
+            <div class="fs-4 fw-bold text-warning">21%</div>
+            <div class="small text-muted">left for <strong>personal reasons</strong> — relocation hardship proxy</div>
+          </div></div>
+          <div class="col-6 col-md-3"><div class="card p-3 border-warning-subtle">
+            <div class="fs-4 fw-bold text-warning">45%</div>
+            <div class="small text-muted">leaders' motivating vision — <strong>14pts below</strong> benchmark</div>
+          </div></div>
         </div>
       </div>
 
       <!-- New starters asked for this -->
-      <div class="bg-[#E6F4FA] rounded-xl p-3 flex items-center gap-3 border border-[#B3DFF0]">
-        <span class="text-xl shrink-0">💬</span>
-        <p class="text-[#002E5D] text-xs leading-relaxed"><strong>New starters asked for it themselves.</strong> Month 3 open-text comments specifically request "buddies or mentors to ease their transition." The demand exists. Anchor delivers it — before Day 1, not at Month 3.</p>
+      <div class="bg-info-subtle rounded p-3 d-flex align-items-center gap-3 border border-info">
+        <span class="text-xl flex-shrink-0">💬</span>
+        <p class="text-primary text-xs leading-relaxed"><strong>New starters asked for it themselves.</strong> Month 3 open-text comments specifically request "buddies or mentors to ease their transition." The demand exists. Anchor delivers it — before Day 1, not at Month 3.</p>
       </div>
     </div>
 
     <!-- Employee table + ROI two columns -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      <!-- Table -->
-      <div class="card p-5">
-        <h4 class="font-bold text-gray-800 mb-4">Active Relocators</h4>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead><tr class="text-gray-400 text-xs uppercase border-b border-gray-100">
-              <th class="text-left pb-2 font-semibold">Employee</th>
+    <div class="row g-4">
+      <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header fw-bold">Active Relocators</div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-hover mb-0">
+            <thead class="table-light"><tr class="small text-muted text-uppercase">
+              <th>Employee</th>
               <th class="text-left pb-2 font-semibold">Wks</th>
               <th class="text-left pb-2 font-semibold">Buddy</th>
               <th class="text-left pb-2 font-semibold">Pulse</th>
@@ -1647,11 +1847,11 @@
             </tr></thead>
             <tbody>
               <template x-for="e in hrEmps" :key="e.id">
-                <tr class="border-b border-gray-50">
-                  <td class="py-2.5"><div class="font-bold text-gray-800 text-sm" x-text="e.name"></div><div class="text-gray-400 text-xs" x-text="e.origin"></div></td>
-                  <td class="py-2.5 text-gray-500 text-sm" x-text="e.weeks+'w'"></td>
+                <tr class="border-b border-light">
+                  <td class="py-2.5"><div class="fw-bold text-sm" x-text="e.name"></div><div class="text-muted text-xs" x-text="e.origin"></div></td>
+                  <td class="py-2.5 text-muted text-sm" x-text="e.weeks+'w'"></td>
                   <td class="py-2.5"><span :class="e.buddy?'text-green-600':'text-red-400'" class="font-bold" x-text="e.buddy?'✓':'✗'"></span></td>
-                  <td class="py-2.5"><span :class="e.pulse>=7?'text-green-600':e.pulse>=5?'text-amber-600':'text-red-500'" class="font-bold" x-text="e.pulse?e.pulse+'/10':'—'"></span></td>
+                  <td class="py-2.5"><span :class="e.pulse>=7?'text-green-600':e.pulse>=5?'text-warning':'text-danger'" class="font-bold" x-text="e.pulse?e.pulse+'/10':'—'"></span></td>
                   <td class="py-2.5"><span :class="e.risk==='low'?'rlo':e.risk==='mid'?'rmi':'rhi'" class="text-xs font-bold px-2 py-1 rounded-full" x-text="e.risk==='low'?'🟢 Low':e.risk==='mid'?'🟡 Med':'🔴 High'"></span></td>
                 </tr>
               </template>
@@ -1659,82 +1859,89 @@
           </table>
         </div>
       </div>
+      </div>
 
-      <!-- ROI -->
-      <div class="hero-panel p-5 text-white relative">
-        <h4 class="font-extrabold text-xl mb-1 relative z-10">📊 Real Cost per Early Exit</h4>
-        <p class="text-white/60 text-xs mb-4">From TasNetworks actual recruitment data</p>
-        <div class="space-y-2 bg-white/10 rounded-xl p-4 mb-4 text-sm">
-          <div class="flex justify-between"><span class="text-white/80">Relocation assistance</span><span class="font-bold text-yellow-300">$5K–$40K</span></div>
-          <div class="flex justify-between"><span class="text-white/80">Visa sponsorship</span><span class="font-bold text-yellow-300">$15K–$21K</span></div>
-          <div class="flex justify-between"><span class="text-white/80">Recruitment process</span><span class="font-bold text-yellow-300">~$5K</span></div>
-          <div class="flex justify-between"><span class="text-white/80">10-week vacancy @ $187.5K/yr</span><span class="font-bold text-yellow-300">~$36K</span></div>
-          <div class="border-t border-white/20 pt-2 flex justify-between font-black"><span>Per early relocator exit</span><span class="text-yellow-300">$61K–$122K</span></div>
+      <div class="col-lg-6">
+      <div class="card sa-panel-primary text-white h-100">
+        <div class="card-body">
+        <h4 class="fw-bold mb-1">📊 Real Cost per Early Exit</h4>
+        <p class="text-white-50 small mb-3">From TasNetworks actual recruitment data</p>
+        <div class="bg-white bg-opacity-10 rounded p-3 mb-3 small">
+          <div class="d-flex justify-content-between"><span class="text-white-50">Relocation assistance</span><span class="fw-bold text-warning">$5K–$40K</span></div>
+          <div class="d-flex justify-content-between"><span class="text-white-50">Visa sponsorship</span><span class="fw-bold text-warning">$15K–$21K</span></div>
+          <div class="d-flex justify-content-between"><span class="text-white-50">Recruitment process</span><span class="fw-bold text-warning">~$5K</span></div>
+          <div class="d-flex justify-content-between"><span class="text-white-50">10-week vacancy</span><span class="fw-bold text-warning">~$36K</span></div>
+          <div class="border-top border-white border-opacity-25 pt-2 mt-2 d-flex justify-content-between fw-bold"><span>Per early exit</span><span class="text-warning">$61K–$122K</span></div>
         </div>
-        <div class="bg-yellow-400/20 border border-yellow-400/40 rounded-xl p-4 text-center">
-          <p class="font-black text-lg">Prevent 5 exits = <span class="text-yellow-300">$405K saved</span></p>
-          <p class="text-white/70 text-sm">Anchor cost ~$22K/yr → <strong class="text-yellow-300">18× ROI</strong></p>
+        <div class="bg-warning bg-opacity-25 border border-warning rounded p-3 text-center">
+          <p class="fw-bold mb-1">Prevent 5 exits = <span class="text-warning">$405K saved</span></p>
+          <p class="text-white-50 small mb-0">Anchor ~$22K/yr → <strong class="text-warning">18× ROI</strong></p>
         </div>
+        </div>
+      </div>
       </div>
     </div>
 
     <!-- Success Metrics — Mentor Questions -->
     <div class="card p-5">
-      <div class="flex items-center justify-between mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-          <h4 class="font-bold text-gray-800">🎯 What Does Success Look Like?</h4>
-          <p class="text-gray-400 text-xs mt-0.5">How TasNetworks knows Anchor is working — 3 measurable horizons</p>
+          <h4 class="fw-bold">🎯 What Does Success Look Like?</h4>
+          <p class="text-muted text-xs mt-0.5">How TasNetworks knows Anchor is working — 3 measurable horizons</p>
         </div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <!-- 90-day horizon -->
-        <div class="bg-green-50 rounded-2xl p-4 border border-green-200">
-          <div class="text-xs font-black text-green-700 uppercase tracking-wide mb-3">📋 90 Days — Individual</div>
-          <div class="space-y-2 text-xs text-gray-600">
-            <div class="flex items-start gap-2"><span class="text-green-500 font-bold shrink-0">✓</span><span>GP registered within 3 weeks</span></div>
-            <div class="flex items-start gap-2"><span class="text-green-500 font-bold shrink-0">✓</span><span>Buddy contact within 48 hours of arrival</span></div>
-            <div class="flex items-start gap-2"><span class="text-green-500 font-bold shrink-0">✓</span><span>Pulse score ≥7 by Week 12</span></div>
-            <div class="flex items-start gap-2"><span class="text-green-500 font-bold shrink-0">✓</span><span>$250 wellbeing rebate claimed</span></div>
-            <div class="flex items-start gap-2"><span class="text-green-500 font-bold shrink-0">✓</span><span>Life Map: 5+ items visited</span></div>
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+        <div class="card h-100 border-success border-opacity-25 bg-success-subtle">
+          <div class="card-body small">
+          <div class="fw-bold text-success text-uppercase mb-2">📋 90 Days — Individual</div>
+            <div class="d-flex gap-2 mb-1"><span class="text-success">✓</span><span>GP registered within 3 weeks</span></div>
+            <div class="d-flex gap-2 mb-1"><span class="text-success">✓</span><span>Buddy contact within 48 hours of arrival</span></div>
+            <div class="d-flex gap-2 mb-1"><span class="text-success">✓</span><span>Pulse score ≥7 by Week 12</span></div>
+            <div class="d-flex gap-2 mb-1"><span class="text-success">✓</span><span>$250 wellbeing rebate claimed</span></div>
+            <div class="d-flex gap-2"><span class="text-success">✓</span><span>Life Map: 5+ items visited</span></div>
           </div>
         </div>
-        <!-- 6-month horizon -->
-        <div class="bg-blue-50 rounded-2xl p-4 border border-blue-200">
-          <div class="text-xs font-black text-blue-700 uppercase tracking-wide mb-3">📈 6 Months — Program</div>
-          <div class="space-y-2 text-xs text-gray-600">
-            <div class="flex items-start gap-2"><span class="text-blue-500 font-bold shrink-0">✓</span><span>Early exits (under 12 months) ↓ vs baseline</span></div>
-            <div class="flex items-start gap-2"><span class="text-blue-500 font-bold shrink-0">✓</span><span>Month 3 engagement score ≥85% (vs 82% now)</span></div>
-            <div class="flex items-start gap-2"><span class="text-blue-500 font-bold shrink-0">✓</span><span>Systems confidence ≥80% (vs 68% now)</span></div>
-            <div class="flex items-start gap-2"><span class="text-blue-500 font-bold shrink-0">✓</span><span>Buddy assignment rate: 100% (vs 71% now)</span></div>
-            <div class="flex items-start gap-2"><span class="text-blue-500 font-bold shrink-0">✓</span><span>At-risk flagged before exit conversation</span></div>
+        </div>
+        <div class="col-md-4">
+        <div class="card h-100 border-primary border-opacity-25 bg-primary-subtle">
+          <div class="card-body small">
+          <div class="fw-bold text-primary text-uppercase mb-2">📈 6 Months — Program</div>
+            <div class="d-flex gap-2 mb-1"><span class="text-primary">✓</span><span>Early exits (under 12 months) ↓ vs baseline</span></div>
+            <div class="d-flex gap-2 mb-1"><span class="text-primary">✓</span><span>Month 3 engagement score ≥85%</span></div>
+            <div class="d-flex gap-2 mb-1"><span class="text-primary">✓</span><span>Systems confidence ≥80%</span></div>
+            <div class="d-flex gap-2 mb-1"><span class="text-primary">✓</span><span>Buddy assignment rate: 100%</span></div>
+            <div class="d-flex gap-2"><span class="text-primary">✓</span><span>At-risk flagged before exit conversation</span></div>
           </div>
         </div>
-        <!-- Scalability horizon -->
-        <div class="bg-purple-50 rounded-2xl p-4 border border-purple-200">
-          <div class="text-xs font-black text-purple-700 uppercase tracking-wide mb-3">🚀 Scalability — Human + AI</div>
-          <div class="space-y-2 text-xs text-gray-600">
-            <div class="flex items-start gap-2"><span class="text-purple-500 font-bold shrink-0">✓</span><span>AI handles matching + pulse at any scale</span></div>
-            <div class="flex items-start gap-2"><span class="text-purple-500 font-bold shrink-0">✓</span><span>Human only intervenes when AI flags it</span></div>
-            <div class="flex items-start gap-2"><span class="text-purple-500 font-bold shrink-0">✓</span><span>Buddy pool grows as more people settle well</span></div>
-            <div class="flex items-start gap-2"><span class="text-purple-500 font-bold shrink-0">✓</span><span>Life Map becomes richer with every user</span></div>
-            <div class="flex items-start gap-2"><span class="text-purple-500 font-bold shrink-0">✓</span><span>Works for 37 hires/yr or 3,700</span></div>
+        </div>
+        <div class="col-md-4">
+        <div class="card h-100 border-secondary">
+          <div class="card-body small">
+          <div class="fw-bold text-secondary text-uppercase mb-2">🚀 Scalability — Human + AI</div>
+            <div class="d-flex gap-2 mb-1"><span>✓</span><span>AI handles matching + pulse at any scale</span></div>
+            <div class="d-flex gap-2 mb-1"><span>✓</span><span>Human only intervenes when AI flags it</span></div>
+            <div class="d-flex gap-2 mb-1"><span>✓</span><span>Buddy pool grows as more people settle well</span></div>
+            <div class="d-flex gap-2 mb-1"><span>✓</span><span>Life Map becomes richer with every user</span></div>
+            <div class="d-flex gap-2"><span>✓</span><span>Works for 37 hires/yr or 3,700</span></div>
           </div>
+        </div>
         </div>
       </div>
-      <div class="bg-[#E6F4FA] rounded-xl p-3 border border-[#B3DFF0]">
-        <p class="text-[#002E5D] text-xs font-semibold">💡 <strong>The program pays for itself when it prevents 1 early exit.</strong> At $81K average replacement cost, Anchor's $22K/yr cost is recovered before the end of the first hire's probation period.</p>
+      <div class="bg-info-subtle rounded p-3 border border-info">
+        <p class="text-primary text-xs font-semibold">💡 <strong>The program pays for itself when it prevents 1 early exit.</strong> At $81K average replacement cost, Anchor's $22K/yr cost is recovered before the end of the first hire's probation period.</p>
       </div>
     </div>
 
     <!-- AWS Architecture -->
     <div class="card p-5">
-      <h4 class="font-bold text-gray-800 mb-4">☁️ AWS Architecture</h4>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <h4 class="fw-bold mb-4">☁️ AWS Architecture</h4>
+      <div class="row g-2">
         <template x-for="a in awsArch" :key="a.s">
-          <div :class="a.bg" class="flex items-center gap-3 p-3 rounded-xl">
-            <span class="font-black text-xs w-28 shrink-0" :class="a.tc" x-text="a.s"></span>
-            <span class="text-gray-600 text-xs leading-tight" x-text="a.d"></span>
-          </div>
+          <div class="col-sm-6"><div :class="a.bg" class="d-flex align-items-center gap-3 p-3 rounded border">
+            <span class="fw-bold text-xs w-28 flex-shrink-0" :class="a.tc" x-text="a.s"></span>
+            <span class="text-muted small" x-text="a.d"></span>
+          </div></div>
         </template>
       </div>
     </div>
@@ -1776,51 +1983,51 @@ function app() { return {
   spiritualFilter: 'all',
 
   railApps: [
-    { id:'teams', label:'Teams', short:'T', color:'#6264A7' },
-    { id:'whatsapp', label:'WhatsApp', short:'W', color:'#25D366' },
-    { id:'facebook', label:'Facebook', short:'f', color:'#1877F2' },
-    { id:'instagram', label:'Instagram', short:'I', color:'#E4405F' },
-    { id:'events', label:'Events', short:'E', color:'#0077B6' },
-    { id:'spiritual', label:'Spiritual', short:'S', color:'#7C3AED' },
-    { id:'marketplace', label:'Marketplace', short:'M', color:'#F59E0B' },
-    { id:'connections', label:'Accounts', short:'⚙', color:'#64748B' },
+    { id:'teams', label:'Teams', icon:'bi-microsoft' },
+    { id:'whatsapp', label:'WhatsApp', icon:'bi-whatsapp' },
+    { id:'facebook', label:'Facebook', icon:'bi-facebook' },
+    { id:'instagram', label:'Instagram', icon:'bi-instagram' },
+    { id:'events', label:'Events', icon:'bi-calendar-event-fill' },
+    { id:'spiritual', label:'Spiritual', icon:'bi-heart-fill' },
+    { id:'marketplace', label:'Marketplace', icon:'bi-bag-fill' },
+    { id:'connections', label:'Accounts', icon:'bi-plug-fill' },
   ],
 
   socialSubItems: {
     teams: [
-      { id:'profile', label:'My profile', icon:'👤' },
-      { id:'channels', label:'Suggested channels', icon:'#' },
-      { id:'tips', label:'TasNetworks tips', icon:'💡' },
+      { id:'profile', label:'My profile', icon:'bi-person-circle' },
+      { id:'channels', label:'Suggested channels', icon:'bi-hash' },
+      { id:'tips', label:'TasNetworks tips', icon:'bi-lightbulb' },
     ],
     whatsapp: [
-      { id:'buddy', label:'Message buddy', icon:'💬' },
-      { id:'groups', label:'Community groups', icon:'👥' },
+      { id:'buddy', label:'Message buddy', icon:'bi-chat-dots-fill' },
+      { id:'groups', label:'Community groups', icon:'bi-people-fill' },
     ],
     facebook: [
-      { id:'groups', label:'Hobby groups', icon:'📘' },
-      { id:'connect', label:'Manage connection', icon:'🔗' },
+      { id:'groups', label:'Hobby groups', icon:'bi-people' },
+      { id:'connect', label:'Manage connection', icon:'bi-link-45deg' },
     ],
     instagram: [
-      { id:'follows', label:'Suggested follows', icon:'📷' },
+      { id:'follows', label:'Suggested follows', icon:'bi-camera' },
     ],
     events: [
-      { id:'week', label:'This week', icon:'📅' },
-      { id:'month', label:'This month', icon:'🗓' },
-      { id:'hobby', label:'By hobby', icon:'✨' },
+      { id:'week', label:'This week', icon:'bi-calendar-week' },
+      { id:'month', label:'This month', icon:'bi-calendar-month' },
+      { id:'hobby', label:'By hobby', icon:'bi-stars' },
     ],
     spiritual: [
-      { id:'all', label:'All places', icon:'🕊' },
-      { id:'worship', label:'Places of worship', icon:'⛪' },
-      { id:'community', label:'Cultural centres', icon:'🌏' },
+      { id:'all', label:'All places', icon:'bi-geo-alt' },
+      { id:'worship', label:'Places of worship', icon:'bi-building' },
+      { id:'community', label:'Cultural centres', icon:'bi-globe2' },
     ],
     marketplace: [
-      { id:'search', label:'Search', icon:'🔍' },
-      { id:'home', label:'Home & furniture', icon:'🏠' },
-      { id:'office', label:'Office', icon:'💼' },
-      { id:'clothes', label:'Clothes', icon:'👕' },
+      { id:'search', label:'Search', icon:'bi-search' },
+      { id:'home', label:'Home & furniture', icon:'bi-house' },
+      { id:'office', label:'Office', icon:'bi-briefcase' },
+      { id:'clothes', label:'Clothes', icon:'bi-handbag' },
     ],
     connections: [
-      { id:'manage', label:'Manage accounts', icon:'⚙' },
+      { id:'manage', label:'Manage accounts', icon:'bi-sliders' },
     ],
   },
 
@@ -1910,11 +2117,11 @@ function app() { return {
   ],
 
   navTabs: [
-    { id:'home', label:'Home', badge:false, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>' },
-    { id:'lifemap', label:'Life Map', badge:false, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>' },
-    { id:'pulse', label:'Pulse', badge:true, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>' },
-    { id:'services', label:'Services', badge:false, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>' },
-    { id:'community', label:'Community', badge:false, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>' },
+    { id:'home', label:'Home', badge:false, icon:'bi-house-door-fill' },
+    { id:'lifemap', label:'Life Map', badge:false, icon:'bi-map-fill' },
+    { id:'pulse', label:'Pulse', badge:true, icon:'bi-heart-pulse-fill' },
+    { id:'services', label:'Services', badge:false, icon:'bi-grid-1x2-fill' },
+    { id:'community', label:'Community', badge:false, icon:'bi-chat-square-text-fill' },
   ],
 
   pulseChips: [
@@ -2091,12 +2298,24 @@ function app() { return {
     sessionStorage.setItem('anchor_connections', JSON.stringify(this.connections));
   },
 
+  panelActive(rail, tab) {
+    if (this.screen !== 'app' || this.activeRail !== rail) return false;
+    if (tab === undefined) return true;
+    return this.activeTab === tab;
+  },
+
+  _scrollMainTop() {
+    const el = document.querySelector('#screen-app .main-scroll');
+    if (el) el.scrollTop = 0;
+  },
+
   selectRail(id) {
     this.activeRail = id;
     this.subPaneOpen = window.innerWidth < 1024;
     const subs = this.socialSubItems[id];
     if (subs && subs.length) this.socialSubView = subs[0].id;
     if (id === 'marketplace') this.mktCategory = 'home';
+    this.$nextTick(() => this._scrollMainTop());
     if (id === 'events') this.loadEventbriteEvents();
   },
 
@@ -2105,6 +2324,7 @@ function app() { return {
     this.subPaneOpen = false;
     if (id === 'pulse') { this.goToPulse(); return; }
     this.activeTab = id;
+    this.$nextTick(() => this._scrollMainTop());
   },
 
   selectTab(id) { this.selectAnchorTab(id); },
@@ -2129,7 +2349,7 @@ function app() { return {
   },
 
   currentSubItems() {
-    if (this.activeRail === 'anchor') return this.navTabs.map(t => ({ id: t.id, label: t.label, icon: '•' }));
+    if (this.activeRail === 'anchor') return this.navTabs.map(t => ({ id: t.id, label: t.label, icon: t.icon }));
     return this.socialSubItems[this.activeRail] || [];
   },
 
@@ -2185,7 +2405,52 @@ function app() { return {
       (m.whatsapp || []).forEach(g => { if (!seen.wa.has(g.name)) { seen.wa.add(g.name); wa.push(g); } });
     });
     if (!fb.length) fb.push({ name:'New to Hobart', desc:'8,500+ members', members:'Facebook group', url:'https://www.facebook.com/search/groups/?q=new%20to%20hobart' });
+    if (!ig.length) ig.push({ name:'@tasmania', desc:'Discover lutruwita', url:'https://www.instagram.com/tasmania/' }, { name:'@hobartandbeyond', desc:'Weekend ideas and food', url:'https://www.instagram.com/explore/tags/hobart/' });
     return { facebook: fb, instagram: ig, whatsapp: wa };
+  },
+
+  eventWhenShort(when) {
+    const w = (when || '').trim();
+    const dow = w.match(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)/i);
+    if (dow) {
+      const rest = w.slice(dow[0].length).trim();
+      return { day: dow[0], sub: (rest || 'soon').slice(0, 12) };
+    }
+    if (/ongoing/i.test(w)) return { day: '∞', sub: 'ongoing' };
+    const month = w.match(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i);
+    if (month) return { day: month[0], sub: 'season' };
+    return { day: '•', sub: 'local' };
+  },
+
+  eventCategory(ev) {
+    const tags = ev?.tags || [];
+    const pick = (cls, icon, label, match) => tags.some(t => match.includes(t)) ? { cls, icon, label } : null;
+    return pick('event-cat--food', 'bi-cup-hot-fill', 'Food & market', ['food', 'market', 'wine'])
+      || pick('event-cat--outdoor', 'bi-tree-fill', 'Outdoor', ['hiking', 'outdoor', 'nature', 'fitness'])
+      || pick('event-cat--community', 'bi-people-fill', 'Community', ['community', 'family'])
+      || pick('event-cat--arts', 'bi-palette-fill', 'Arts & culture', ['art', 'culture', 'music', 'live', 'photography'])
+      || pick('event-cat--sport', 'bi-trophy-fill', 'Sport', ['sport'])
+      || { cls: 'event-cat--default', icon: 'bi-calendar-event-fill', label: 'Event' };
+  },
+
+  displayedEvents() {
+    let list = this.filteredEvents();
+    if (this.activeRail !== 'events') return list;
+    if (this.socialSubView === 'week') {
+      const week = list.filter(e => /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)/i.test((e.when || '').trim()));
+      return week.length ? week : list.slice(0, 4);
+    }
+    if (this.socialSubView === 'hobby') return list;
+    return list;
+  },
+
+  featuredEvent() {
+    const list = this.displayedEvents();
+    return list.length ? list[0] : null;
+  },
+
+  otherEvents() {
+    return this.displayedEvents().slice(1);
   },
 
   hobbyEventTags() {
@@ -2469,7 +2734,12 @@ function app() { return {
     });
   },
 
-  goToApp() { this.screen = 'app'; this.activeTab = 'home'; },
+  goToApp() {
+    this.screen = 'app';
+    this.activeRail = 'anchor';
+    this.activeTab = 'home';
+    this.$nextTick(() => { this.initApp(); this._scrollMainTop(); });
+  },
 
   getLmItems() { return this.lifeMapData[this.lmCat] || []; },
 
@@ -2612,9 +2882,6 @@ function app() { return {
   },
 }}
 </script>
-
-<style>
-  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
-</style>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 </body>
 </html>
