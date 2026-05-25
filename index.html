@@ -251,6 +251,15 @@
           </select>
         </div>
 
+        <!-- Country field — only shown for international -->
+        <div x-show="form.origin==='Overseas'" x-transition class="bg-[#E6F4FA] rounded-xl p-3 border border-[#B3DFF0]">
+          <label class="text-xs font-semibold text-[#002E5D] uppercase tracking-wide block mb-1">
+            Which country? <span class="text-gray-400 font-normal normal-case">(optional — helps us find the best buddy match)</span>
+          </label>
+          <input x-model="form.country" type="text" placeholder="e.g. India, Philippines, UK, Germany…"
+                 class="w-full border border-[#B3DFF0] bg-white rounded-xl px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-[#0099CC] focus:ring-2 focus:ring-[#0099CC]/20 transition">
+        </div>
+
         <div>
           <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-2">Who's making the move?</label>
           <div class="grid grid-cols-3 gap-2">
@@ -320,67 +329,91 @@
       <div class="absolute inset-10 border-4 border-white/35 rounded-full r3"></div>
       <div class="absolute inset-0 flex items-center justify-center">
         <div class="w-28 h-28 bg-white/20 rounded-full flex items-center justify-center glow">
-          <svg viewBox="0 0 200 185" class="w-24 h-24" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
+          <span style="font-size:54px">🤝</span>
         </div>
       </div>
     </div>
-    <h2 class="text-2xl font-black text-white mb-1">Finding your perfect match…</h2>
+    <h2 class="text-2xl font-black text-white mb-1">Finding your Anchor community…</h2>
     <p class="text-white/60 text-sm mb-8">Amazon Bedrock is scanning 847 TasNetworks employee profiles</p>
     <div class="space-y-3 text-left max-w-xs mx-auto">
       <div x-show="matchStep>=1" class="bg-white/15 rounded-xl px-4 py-3 flex items-center gap-3 fi">
         <span class="text-green-300 font-bold">✓</span>
-        <span class="text-white text-sm">Origin city: <span x-text="form.origin||'Melbourne'"></span> relocators found (23 matches)</span>
+        <span class="text-white text-sm">Origin: <span x-text="form.origin||'Melbourne'"></span> relocators found (23 profiles)</span>
       </div>
       <div x-show="matchStep>=2" class="bg-white/15 rounded-xl px-4 py-3 flex items-center gap-3 fi">
         <span class="text-green-300 font-bold">✓</span>
-        <span class="text-white text-sm">Family: <span x-text="familyLabel()"></span> situation aligned (11 matches)</span>
+        <span class="text-white text-sm"><span x-text="familyLabel()"></span> situation aligned (11 matches)</span>
       </div>
       <div x-show="matchStep>=3" class="bg-white/15 rounded-xl px-4 py-3 flex items-center gap-3 fi">
         <span class="text-green-300 font-bold">✓</span>
-        <span class="text-white text-sm">Shared interests matched (4 matches)</span>
+        <span class="text-white text-sm">Shared interests &amp; hobbies matched (6 matches)</span>
       </div>
       <div x-show="matchStep>=4" class="bg-white/15 rounded-xl px-4 py-3 flex items-center gap-3 fi">
         <span class="text-green-300 font-bold">✓</span>
-        <span class="text-white text-sm">Relocation needs: knowledge confirmed</span>
+        <span class="text-white text-sm">Relocation needs — knowledge confirmed (4 matches)</span>
       </div>
       <div x-show="matchStep>=5" class="bg-[#0099CC]/40 border border-[#0099CC] rounded-xl px-4 py-3 flex items-center gap-3 fi">
-        <span class="text-yellow-300 text-xl">🎯</span>
-        <span class="text-white text-sm font-bold">Match found — 94% compatibility!</span>
+        <span class="text-yellow-300 text-xl">🫂</span>
+        <span class="text-white text-sm font-bold">3 community members found — your best match is ready!</span>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════ BUDDY REVEAL ═════════════════════════════ -->
-<div x-show="screen==='buddy-reveal'" class="min-h-screen grad flex flex-col items-center justify-center p-6">
+<div x-show="screen==='buddy-reveal'" class="min-h-screen grad flex flex-col items-center justify-center p-6 overflow-y-auto">
   <div class="text-center mb-5 fu">
-    <p class="text-white/80 text-lg">🎉 We found your Anchor buddy!</p>
-    <h2 class="text-4xl font-black text-white">94% compatibility</h2>
+    <p class="text-white/80 text-lg">🫂 Your Anchor community is ready!</p>
+    <h2 class="text-3xl font-black text-white">1 primary buddy + 2 community members</h2>
+    <p class="text-white/60 text-sm mt-1">One friend to get started — a whole community to belong to</p>
   </div>
-  <div class="card p-6 w-full max-w-sm pop">
-    <div class="text-center mb-5">
-      <div class="w-28 h-28 grad-r rounded-full flex items-center justify-center mx-auto mb-3 text-6xl shadow-xl">👨‍💼</div>
-      <h3 class="text-2xl font-black text-gray-800">James Chen</h3>
-      <p class="text-[#0099CC] font-semibold text-sm">Field Engineer · TasNetworks</p>
-      <p class="text-gray-400 text-xs mt-1">📍 From <span x-text="form.origin||'Melbourne'"></span> · In Hobart 8 months · <span x-text="form.family==='family'?'Dad of 2':form.family==='couple'?'Moved with partner':'Single mover'"></span></p>
+
+  <!-- Primary buddy card -->
+  <div class="card p-6 w-full max-w-lg pop mb-4">
+    <div class="flex items-start gap-4 mb-4">
+      <div class="w-20 h-20 grad-r rounded-2xl flex items-center justify-center text-5xl shadow-xl shrink-0" x-text="getBestBuddy().avatar"></div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2 flex-wrap mb-1">
+          <h3 class="text-xl font-black text-gray-800" x-text="getBestBuddy().name"></h3>
+          <span class="bg-[#0099CC] text-white text-xs font-bold px-2 py-0.5 rounded-full">⭐ Best match</span>
+        </div>
+        <p class="text-[#0099CC] font-semibold text-sm" x-text="getBestBuddy().role+' · TasNetworks'"></p>
+        <p class="text-gray-400 text-xs mt-1">📍 From <span x-text="form.origin||'Melbourne'"></span> · <span x-text="getBestBuddy().months"></span> months in Hobart · <span x-text="getBestBuddy().tag"></span></p>
+      </div>
     </div>
-    <div class="flex flex-wrap justify-center gap-2 mb-4">
-      <span class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Same origin city</span>
-      <span x-show="form.family==='family'" class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Kids in school</span>
-      <span x-show="form.family==='couple'" class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Partner settled too</span>
-      <span x-show="form.needs.includes('gp')" class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Knows the best GP</span>
-      <span class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Hiking lover</span>
+    <div class="flex flex-wrap gap-2 mb-3">
+      <span class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Same origin</span>
+      <span x-show="getBestBuddy().family===form.family" class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full" x-text="'✓ '+getBestBuddy().tag"></span>
+      <template x-for="n in form.needs.filter(nd=>getBestBuddy().needs.includes(nd)).slice(0,2)">
+        <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-full" x-text="'✓ Knows: '+n"></span>
+      </template>
     </div>
-    <div class="bg-[#F0F6FB] rounded-2xl p-4 mb-4 border-l-4 border-[#0099CC] text-sm text-gray-700 italic">
-      <span x-text="buddyMessage()"></span>
-      <div class="text-gray-400 text-xs mt-2 not-italic font-semibold">— James, joined Anchor 8 months ago</div>
-    </div>
+    <div class="bg-[#F0F6FB] rounded-2xl p-4 mb-4 border-l-4 border-[#0099CC] text-sm text-gray-700 italic" x-text="buddyMessage()"></div>
     <div class="flex gap-3">
       <button class="flex-1 grad text-white font-bold py-3 rounded-xl hover:opacity-90 transition">💬 Say Hello</button>
       <button class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition">📞 Call</button>
     </div>
   </div>
-  <button @click="goToApp()" class="mt-5 w-full max-w-sm bg-white/15 text-white font-semibold py-4 rounded-2xl border border-white/30 hover:bg-white/25 transition fu">
+
+  <!-- Community members -->
+  <div class="w-full max-w-lg mb-4 fu">
+    <p class="text-white/70 text-sm font-semibold mb-3 text-center">👥 Your broader Anchor community</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <template x-for="b in communityBuddies()" :key="b.id">
+        <div class="card p-4 flex items-center gap-3 hover:shadow-md transition cursor-pointer border border-transparent hover:border-[#B3DFF0]">
+          <div class="w-12 h-12 bg-[#E6F4FA] rounded-xl flex items-center justify-center text-2xl shrink-0" x-text="b.avatar"></div>
+          <div class="flex-1 min-w-0">
+            <div class="font-bold text-gray-800 text-sm" x-text="b.name"></div>
+            <div class="text-gray-400 text-xs truncate" x-text="b.role"></div>
+            <div class="text-[#0099CC] text-xs font-semibold" x-text="b.tag+' · '+b.months+'mo in Hobart'"></div>
+          </div>
+          <button class="text-xs bg-[#002E5D] text-white px-3 py-1.5 rounded-xl hover:bg-[#0099CC] transition shrink-0">Connect</button>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <button @click="goToApp()" class="w-full max-w-lg bg-white text-[#002E5D] font-black py-4 rounded-2xl hover:bg-white/90 transition shadow-xl fu text-lg">
     Go to my Dashboard →
   </button>
 </div>
@@ -397,7 +430,7 @@
       <span class="hidden sm:block text-white/50 text-xs">TasNetworks Relocation Companion</span>
     </div>
     <div class="flex items-center gap-3">
-      <span class="text-white/50 text-sm hidden md:block">🌿 Day 14 in Tasmania</span>
+      <span class="text-white text-sm hidden md:block bg-white/20 px-3 py-1 rounded-full font-semibold">🌿 Day 14 in Tasmania</span>
       <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm border border-white/30">
         <span x-text="(form.name||'SA').substring(0,2).toUpperCase()"></span>
       </div>
@@ -409,66 +442,85 @@
   <div class="flex flex-1 overflow-hidden">
 
     <!-- ── Sidebar ── -->
-    <div class="w-56 bg-white border-r border-gray-100 flex flex-col py-5 shrink-0 shadow-sm">
+    <div class="w-64 bg-white border-r border-gray-100 flex flex-col shrink-0 shadow-sm">
 
       <!-- User card -->
-      <div class="px-4 mb-5">
+      <div class="px-4 pt-5 pb-4 border-b border-gray-100">
         <div class="bg-[#F0F6FB] rounded-2xl p-3 flex items-center gap-3">
           <div class="w-10 h-10 grad rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
             <span x-text="(form.name||'SA').substring(0,2).toUpperCase()"></span>
           </div>
           <div class="overflow-hidden">
             <div class="font-bold text-gray-800 text-sm truncate" x-text="form.name||'New Starter'"></div>
-            <div class="text-gray-400 text-xs">Week 2 · <span x-text="form.origin||'TAS'"></span></div>
+            <div class="text-[#0099CC] text-xs font-semibold">● Week 2 in Tasmania</div>
           </div>
         </div>
       </div>
 
       <!-- Nav -->
-      <nav class="px-3 space-y-1 flex-1">
+      <nav class="px-3 py-4 space-y-1 flex-1">
+        <p class="text-xs font-black text-gray-400 uppercase tracking-widest px-3 mb-2">Navigation</p>
         <button @click="activeTab='home'"
                 :class="activeTab==='home'?'nav-on':'nav-off'"
-                class="nav-item">
-          <span>🏠</span><span>Dashboard</span>
+                class="nav-item group">
+          <span class="text-xl">🏠</span>
+          <div class="flex-1 text-left">
+            <div class="text-sm font-bold">Dashboard</div>
+            <div class="text-xs opacity-60 group-hover:opacity-80">90-day journey &amp; buddy</div>
+          </div>
         </button>
         <button @click="activeTab='lifemap'"
                 :class="activeTab==='lifemap'?'nav-on':'nav-off'"
-                class="nav-item">
-          <span>🗺️</span><span>Life Map</span>
+                class="nav-item group">
+          <span class="text-xl">🗺️</span>
+          <div class="flex-1 text-left">
+            <div class="text-sm font-bold">Life Map</div>
+            <div class="text-xs opacity-60 group-hover:opacity-80">Local tips &amp; TAS benefits</div>
+          </div>
         </button>
         <button @click="goToPulse()"
                 :class="activeTab==='pulse'?'nav-on':'nav-off'"
-                class="nav-item relative">
-          <span>💚</span><span>Pulse Check</span>
-          <span class="ml-auto w-2 h-2 bg-red-500 rounded-full shrink-0"></span>
+                class="nav-item group">
+          <span class="text-xl">💚</span>
+          <div class="flex-1 text-left">
+            <div class="text-sm font-bold flex items-center gap-2">
+              Pulse Check
+              <span class="w-2 h-2 bg-red-500 rounded-full inline-block"></span>
+            </div>
+            <div class="text-xs opacity-60 group-hover:opacity-80">AI fortnightly check-in</div>
+          </div>
         </button>
         <button @click="activeTab='services'"
                 :class="activeTab==='services'?'nav-on':'nav-off'"
-                class="nav-item">
-          <span>🛎️</span><span>Services</span>
+                class="nav-item group">
+          <span class="text-xl">🛎️</span>
+          <div class="flex-1 text-left">
+            <div class="text-sm font-bold">Services</div>
+            <div class="text-xs opacity-60 group-hover:opacity-80">All support in one place</div>
+          </div>
         </button>
       </nav>
 
       <!-- Buddy mini-card -->
-      <div class="mx-3 my-3 p-3 bg-[#F0F6FB] rounded-2xl border border-[#B3DFF0]">
+      <div class="mx-3 mb-3 p-3 bg-[#F0F6FB] rounded-2xl border border-[#B3DFF0]">
         <div class="flex items-center gap-1.5 mb-2">
-          <svg viewBox="0 0 130 115" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg>
-          <p class="text-xs text-gray-400 font-semibold">Your Buddy</p>
+          <span class="text-sm">🤝</span>
+          <p class="text-xs text-gray-500 font-bold">Your Anchor Buddy</p>
         </div>
         <div class="flex items-center gap-2 mb-2">
-          <div class="w-9 h-9 grad-r rounded-full flex items-center justify-center text-xl shrink-0">👨‍💼</div>
+          <div class="w-9 h-9 bg-[#0099CC] rounded-full flex items-center justify-center text-xl shrink-0" x-text="getBestBuddy().avatar"></div>
           <div>
-            <div class="font-bold text-gray-800 text-xs">James Chen</div>
-            <div class="text-green-600 text-xs">🟢 Active</div>
+            <div class="font-bold text-gray-800 text-xs" x-text="getBestBuddy().name"></div>
+            <div class="text-green-600 text-xs">🟢 Active now</div>
           </div>
         </div>
         <button class="w-full bg-[#002E5D] text-white text-xs font-bold py-2 rounded-xl hover:bg-[#0099CC] transition-all">
-          Message James
+          💬 Message <span x-text="getBestBuddy().name.split(' ')[0]"></span>
         </button>
       </div>
 
       <!-- Sign out -->
-      <div class="px-3">
+      <div class="px-3 pb-4">
         <button @click="logout()"
                 class="w-full flex items-center gap-2 px-4 py-2.5 text-gray-400 hover:text-red-500 text-sm transition-all rounded-xl hover:bg-red-50">
           <span>🚪</span><span>Sign out</span>
@@ -485,7 +537,7 @@
         <!-- Welcome banner -->
         <div class="grad rounded-2xl p-6 text-white flex items-center justify-between">
           <div>
-            <p class="text-white/60 text-sm">Day 14 in lutruwita (Tasmania) 🌿</p>
+            <p class="text-white font-semibold text-sm">🌿 Day 14 in lutruwita (Tasmania)</p>
             <h2 class="text-3xl font-black mt-0.5">Good morning, <span x-text="form.name||'Sarah'"></span> 👋</h2>
             <p class="text-white/70 text-sm mt-1">Your buddy James is online · Pulse check is due today</p>
           </div>
@@ -513,12 +565,12 @@
 
           <!-- Buddy card -->
           <div class="card p-5">
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">😈 Your Anchor Buddy</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">🤝 Your Anchor Buddy</p>
             <div class="flex items-center gap-3 mb-3">
-              <div class="w-12 h-12 grad-r rounded-2xl flex items-center justify-center text-2xl shadow">👨‍💼</div>
+              <div class="w-12 h-12 bg-[#0099CC] rounded-2xl flex items-center justify-center text-2xl shadow" x-text="getBestBuddy().avatar"></div>
               <div class="flex-1">
-                <h5 class="font-black text-gray-800">James Chen</h5>
-                <p class="text-gray-400 text-xs">Field Engineer · From <span x-text="form.origin||'Melbourne'"></span></p>
+                <h5 class="font-black text-gray-800" x-text="getBestBuddy().name"></h5>
+                <p class="text-gray-400 text-xs" x-text="getBestBuddy().role+' · From '+(form.origin||'Interstate')"></p>
                 <p class="text-green-600 text-xs font-semibold">🟢 Active · replied 2h ago</p>
               </div>
               <button class="bg-[#E6F4FA] text-[#002E5D] font-bold px-3 py-2 rounded-xl text-sm hover:bg-[#0099CC] hover:text-white transition">Chat</button>
@@ -702,15 +754,24 @@
         </div>
 
         <!-- Human support CTA -->
-        <div class="grad rounded-2xl p-5 text-white flex items-center gap-4">
-          <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl shrink-0">📞</div>
-          <div class="flex-1">
-            <h5 class="font-bold text-lg">Need a real human?</h5>
-            <p class="text-white/70 text-sm">Call support · 8 am – 8 pm AEST · No bots, ever</p>
+        <div class="grad rounded-2xl p-5 text-white">
+          <div class="flex items-start gap-4 mb-4">
+            <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl shrink-0">📞</div>
+            <div class="flex-1">
+              <h5 class="font-bold text-lg">Need a real human?</h5>
+              <p class="text-white/80 text-sm">Our Anchor team answers directly — no bots, no call centres, no hold music. 8 am – 8 pm AEST.</p>
+            </div>
           </div>
-          <button class="bg-white text-[#002E5D] font-bold py-3 px-6 rounded-xl hover:opacity-90 transition shrink-0">
-            📞 Call Now
-          </button>
+          <div class="grid grid-cols-2 gap-3">
+            <a href="tel:+61489180129"
+               class="bg-white text-[#002E5D] font-bold py-3 px-4 rounded-xl hover:opacity-90 transition text-center text-sm flex items-center justify-center gap-2">
+              📞 Call Samin<br><span class="text-xs text-[#0099CC]">+61 489 180 129</span>
+            </a>
+            <a href="tel:+61424861396"
+               class="bg-white/20 border border-white/40 text-white font-bold py-3 px-4 rounded-xl hover:bg-white/30 transition text-center text-sm flex items-center justify-center gap-2">
+              📞 Call Team<br><span class="text-xs text-white/70">+61 424 861 396</span>
+            </a>
+          </div>
         </div>
       </div>
 
@@ -877,6 +938,54 @@
       </div>
     </div>
 
+    <!-- Success Metrics — Mentor Questions -->
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h4 class="font-bold text-gray-800">🎯 What Does Success Look Like?</h4>
+          <p class="text-gray-400 text-xs mt-0.5">How TasNetworks knows Anchor is working — 3 measurable horizons</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+        <!-- 90-day horizon -->
+        <div class="bg-green-50 rounded-2xl p-4 border border-green-200">
+          <div class="text-xs font-black text-green-700 uppercase tracking-wide mb-3">📋 90 Days — Individual</div>
+          <div class="space-y-2 text-xs text-gray-600">
+            <div class="flex items-start gap-2"><span class="text-green-500 font-bold shrink-0">✓</span><span>GP registered within 3 weeks</span></div>
+            <div class="flex items-start gap-2"><span class="text-green-500 font-bold shrink-0">✓</span><span>Buddy contact within 48 hours of arrival</span></div>
+            <div class="flex items-start gap-2"><span class="text-green-500 font-bold shrink-0">✓</span><span>Pulse score ≥7 by Week 12</span></div>
+            <div class="flex items-start gap-2"><span class="text-green-500 font-bold shrink-0">✓</span><span>$250 wellbeing rebate claimed</span></div>
+            <div class="flex items-start gap-2"><span class="text-green-500 font-bold shrink-0">✓</span><span>Life Map: 5+ items visited</span></div>
+          </div>
+        </div>
+        <!-- 6-month horizon -->
+        <div class="bg-blue-50 rounded-2xl p-4 border border-blue-200">
+          <div class="text-xs font-black text-blue-700 uppercase tracking-wide mb-3">📈 6 Months — Program</div>
+          <div class="space-y-2 text-xs text-gray-600">
+            <div class="flex items-start gap-2"><span class="text-blue-500 font-bold shrink-0">✓</span><span>Early exits (under 12 months) ↓ vs baseline</span></div>
+            <div class="flex items-start gap-2"><span class="text-blue-500 font-bold shrink-0">✓</span><span>Month 3 engagement score ≥85% (vs 82% now)</span></div>
+            <div class="flex items-start gap-2"><span class="text-blue-500 font-bold shrink-0">✓</span><span>Systems confidence ≥80% (vs 68% now)</span></div>
+            <div class="flex items-start gap-2"><span class="text-blue-500 font-bold shrink-0">✓</span><span>Buddy assignment rate: 100% (vs 71% now)</span></div>
+            <div class="flex items-start gap-2"><span class="text-blue-500 font-bold shrink-0">✓</span><span>At-risk flagged before exit conversation</span></div>
+          </div>
+        </div>
+        <!-- Scalability horizon -->
+        <div class="bg-purple-50 rounded-2xl p-4 border border-purple-200">
+          <div class="text-xs font-black text-purple-700 uppercase tracking-wide mb-3">🚀 Scalability — Human + AI</div>
+          <div class="space-y-2 text-xs text-gray-600">
+            <div class="flex items-start gap-2"><span class="text-purple-500 font-bold shrink-0">✓</span><span>AI handles matching + pulse at any scale</span></div>
+            <div class="flex items-start gap-2"><span class="text-purple-500 font-bold shrink-0">✓</span><span>Human only intervenes when AI flags it</span></div>
+            <div class="flex items-start gap-2"><span class="text-purple-500 font-bold shrink-0">✓</span><span>Buddy pool grows as more people settle well</span></div>
+            <div class="flex items-start gap-2"><span class="text-purple-500 font-bold shrink-0">✓</span><span>Life Map becomes richer with every user</span></div>
+            <div class="flex items-start gap-2"><span class="text-purple-500 font-bold shrink-0">✓</span><span>Works for 37 hires/yr or 3,700</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-[#E6F4FA] rounded-xl p-3 border border-[#B3DFF0]">
+        <p class="text-[#002E5D] text-xs font-semibold">💡 <strong>The program pays for itself when it prevents 1 early exit.</strong> At $81K average replacement cost, Anchor's $22K/yr cost is recovered before the end of the first hire's probation period.</p>
+      </div>
+    </div>
+
     <!-- AWS Architecture -->
     <div class="card p-5">
       <h4 class="font-bold text-gray-800 mb-4">☁️ AWS Architecture</h4>
@@ -908,7 +1017,20 @@ function app() { return {
   loginName: 'Sarah Mitchell',
   loginEmail: 'sarah.mitchell@tasnetworks.com.au',
 
-  form: { name:'Sarah', origin:'Melbourne', family:'family', hobbies:['hiking','food'], needs:['gp','schools','community'] },
+  form: { name:'Sarah', origin:'Melbourne', country:'', family:'family', hobbies:['hiking','food'], needs:['gp','schools','community'] },
+
+  buddyProfiles: [
+    {id:1,name:'James Chen',role:'Field Engineer',from:'Melbourne',family:'family',avatar:'👨‍💼',months:8,needs:['gp','schools'],bio:"Moving from Melbourne with the family? The school waitlists nearly broke me — but I sorted it. Ask me anything.",tag:'🏡 Family'},
+    {id:2,name:'Priya Nair',role:'Business Analyst',from:'Sydney',family:'couple',avatar:'👩‍💼',months:5,needs:['community','licence'],bio:"Came with my partner. Took 6 weeks to feel like we really belonged. Now we love it more than Sydney ever. Happy to chat.",tag:'👫 Couple'},
+    {id:3,name:'Kofi Mensah',role:'Network Technician',from:'Brisbane',family:'single',avatar:'👨‍🔧',months:12,needs:['housing','community'],bio:"Moved solo from Brisbane. Joined the hiking club week 2 — best decision I made. DM me anytime.",tag:'🧑 Solo'},
+    {id:4,name:'Amara Singh',role:'Project Manager',from:'Perth',family:'family',avatar:'👩‍🔬',months:10,needs:['schools','gp'],bio:"Three kids, big move, zero meltdowns (almost!). I have a suburb-by-school shortlist ready for you.",tag:'🏡 Family'},
+    {id:5,name:'Luca Moretti',role:'Electrical Engineer',from:'Auckland',family:'couple',avatar:'👨‍💻',months:6,needs:['housing','licence'],bio:"NZ to Tassie is surprisingly easy culturally. Licence conversion took 45 min. Happy to walk you through it.",tag:'👫 Couple'},
+    {id:6,name:'Mei-Lin Wu',role:'HR Advisor',from:'Melbourne',family:'single',avatar:'👩‍💼',months:9,needs:['community','safety'],bio:"Solo move from Melbourne. The culture and food scene here is genuinely great — took me a month to find it. I'll share the shortlist.",tag:'🧑 Solo'},
+    {id:7,name:'Wei Zhang',role:'Systems Engineer',from:'Overseas',family:'family',avatar:'👨‍💻',months:14,needs:['schools','gp'],bio:"From Shanghai — the visa process was thorough but TasNetworks were great throughout. Happy to help international families.",tag:'🌏 International'},
+    {id:8,name:'Fatima Al-Hassan',role:'Data Analyst',from:'Overseas',family:'single',avatar:'👩‍🔬',months:7,needs:['community','safety'],bio:"From Dubai. Finding your people here takes a bit longer — but the community is genuinely warm. Reach out.",tag:'🌏 International'},
+    {id:9,name:'Raj Patel',role:'Asset Manager',from:'Overseas',family:'family',avatar:'👨‍🔧',months:11,needs:['schools','housing'],bio:"From Mumbai — the adjustment is real but Tasmania is beautiful. Happy to share what helped our family most.",tag:'🌏 International'},
+    {id:10,name:'Sophie Laurent',role:'Graduate Engineer',from:'Adelaide',family:'single',avatar:'👩‍💼',months:3,needs:['community','licence'],bio:"Fresh from Adelaide and still finding my feet! Perfect for connecting with other recent starters — we can figure it out together.",tag:'🧑 Solo'},
+  ],
 
   hobbies: [
     {id:'hiking',e:'🥾',l:'Hiking'},{id:'food',e:'🍜',l:'Food'},
@@ -1038,20 +1160,37 @@ function app() { return {
     return this.form.family === 'family' ? 'family with children' : this.form.family === 'couple' ? 'couple' : 'solo mover';
   },
 
+  // ── BUDDY MATCHING ──────────────────────────────────────────────────────
+  getBestBuddies() {
+    const origin = this.form.origin;
+    const family = this.form.family;
+    const needs = this.form.needs;
+    const isOverseas = origin === 'Overseas (International)' || origin === 'Overseas';
+    return this.buddyProfiles.map(b => {
+      let score = 0;
+      if (isOverseas && b.from === 'Overseas') score += 50;
+      else if (!isOverseas && b.from === origin) score += 50;
+      else score += 5;
+      if (b.family === family) score += 30;
+      score += needs.filter(n => b.needs.includes(n)).length * 20;
+      return {...b, score};
+    }).sort((a,b) => b.score - a.score).slice(0, 3);
+  },
+  getBestBuddy() { return this.getBestBuddies()[0] || this.buddyProfiles[0]; },
+  communityBuddies() { return this.getBestBuddies().slice(1); },
+
   buddyMessage() {
-    const origin = this.form.origin || 'your city';
-    const isFamily = this.form.family === 'family';
-    const isCouple = this.form.family === 'couple';
-    if (isFamily) return `Moving from ${origin} with the family? I've been there — the school waitlists nearly broke me. But honestly Hobart is incredible once you find your feet. I'll introduce you to the school mums and dads crew 😊`;
-    if (isCouple) return `Moving from ${origin} with your partner? My partner found it tough for the first few weeks but now she loves it more than I do! Happy to share what helped.`;
-    return `Moving solo from ${origin}? The first few weeks can feel quiet but the walking club and the TasNetworks crew made all the difference. DM me anytime 🥾`;
+    const b = this.getBestBuddy();
+    return b.bio;
   },
 
   buddyLatestMsg() {
+    const b = this.getBestBuddy();
     const needs = this.form.needs;
-    if (needs.includes('gp')) return '"Hey! I found a great GP 5 min from the office — Sonic Health Plus, ask for the bulk-billing receptionist. Should I send you the number? 😊"';
-    if (needs.includes('schools')) return '"The school waitlists here move fast — I can connect you with the Parents Facebook group for the good primary schools near the CBD. When do you need them by?"';
-    return '"Hey! Hope Week 2 is treating you okay. Hobart surprises people — give it a month and you\'ll start to love it. What\'s been the hardest bit so far?"';
+    if (needs.includes('gp')) return `"Hey! I know a great GP 5 min from the office — Sonic Health Plus on Elizabeth St, ask for the bulk-billing option. Want me to send the number? 😊" — ${b.name}`;
+    if (needs.includes('schools')) return `"School waitlists move fast here — I can connect you with the right parents group for the CBD suburbs. When do you need enrolment by?" — ${b.name}`;
+    if (needs.includes('housing')) return `"Happy to share the suburb shortlist I wish I'd had. Some great spots near the waterfront that aren't too far from the office." — ${b.name}`;
+    return `"Hey! Hope Week 2 is going okay. Hobart surprises people — give it a month and you'll start to love it. What's been the hardest part so far?" — ${b.name}`;
   },
 
   startMatching() {
@@ -1060,7 +1199,7 @@ function app() { return {
     [1,2,3,4,5].forEach((s,i) => {
       setTimeout(() => {
         this.matchStep = s;
-        if (s === 5) setTimeout(() => this.screen = 'buddy-reveal', 800);
+        if (s === 5) setTimeout(() => this.screen = 'buddy-reveal', 1000);
       }, (i+1) * 900);
     });
   },
@@ -1075,7 +1214,7 @@ function app() { return {
     const items = [
       {id:1, done:true,  active:false, label:'Transport from Hobart Airport arranged ✓', when:'Before Day 1', tag:'logistics'},
       {id:2, done:true,  active:false, label:'TasNetworks digital employee card issued ✓', when:'Day 1', tag:'admin'},
-      {id:3, done:true,  active:false, label:'Anchor buddy matched — meet James Chen ✓', when:'Day 1', tag:'people'},
+      {id:3, done:true,  active:false, label:'Anchor community matched — meet your buddy + 2 others ✓', when:'Day 1', tag:'people'},
       {id:4, done:true,  active:false, label:'Office induction & site tour completed ✓', when:'Week 1', tag:'work'},
     ];
     if (this.form.needs.includes('gp'))
@@ -1172,14 +1311,35 @@ function app() { return {
   submitTxt() {
     if (!this.txtInput.trim()) return;
     const resp = this.txtInput;
+    const lower = resp.toLowerCase();
     this.txtInput = ''; this.showTxt = false;
     this._userSay(resp);
     const n = this.form.name || 'friend';
+    const buddy = this.getBestBuddy();
+    const bn = buddy.name.split(' ')[0];
+
+    let aiResp;
+    if (lower.match(/\b(gp|doctor|medical|health|sick|clinic|appointment)\b/)) {
+      aiResp = `GP access is one of the most common stressors in the first weeks — you're not alone.\n\nI've flagged this for ${bn}, who knows the local GP setup near the office. Sonic Health Plus on Elizabeth St does bulk-billing for TasNetworks staff. Your Life Map has the full details.\n\nI've also nudged this to the top of your 90-day checklist. ✅`;
+    } else if (lower.match(/\b(school|childcare|kids|children|enrol|waitlist)\b/)) {
+      aiResp = `Schools is one of the highest-stress parts of relocating with kids — and the waitlists here move faster than people expect.\n\n${bn} has navigated this and I've asked them to send you the suburb-by-school breakdown directly. Also check the Family section in your Life Map — it has direct tips from TasNetworks families.\n\nStart the enrolment application this week if you can. 🏫`;
+    } else if (lower.match(/\b(lonely|alone|miss|friend|social|people|isolated|nobody|know anyone)\b/)) {
+      aiResp = `That feeling of "everyone knows everyone except me" usually peaks around weeks 3–4 — and it's completely normal.\n\nWhat actually helps: the Hobart Walking Club (Sundays, 12 TasNetworks members, very welcoming), and #hobart-newcomers on Slack. ${bn} specifically joined Anchor because they remember this exact feeling.\n\nYou've already done the hardest thing — you said it out loud. 🤝`;
+    } else if (lower.match(/\b(housing|rent|home|suburb|apartment|flat|where to live)\b/)) {
+      aiResp = `Hobart housing is much more manageable than Melbourne or Sydney, but the good suburbs do go fast.\n\nI've surfaced the crowdsourced suburb guide in your Life Map. ${bn} settled somewhere similar to what you're describing — I've nudged them to share their experience directly with you. 🏠`;
+    } else if (lower.match(/\b(work|job|role|manager|team|culture|stress|pressure)\b/)) {
+      aiResp = `Work stuff in the first few weeks is real — even when the "life" side is going okay.\n\nYour People Partner is specifically there for this — not just probation tick-boxes, but genuine support. The pulse data I'm collecting helps them understand where support is most needed. That's the whole point.\n\n${bn} has been here long enough to give you the honest lay of the land too. Reach out to them. 💬`;
+    } else if (lower.match(/\b(licence|license|driving|car|transport|commute)\b/)) {
+      aiResp = `Licence conversion is actually straightforward — Service Tasmania on Macquarie St, takes about 45 minutes. Book online first though.\n\nI've pinned this in your checklist and added the Transport section of the Life Map to your dashboard. ${bn} can tell you which suburbs are easy to commute from if that's still a question. 🚗`;
+    } else {
+      aiResp = `Got it — "${resp.slice(0,60)}${resp.length>60?'…':''}".\n\nI've saved that and matched it to tips in your Life Map. I've also nudged ${bn} — they're probably already thinking of something useful to share. That's what your Anchor community is for. 😊`;
+    }
+
     setTimeout(() => {
-      this._aiSay(`Got it — "${resp.slice(0,60)}${resp.length>60?'…':''}".\n\nI've saved that and matched it to tips in your Life Map. I've also let James know — he's probably already typing something. That's what Anchor is for.`);
+      this._aiSay(aiResp);
       setTimeout(() => {
-        this._aiSay(`Check-in done 😈\n\nSee you in a fortnight, ${n}. You're doing better than you think. And if anything comes up before then — your buddy James, the Services hub, or just come back here. We're not going anywhere.`);
-      }, 2200);
+        this._aiSay(`Check-in done 😈\n\nSee you in a fortnight, ${n}. You're doing better than you think. And if anything comes up before then — your Anchor community, the Services hub, or just come back here. We're not going anywhere. 🫂`);
+      }, 2400);
     }, 1000);
   },
 }}
