@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anchor — TasNetworks Relocation Companion</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:  #002E5D;
+    --blue:  #0099CC;
+    --light: #E6F4FA;
+    --grad:  linear-gradient(135deg,#002E5D 0%,#004A8F 55%,#0099CC 100%);
+  }
+  * { box-sizing: border-box; }
+  body { font-family:'Inter',sans-serif; background:#F0F6FB; }
+  [x-cloak]{ display:none!important; }
+
+  /* ---- animations ---- */
+  @keyframes fadeUp  { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+  @keyframes popIn   { 0%{transform:scale(.45);opacity:0} 65%{transform:scale(1.06)} 100%{transform:scale(1);opacity:1} }
+  @keyframes spinR   { to{transform:rotate(360deg)} }
+  @keyframes spinL   { to{transform:rotate(-360deg)} }
+  @keyframes glow    { 0%,100%{box-shadow:0 0 0 0 rgba(0,153,204,.45)} 50%{box-shadow:0 0 0 20px rgba(0,153,204,0)} }
+  @keyframes bounce  { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+  @keyframes slide   { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+
+  .fu    { animation:fadeUp .45s ease both }
+  .fi    { animation:fadeIn .3s ease both }
+  .pop   { animation:popIn .6s cubic-bezier(.34,1.56,.64,1) both }
+  .r1    { animation:spinR 3.5s linear infinite }
+  .r2    { animation:spinL 2.5s linear infinite }
+  .r3    { animation:spinR 5s linear infinite }
+  .glow  { animation:glow 2.2s ease-in-out infinite }
+  .bdot  { animation:bounce 1.1s ease-in-out infinite }
+  .msg   { animation:slide .3s ease both }
+
+  /* ---- layout ---- */
+  .grad  { background:var(--grad) }
+  .grad-r{ background:linear-gradient(135deg,#0099CC,#002E5D) }
+
+  /* ---- sidebar nav item ---- */
+  .nav-item { @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all w-full text-left cursor-pointer; }
+  .nav-on   { background:var(--navy); color:white; }
+  .nav-off  { color:#4B5563; }
+  .nav-off:hover { background:#EBF5FB; color:var(--navy); }
+
+  /* ---- chat bubbles ---- */
+  .bai  { background:#EBF5FB; border:1px solid #B3DFF0; }
+  .busr { background:var(--grad); color:white; }
+
+  /* ---- risk badges ---- */
+  .rlo { background:#D1FAE5; color:#065F46 }
+  .rmi { background:#FEF3C7; color:#92400E }
+  .rhi { background:#FEE2E2; color:#991B1B }
+
+  /* ---- misc ---- */
+  .card { background:white; border-radius:1.25rem; box-shadow:0 2px 12px rgba(0,46,93,.07); }
+  .scr  { overflow-y:auto; scrollbar-width:thin; scrollbar-color:#B3DFF0 transparent; }
+  .scr::-webkit-scrollbar { width:4px; }
+  .scr::-webkit-scrollbar-thumb { background:#B3DFF0; border-radius:2px; }
+  input[type=range] { accent-color:var(--blue); }
+
+  /* ---- tag pill ---- */
+  .tag-health  { background:#DBEAFE; color:#1E40AF }
+  .tag-family  { background:#FCE7F3; color:#9D174D }
+  .tag-admin   { background:#F3F4F6; color:#374151 }
+  .tag-people  { background:#D1FAE5; color:#065F46 }
+  .tag-community{ background:#EDE9FE; color:#4C1D95 }
+  .tag-work    { background:#FEF3C7; color:#78350F }
+  .tag-wellbeing{ background:#ECFDF5; color:#065F46 }
+  .tag-benefits{ background:#FFF7ED; color:#9A3412 }
+  .tag-logistics{ background:#E0F2FE; color:#0369A1 }
+</style>
+</head>
+<body x-data="app()" x-cloak class="min-h-screen">
+
+<!-- ══ Tassie Devil SVG Symbol Library ══ -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Full body: devil + anchor (login, matching animation) -->
+  <symbol id="td-full" viewBox="0 0 200 185">
+    <!-- Left ear outer -->
+    <ellipse cx="43" cy="30" rx="14" ry="19" fill="#1a1a1a" transform="rotate(-22 43 30)"/>
+    <!-- Left ear inner (red) -->
+    <ellipse cx="43" cy="30" rx="8" ry="11" fill="#B83030" transform="rotate(-22 43 30)"/>
+    <!-- Right ear outer -->
+    <ellipse cx="107" cy="30" rx="14" ry="19" fill="#1a1a1a" transform="rotate(22 107 30)"/>
+    <!-- Right ear inner (red) -->
+    <ellipse cx="107" cy="30" rx="8" ry="11" fill="#B83030" transform="rotate(22 107 30)"/>
+    <!-- Head -->
+    <ellipse cx="75" cy="73" rx="46" ry="44" fill="#1a1a1a"/>
+    <!-- Body -->
+    <ellipse cx="75" cy="133" rx="38" ry="40" fill="#1a1a1a"/>
+    <!-- Belly (slightly lighter) -->
+    <ellipse cx="75" cy="140" rx="22" ry="26" fill="#242424"/>
+    <!-- Left eye white -->
+    <circle cx="56" cy="62" r="16" fill="white"/>
+    <!-- Right eye white -->
+    <circle cx="94" cy="62" r="16" fill="white"/>
+    <!-- Left pupil -->
+    <circle cx="58" cy="63" r="8" fill="#0d0d0d"/>
+    <!-- Right pupil -->
+    <circle cx="96" cy="63" r="8" fill="#0d0d0d"/>
+    <!-- Eye shine L -->
+    <circle cx="51" cy="57" r="4" fill="white"/>
+    <!-- Eye shine R -->
+    <circle cx="89" cy="57" r="4" fill="white"/>
+    <!-- Snout -->
+    <ellipse cx="75" cy="87" rx="19" ry="14" fill="#D4A57A"/>
+    <!-- Nose -->
+    <ellipse cx="75" cy="81" rx="5" ry="4" fill="#2a2a2a"/>
+    <!-- Mouth -->
+    <path d="M 60 92 Q 75 105 90 92" stroke="#666" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- Teeth L -->
+    <rect x="62" y="91" width="8" height="10" rx="2.5" fill="white"/>
+    <!-- Teeth R -->
+    <rect x="74" y="91" width="8" height="10" rx="2.5" fill="white"/>
+    <!-- Left arm -->
+    <ellipse cx="37" cy="136" rx="11" ry="24" fill="#1a1a1a" transform="rotate(16 37 136)"/>
+    <!-- Right arm -->
+    <ellipse cx="113" cy="136" rx="11" ry="24" fill="#1a1a1a" transform="rotate(-16 113 136)"/>
+    <!-- Left leg -->
+    <ellipse cx="60" cy="170" rx="15" ry="9" fill="#1a1a1a"/>
+    <!-- Right leg -->
+    <ellipse cx="90" cy="170" rx="15" ry="9" fill="#1a1a1a"/>
+    <!-- ── Blue Anchor (right side) ── -->
+    <circle cx="158" cy="90" r="11" stroke="#0099CC" stroke-width="5" fill="none"/>
+    <line x1="158" y1="101" x2="158" y2="140" stroke="#0099CC" stroke-width="5" stroke-linecap="round"/>
+    <line x1="140" y1="114" x2="176" y2="114" stroke="#0099CC" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 158 140 Q 140 140 140 130" stroke="#0099CC" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M 158 140 Q 176 140 176 130" stroke="#0099CC" stroke-width="5" fill="none" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- Head only: for top bar / sidebar small icon -->
+  <symbol id="td-head" viewBox="10 15 130 100">
+    <ellipse cx="43" cy="30" rx="14" ry="19" fill="#1a1a1a" transform="rotate(-22 43 30)"/>
+    <ellipse cx="43" cy="30" rx="8" ry="11" fill="#B83030" transform="rotate(-22 43 30)"/>
+    <ellipse cx="107" cy="30" rx="14" ry="19" fill="#1a1a1a" transform="rotate(22 107 30)"/>
+    <ellipse cx="107" cy="30" rx="8" ry="11" fill="#B83030" transform="rotate(22 107 30)"/>
+    <ellipse cx="75" cy="73" rx="46" ry="44" fill="#1a1a1a"/>
+    <!-- Neck/body peek -->
+    <ellipse cx="75" cy="115" rx="30" ry="12" fill="#1a1a1a"/>
+    <circle cx="56" cy="62" r="16" fill="white"/>
+    <circle cx="94" cy="62" r="16" fill="white"/>
+    <circle cx="58" cy="63" r="8" fill="#0d0d0d"/>
+    <circle cx="96" cy="63" r="8" fill="#0d0d0d"/>
+    <circle cx="51" cy="57" r="4" fill="white"/>
+    <circle cx="89" cy="57" r="4" fill="white"/>
+    <ellipse cx="75" cy="87" rx="19" ry="14" fill="#D4A57A"/>
+    <ellipse cx="75" cy="81" rx="5" ry="4" fill="#2a2a2a"/>
+    <path d="M 60 92 Q 75 105 90 92" stroke="#666" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <rect x="62" y="91" width="8" height="10" rx="2.5" fill="white"/>
+    <rect x="74" y="91" width="8" height="10" rx="2.5" fill="white"/>
+  </symbol>
+</svg>
+
+<!-- ═══════════════════════════════ LOGIN ════════════════════════════════ -->
+<div x-show="screen==='login'" class="min-h-screen grad flex flex-col items-center justify-center p-6 relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
+  <div class="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/3"></div>
+
+  <!-- Logo -->
+  <div class="text-center mb-8 fu">
+    <div class="mx-auto mb-4 drop-shadow-2xl">
+      <svg viewBox="0 0 200 185" class="w-44 h-40" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
+    </div>
+    <h1 class="text-5xl font-black text-white">Anchor</h1>
+    <p class="text-white/70 mt-1">TasNetworks Relocation Companion</p>
+  </div>
+
+  <!-- Login card -->
+  <div class="card p-8 w-full max-w-sm fu">
+    <h2 class="text-xl font-bold text-gray-800 mb-1">Welcome back</h2>
+    <p class="text-gray-400 text-sm mb-6">Sign in to your Anchor account</p>
+
+    <div class="space-y-3 mb-5">
+      <div>
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Full name</label>
+        <input x-model="loginName" type="text" placeholder="e.g. Sarah Mitchell"
+               class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm focus:outline-none focus:border-[#0099CC] focus:ring-2 focus:ring-[#0099CC]/20 transition">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Email</label>
+        <input x-model="loginEmail" type="email" placeholder="you@tasnetworks.com.au"
+               class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 text-sm focus:outline-none focus:border-[#0099CC] focus:ring-2 focus:ring-[#0099CC]/20 transition">
+      </div>
+    </div>
+
+    <button @click="loginAsEmployee()"
+            class="w-full grad text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-all shadow-md mb-3">
+      Sign in with TasNetworks SSO →
+    </button>
+    <p class="text-center text-gray-300 text-xs mb-3">— or —</p>
+    <button @click="loginAsHR()"
+            class="w-full bg-gray-50 text-gray-600 font-semibold py-3 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all text-sm">
+      👔 Sign in as HR / People Partner
+    </button>
+  </div>
+
+  <!-- Demo hint -->
+  <div class="mt-6 bg-white/10 rounded-2xl px-5 py-3 text-white/70 text-xs text-center fu max-w-xs">
+    <strong class="text-white">Demo tip:</strong> Leave fields as-is and click SSO to enter the new employee onboarding experience
+  </div>
+  <p class="text-white/30 text-xs mt-6">Powered by Amazon Bedrock · TasNetworks × UTAS × AWS 2026</p>
+</div>
+
+<!-- ═══════════════════════════════ ONBOARDING ════════════════════════════ -->
+<div x-show="screen==='onboarding'" class="min-h-screen bg-[#F0F6FB] flex flex-col items-center pt-0 pb-8">
+
+  <!-- Header -->
+  <div class="grad w-full px-6 pt-10 pb-14 text-center">
+    <button @click="logout()" class="absolute top-4 left-4 text-white/50 text-sm hover:text-white">← Back</button>
+    <div class="mb-2 flex justify-center">
+      <svg viewBox="0 0 200 185" class="w-20 h-18" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
+    </div>
+    <h2 class="text-2xl font-black text-white">Let's set up your Anchor</h2>
+    <p class="text-white/70 text-sm mt-1">Make settling down in Tasmania easier</p>
+    <div class="mt-4 max-w-xs mx-auto bg-white/20 rounded-full h-2">
+      <div class="bg-white rounded-full h-2 transition-all duration-500" :style="`width:${onboardStep===1?50:100}%`"></div>
+    </div>
+    <p class="text-white/50 text-xs mt-1">Step <span x-text="onboardStep"></span> of 2</p>
+  </div>
+
+  <div class="card p-6 w-full max-w-lg -mt-8 mx-4 fu">
+
+    <!-- ── Step 1 ── -->
+    <div x-show="onboardStep===1">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">Tell us about yourself</h3>
+      <div class="space-y-4">
+
+        <div>
+          <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-1">Your first name</label>
+          <input x-model="form.name" type="text" placeholder="e.g. Sarah"
+                 class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-[#0099CC] focus:ring-2 focus:ring-[#0099CC]/20">
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-1">Moving from</label>
+          <select x-model="form.origin" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-[#0099CC]">
+            <option value="">Select city…</option>
+            <option value="Melbourne">Melbourne, VIC</option>
+            <option value="Sydney">Sydney, NSW</option>
+            <option value="Brisbane">Brisbane, QLD</option>
+            <option value="Perth">Perth, WA</option>
+            <option value="Adelaide">Adelaide, SA</option>
+            <option value="Auckland">Auckland, NZ</option>
+            <option value="Overseas">Overseas (International)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-2">Who's making the move?</label>
+          <div class="grid grid-cols-3 gap-2">
+            <template x-for="f in [{v:'single',e:'🧑',l:'Just me'},{v:'couple',e:'👫',l:'Me & partner'},{v:'family',e:'👨‍👩‍👧',l:'Family'}]" :key="f.v">
+              <button @click="form.family=f.v"
+                      :class="form.family===f.v?'border-[#0099CC] bg-[#0099CC]/10 text-[#002E5D] font-bold':'border-gray-200 text-gray-500'"
+                      class="border-2 rounded-xl py-3 text-sm transition-all flex flex-col items-center gap-1">
+                <span x-text="f.e" class="text-2xl"></span>
+                <span x-text="f.l" class="text-xs"></span>
+              </button>
+            </template>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-2">Interests & hobbies</label>
+          <div class="flex flex-wrap gap-2">
+            <template x-for="h in hobbies" :key="h.id">
+              <button @click="toggleHobby(h.id)"
+                      :class="form.hobbies.includes(h.id)?'bg-[#002E5D] text-white':'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                      class="px-3 py-1.5 rounded-full text-sm font-medium transition-all">
+                <span x-text="h.e+' '+h.l"></span>
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+      <button @click="onboardStep=2" class="w-full grad text-white font-bold py-3.5 rounded-xl mt-6 hover:opacity-90 transition shadow-md">
+        Continue →
+      </button>
+    </div>
+
+    <!-- ── Step 2 ── -->
+    <div x-show="onboardStep===2">
+      <h3 class="text-lg font-bold text-gray-800 mb-1">What services would you use the most?</h3>
+      <p class="text-sm text-gray-400 mb-4">This will let us help you tailor your experience</p>
+      <div class="space-y-2">
+        <template x-for="n in needs" :key="n.id">
+          <button @click="toggleNeed(n.id)"
+                  :class="form.needs.includes(n.id)?'border-[#0099CC] bg-[#E6F4FA]':'border-gray-200 hover:border-gray-300'"
+                  class="w-full flex items-center gap-3 border-2 rounded-xl p-3.5 text-left transition-all">
+            <span class="text-2xl shrink-0" x-text="n.e"></span>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-800 text-sm" x-text="n.l"></div>
+              <div class="text-gray-400 text-xs" x-text="n.d"></div>
+            </div>
+            <div :class="form.needs.includes(n.id)?'border-[#0099CC] bg-[#0099CC]':'border-gray-300'"
+                 class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all">
+              <span x-show="form.needs.includes(n.id)" class="text-white text-xs font-bold">✓</span>
+            </div>
+          </button>
+        </template>
+      </div>
+      <button @click="startMatching()" class="w-full grad text-white font-bold py-3.5 rounded-xl mt-6 hover:opacity-90 transition shadow-md">
+        😈 Find My Anchor Buddy
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ MATCHING ══════════════════════════════ -->
+<div x-show="screen==='matching'" class="min-h-screen grad flex flex-col items-center justify-center p-8">
+  <div class="text-center">
+    <div class="relative w-48 h-48 mx-auto mb-8">
+      <div class="absolute inset-0 border-4 border-white/15 rounded-full r1"></div>
+      <div class="absolute inset-5 border-4 border-white/25 rounded-full r2"></div>
+      <div class="absolute inset-10 border-4 border-white/35 rounded-full r3"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="w-28 h-28 bg-white/20 rounded-full flex items-center justify-center glow">
+          <svg viewBox="0 0 200 185" class="w-24 h-24" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
+        </div>
+      </div>
+    </div>
+    <h2 class="text-2xl font-black text-white mb-1">Finding your perfect match…</h2>
+    <p class="text-white/60 text-sm mb-8">Amazon Bedrock is scanning 847 TasNetworks employee profiles</p>
+    <div class="space-y-3 text-left max-w-xs mx-auto">
+      <div x-show="matchStep>=1" class="bg-white/15 rounded-xl px-4 py-3 flex items-center gap-3 fi">
+        <span class="text-green-300 font-bold">✓</span>
+        <span class="text-white text-sm">Origin city: <span x-text="form.origin||'Melbourne'"></span> relocators found (23 matches)</span>
+      </div>
+      <div x-show="matchStep>=2" class="bg-white/15 rounded-xl px-4 py-3 flex items-center gap-3 fi">
+        <span class="text-green-300 font-bold">✓</span>
+        <span class="text-white text-sm">Family: <span x-text="familyLabel()"></span> situation aligned (11 matches)</span>
+      </div>
+      <div x-show="matchStep>=3" class="bg-white/15 rounded-xl px-4 py-3 flex items-center gap-3 fi">
+        <span class="text-green-300 font-bold">✓</span>
+        <span class="text-white text-sm">Shared interests matched (4 matches)</span>
+      </div>
+      <div x-show="matchStep>=4" class="bg-white/15 rounded-xl px-4 py-3 flex items-center gap-3 fi">
+        <span class="text-green-300 font-bold">✓</span>
+        <span class="text-white text-sm">Relocation needs: knowledge confirmed</span>
+      </div>
+      <div x-show="matchStep>=5" class="bg-[#0099CC]/40 border border-[#0099CC] rounded-xl px-4 py-3 flex items-center gap-3 fi">
+        <span class="text-yellow-300 text-xl">🎯</span>
+        <span class="text-white text-sm font-bold">Match found — 94% compatibility!</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ BUDDY REVEAL ═════════════════════════════ -->
+<div x-show="screen==='buddy-reveal'" class="min-h-screen grad flex flex-col items-center justify-center p-6">
+  <div class="text-center mb-5 fu">
+    <p class="text-white/80 text-lg">🎉 We found your Anchor buddy!</p>
+    <h2 class="text-4xl font-black text-white">94% compatibility</h2>
+  </div>
+  <div class="card p-6 w-full max-w-sm pop">
+    <div class="text-center mb-5">
+      <div class="w-28 h-28 grad-r rounded-full flex items-center justify-center mx-auto mb-3 text-6xl shadow-xl">👨‍💼</div>
+      <h3 class="text-2xl font-black text-gray-800">James Chen</h3>
+      <p class="text-[#0099CC] font-semibold text-sm">Field Engineer · TasNetworks</p>
+      <p class="text-gray-400 text-xs mt-1">📍 From <span x-text="form.origin||'Melbourne'"></span> · In Hobart 8 months · <span x-text="form.family==='family'?'Dad of 2':form.family==='couple'?'Moved with partner':'Single mover'"></span></p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-2 mb-4">
+      <span class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Same origin city</span>
+      <span x-show="form.family==='family'" class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Kids in school</span>
+      <span x-show="form.family==='couple'" class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Partner settled too</span>
+      <span x-show="form.needs.includes('gp')" class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Knows the best GP</span>
+      <span class="bg-[#0099CC]/10 text-[#002E5D] text-xs font-bold px-3 py-1.5 rounded-full">✓ Hiking lover</span>
+    </div>
+    <div class="bg-[#F0F6FB] rounded-2xl p-4 mb-4 border-l-4 border-[#0099CC] text-sm text-gray-700 italic">
+      <span x-text="buddyMessage()"></span>
+      <div class="text-gray-400 text-xs mt-2 not-italic font-semibold">— James, joined Anchor 8 months ago</div>
+    </div>
+    <div class="flex gap-3">
+      <button class="flex-1 grad text-white font-bold py-3 rounded-xl hover:opacity-90 transition">💬 Say Hello</button>
+      <button class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition">📞 Call</button>
+    </div>
+  </div>
+  <button @click="goToApp()" class="mt-5 w-full max-w-sm bg-white/15 text-white font-semibold py-4 rounded-2xl border border-white/30 hover:bg-white/25 transition fu">
+    Go to my Dashboard →
+  </button>
+</div>
+
+<!-- ═══════════════════════════ MAIN APP ══════════════════════════════════ -->
+<div x-show="screen==='app'" class="min-h-screen flex flex-col w-full">
+
+  <!-- Top bar -->
+  <div class="grad px-6 py-3 flex items-center justify-between shrink-0 shadow-md">
+    <div class="flex items-center gap-3">
+      <svg viewBox="0 0 130 115" class="w-9 h-9" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg>
+      <span class="text-white font-black text-lg tracking-tight">Anchor</span>
+      <span class="hidden sm:block text-white/30 text-sm">·</span>
+      <span class="hidden sm:block text-white/50 text-xs">TasNetworks Relocation Companion</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-white/50 text-sm hidden md:block">🌿 Day 14 in Tasmania</span>
+      <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm border border-white/30">
+        <span x-text="(form.name||'SA').substring(0,2).toUpperCase()"></span>
+      </div>
+      <button @click="logout()" class="text-white/50 text-sm hover:text-white transition-all hidden sm:block">Sign out</button>
+    </div>
+  </div>
+
+  <!-- Body: sidebar + content -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- ── Sidebar ── -->
+    <div class="w-56 bg-white border-r border-gray-100 flex flex-col py-5 shrink-0 shadow-sm">
+
+      <!-- User card -->
+      <div class="px-4 mb-5">
+        <div class="bg-[#F0F6FB] rounded-2xl p-3 flex items-center gap-3">
+          <div class="w-10 h-10 grad rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
+            <span x-text="(form.name||'SA').substring(0,2).toUpperCase()"></span>
+          </div>
+          <div class="overflow-hidden">
+            <div class="font-bold text-gray-800 text-sm truncate" x-text="form.name||'New Starter'"></div>
+            <div class="text-gray-400 text-xs">Week 2 · <span x-text="form.origin||'TAS'"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="px-3 space-y-1 flex-1">
+        <button @click="activeTab='home'"
+                :class="activeTab==='home'?'nav-on':'nav-off'"
+                class="nav-item">
+          <span>🏠</span><span>Dashboard</span>
+        </button>
+        <button @click="activeTab='lifemap'"
+                :class="activeTab==='lifemap'?'nav-on':'nav-off'"
+                class="nav-item">
+          <span>🗺️</span><span>Life Map</span>
+        </button>
+        <button @click="goToPulse()"
+                :class="activeTab==='pulse'?'nav-on':'nav-off'"
+                class="nav-item relative">
+          <span>💚</span><span>Pulse Check</span>
+          <span class="ml-auto w-2 h-2 bg-red-500 rounded-full shrink-0"></span>
+        </button>
+        <button @click="activeTab='services'"
+                :class="activeTab==='services'?'nav-on':'nav-off'"
+                class="nav-item">
+          <span>🛎️</span><span>Services</span>
+        </button>
+      </nav>
+
+      <!-- Buddy mini-card -->
+      <div class="mx-3 my-3 p-3 bg-[#F0F6FB] rounded-2xl border border-[#B3DFF0]">
+        <div class="flex items-center gap-1.5 mb-2">
+          <svg viewBox="0 0 130 115" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg>
+          <p class="text-xs text-gray-400 font-semibold">Your Buddy</p>
+        </div>
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-9 h-9 grad-r rounded-full flex items-center justify-center text-xl shrink-0">👨‍💼</div>
+          <div>
+            <div class="font-bold text-gray-800 text-xs">James Chen</div>
+            <div class="text-green-600 text-xs">🟢 Active</div>
+          </div>
+        </div>
+        <button class="w-full bg-[#002E5D] text-white text-xs font-bold py-2 rounded-xl hover:bg-[#0099CC] transition-all">
+          Message James
+        </button>
+      </div>
+
+      <!-- Sign out -->
+      <div class="px-3">
+        <button @click="logout()"
+                class="w-full flex items-center gap-2 px-4 py-2.5 text-gray-400 hover:text-red-500 text-sm transition-all rounded-xl hover:bg-red-50">
+          <span>🚪</span><span>Sign out</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Main content ── -->
+    <div class="flex-1 scr bg-[#F0F6FB] p-6">
+
+      <!-- ===== DASHBOARD ===== -->
+      <div x-show="activeTab==='home'" class="fi max-w-4xl mx-auto space-y-5">
+
+        <!-- Welcome banner -->
+        <div class="grad rounded-2xl p-6 text-white flex items-center justify-between">
+          <div>
+            <p class="text-white/60 text-sm">Day 14 in lutruwita (Tasmania) 🌿</p>
+            <h2 class="text-3xl font-black mt-0.5">Good morning, <span x-text="form.name||'Sarah'"></span> 👋</h2>
+            <p class="text-white/70 text-sm mt-1">Your buddy James is online · Pulse check is due today</p>
+          </div>
+          <div class="hidden md:block opacity-50">
+            <svg viewBox="0 0 200 185" class="w-24 h-24" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
+          </div>
+        </div>
+
+        <!-- Two-column layout -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+          <!-- Pulse CTA -->
+          <div class="card p-5 border-l-4 border-[#0099CC]">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-[#E6F4FA] rounded-2xl flex items-center justify-center text-2xl shrink-0">💚</div>
+              <div class="flex-1">
+                <h4 class="font-bold text-gray-800">Pulse Check due today</h4>
+                <p class="text-gray-400 text-xs">2 questions · 60 seconds · confidential</p>
+              </div>
+              <button @click="goToPulse()" class="grad text-white text-sm font-bold px-4 py-2.5 rounded-xl hover:opacity-90 transition shrink-0">
+                Start
+              </button>
+            </div>
+          </div>
+
+          <!-- Buddy card -->
+          <div class="card p-5">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">😈 Your Anchor Buddy</p>
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 grad-r rounded-2xl flex items-center justify-center text-2xl shadow">👨‍💼</div>
+              <div class="flex-1">
+                <h5 class="font-black text-gray-800">James Chen</h5>
+                <p class="text-gray-400 text-xs">Field Engineer · From <span x-text="form.origin||'Melbourne'"></span></p>
+                <p class="text-green-600 text-xs font-semibold">🟢 Active · replied 2h ago</p>
+              </div>
+              <button class="bg-[#E6F4FA] text-[#002E5D] font-bold px-3 py-2 rounded-xl text-sm hover:bg-[#0099CC] hover:text-white transition">Chat</button>
+            </div>
+            <div class="bg-[#F0F6FB] rounded-xl p-3 text-sm text-gray-600 italic border border-gray-100" x-text="buddyLatestMsg()"></div>
+          </div>
+        </div>
+
+        <!-- TAILORED 90-Day Journey -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-gray-800">📋 Your Personalised 90-Day Checklist</h4>
+            <span class="bg-[#E6F4FA] text-[#002E5D] text-xs font-bold px-3 py-1 rounded-full">Day 14 / 90</span>
+          </div>
+          <!-- Progress bar -->
+          <div class="bg-gray-100 rounded-full h-3 mb-5">
+            <div class="bg-[#0099CC] rounded-full h-3 transition-all" style="width:15.5%"></div>
+          </div>
+
+          <!-- Tailored items -->
+          <div class="space-y-3">
+            <template x-for="m in getTailoredJourney()" :key="m.id">
+              <div class="flex items-start gap-3">
+                <div :class="m.done?'bg-[#0099CC]':m.active?'bg-amber-400':'bg-gray-200'"
+                     class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold"
+                     :style="m.done||m.active?'color:white':''">
+                  <span x-text="m.done?'✓':m.active?'⟳':'○'"></span>
+                </div>
+                <div class="flex-1">
+                  <div :class="m.done?'text-gray-500':m.active?'text-gray-800 font-semibold':'text-gray-400'"
+                       class="text-sm" x-text="m.label"></div>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full" :class="'tag-'+m.tag" x-text="m.tag"></span>
+                    <span :class="m.done?'text-gray-300':m.active?'text-amber-500 font-semibold':'text-gray-300'"
+                          class="text-xs" x-text="m.when"></span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== LIFE MAP ===== -->
+      <div x-show="activeTab==='lifemap'" class="fi max-w-4xl mx-auto">
+        <div class="card p-5 mb-4">
+          <h4 class="font-bold text-gray-800 mb-1">🗺️ Tasmania Life Map</h4>
+          <p class="text-gray-400 text-sm">Crowdsourced by 847 TasNetworks employees · Personalised for
+            <span class="text-[#0099CC] font-semibold" x-text="form.name||'you'"></span></p>
+          <div class="flex gap-2 mt-2 flex-wrap">
+            <span class="bg-[#E6F4FA] text-[#002E5D] text-xs font-semibold px-3 py-1 rounded-full">✨ Tailored to your needs</span>
+            <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full" x-text="(form.family==='family'?'👨‍👩‍👧 Family':form.family==='couple'?'👫 Couple':'🧑 Solo')+' · '+(form.origin||'Your city')"></span>
+          </div>
+        </div>
+        <!-- Category pills -->
+        <div class="flex gap-2 overflow-x-auto pb-2 mb-4">
+          <template x-for="cat in lifeMapCats" :key="cat.id">
+            <button @click="lmCat=cat.id"
+                    :class="lmCat===cat.id?'bg-[#002E5D] text-white shadow-md':'bg-white text-gray-500 hover:border-[#0099CC]'"
+                    class="shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all shadow-sm border border-transparent">
+              <span x-text="cat.e+' '+cat.l"></span>
+            </button>
+          </template>
+        </div>
+        <!-- Items grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-4">
+          <template x-for="item in getLmItems()" :key="item.id">
+            <div class="card p-4 hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-[#B3DFF0]">
+              <div class="flex items-start gap-3">
+                <span class="text-2xl shrink-0" x-text="item.e"></span>
+                <div class="flex-1">
+                  <h5 class="font-bold text-gray-800 text-sm leading-snug" x-text="item.t"></h5>
+                  <p class="text-gray-400 text-xs mt-1 leading-relaxed" x-text="item.d"></p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="text-yellow-500 text-xs font-bold" x-text="'⭐ '+item.r""></span>
+                    <span class="text-gray-200 text-xs">·</span>
+                    <span class="text-gray-400 text-xs" x-text="item.v+' employees'"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- ===== PULSE CHECK ===== -->
+      <div x-show="activeTab==='pulse'" class="fi max-w-xl mx-auto">
+        <div class="card p-5 mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-[#0099CC] rounded-full flex items-center justify-center shadow overflow-hidden">
+              <svg viewBox="0 0 130 115" class="w-10 h-10" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-800">Anchor AI · Fortnightly Check-in</h4>
+              <p class="text-xs text-gray-400">Confidential &nbsp;·&nbsp; <span class="text-[#0099CC] font-semibold">Amazon Bedrock</span> &nbsp;·&nbsp; Not shared with your leader</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-3 mb-4" id="chat-box">
+          <template x-for="msg in chatMsgs" :key="msg.id">
+            <div :class="msg.role==='ai'?'justify-start':'justify-end'" class="flex msg">
+              <div :class="msg.role==='ai'?'bai rounded-2xl rounded-tl-sm max-w-sm':'busr rounded-2xl rounded-tr-sm max-w-xs'"
+                   class="px-4 py-3 shadow-sm">
+                <p class="text-sm leading-relaxed" x-text="msg.text"></p>
+                <div x-show="msg.type==='slider'&&!msg.done" class="mt-3">
+                  <input type="range" min="1" max="10" x-model="pulseVal" class="w-full">
+                  <div class="flex justify-between text-xs text-gray-400 mt-1">
+                    <span>1 — Really tough</span>
+                    <strong class="text-[#0099CC]" x-text="pulseVal+' / 10'"></strong>
+                    <span>10 — Loving it</span>
+                  </div>
+                  <button @click="submitScore()" class="w-full mt-3 grad text-white text-sm font-bold py-2.5 rounded-xl hover:opacity-90 transition">
+                    That's where I'm at
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+          <div x-show="aiTyping" class="flex justify-start msg">
+            <div class="bai rounded-2xl rounded-tl-sm px-5 py-3.5 shadow-sm flex gap-1.5 items-center">
+              <div class="w-2 h-2 bg-[#0099CC]/60 rounded-full bdot" style="animation-delay:0s"></div>
+              <div class="w-2 h-2 bg-[#0099CC]/60 rounded-full bdot" style="animation-delay:.18s"></div>
+              <div class="w-2 h-2 bg-[#0099CC]/60 rounded-full bdot" style="animation-delay:.36s"></div>
+            </div>
+          </div>
+        </div>
+
+        <div x-show="showTxt" class="card p-3 flex gap-2 mb-4">
+          <input x-model="txtInput" type="text" placeholder="Tell me honestly…"
+                 class="flex-1 text-sm text-gray-800 focus:outline-none"
+                 @keydown.enter="submitTxt()">
+          <button @click="submitTxt()" class="grad text-white rounded-xl px-4 py-2 text-sm font-bold hover:opacity-90 transition">Send</button>
+        </div>
+
+        <div x-show="chatMsgs.length===0" class="text-center py-12">
+          <div class="w-20 h-20 bg-[#E6F4FA] rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">💚</div>
+          <h4 class="font-bold text-gray-800 mb-2">Fortnightly Check-in</h4>
+          <p class="text-gray-400 text-sm mb-5">Just 2 questions · 60 seconds · Completely confidential</p>
+          <button @click="startPulse()" class="grad text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition shadow-lg">
+            Start Check-in 💚
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== SERVICES ===== -->
+      <div x-show="activeTab==='services'" class="fi max-w-4xl mx-auto">
+        <div class="card p-5 mb-4">
+          <h4 class="font-bold text-gray-800">🛎️ All Your Support Services — Centralised</h4>
+          <p class="text-gray-400 text-sm mt-1">Everything you need to settle into Tasmania, in one place. Active from Day 1.</p>
+        </div>
+
+        <!-- Highlighted: Transport Assistance (ongoing) -->
+        <div class="card p-5 mb-4 border-2 border-[#0099CC]/30 bg-[#E6F4FA]">
+          <div class="flex items-start gap-4">
+            <div class="w-14 h-14 grad rounded-2xl flex items-center justify-center text-3xl shrink-0">✈️</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <h5 class="font-black text-gray-800">Transport Assistance</h5>
+                <span class="bg-[#0099CC] text-white text-xs font-bold px-2 py-0.5 rounded-full">Ongoing</span>
+              </div>
+              <p class="text-gray-600 text-sm">Not just for Day 1. Book airport pickups for family members arriving later, medical appointments, first office run — anytime you need it.</p>
+              <div class="flex gap-2 mt-3 flex-wrap">
+                <button class="grad text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-90 transition">Book a pickup</button>
+                <button class="bg-white text-[#002E5D] text-xs font-bold px-4 py-2 rounded-xl border border-[#0099CC]/30 hover:bg-[#002E5D] hover:text-white transition">Family arrival pickup</button>
+                <button class="bg-white text-[#002E5D] text-xs font-bold px-4 py-2 rounded-xl border border-[#0099CC]/30 hover:bg-[#002E5D] hover:text-white transition">Medical transport</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Services grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
+          <template x-for="s in services" :key="s.id">
+            <button class="card p-4 text-left hover:shadow-md transition border border-transparent hover:border-[#B3DFF0] cursor-pointer">
+              <span class="text-3xl block mb-2" x-text="s.e"></span>
+              <h5 class="font-bold text-gray-800 text-sm" x-text="s.t"></h5>
+              <p class="text-gray-400 text-xs mt-1 leading-tight" x-text="s.d"></p>
+            </button>
+          </template>
+        </div>
+
+        <!-- Human support CTA -->
+        <div class="grad rounded-2xl p-5 text-white flex items-center gap-4">
+          <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl shrink-0">📞</div>
+          <div class="flex-1">
+            <h5 class="font-bold text-lg">Need a real human?</h5>
+            <p class="text-white/70 text-sm">Call support · 8 am – 8 pm AEST · No bots, ever</p>
+          </div>
+          <button class="bg-white text-[#002E5D] font-bold py-3 px-6 rounded-xl hover:opacity-90 transition shrink-0">
+            📞 Call Now
+          </button>
+        </div>
+      </div>
+
+    </div><!-- end main content -->
+  </div><!-- end flex body -->
+</div><!-- end app -->
+
+<!-- ═══════════════════════════ HR PORTAL ═════════════════════════════════ -->
+<div x-show="screen==='hr-portal'" class="min-h-screen bg-[#F0F6FB]">
+  <div class="grad px-6 py-4 flex items-center justify-between shadow-md">
+    <div class="flex items-center gap-3">
+      <svg viewBox="0 0 130 115" class="w-9 h-9" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg>
+      <span class="text-white font-black text-lg">Anchor</span>
+      <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full font-semibold">HR Portal</span>
+    </div>
+    <button @click="screen='login'" class="bg-white/20 text-white text-sm px-4 py-2 rounded-xl hover:bg-white/30 transition font-semibold">← Sign out</button>
+  </div>
+
+  <div class="p-6 max-w-5xl mx-auto space-y-5">
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="card p-4 text-center"><div class="text-3xl font-black text-[#002E5D]">37</div><div class="text-gray-400 text-xs mt-1">Interstate/int'l hires since Mar 2025</div></div>
+      <div class="card p-4 text-center border-l-4 border-red-400"><div class="text-3xl font-black text-red-500">3</div><div class="text-gray-400 text-xs mt-1">At-risk this fortnight 🔴</div></div>
+      <div class="card p-4 text-center"><div class="text-3xl font-black text-[#002E5D]">7.8</div><div class="text-gray-400 text-xs mt-1">Avg pulse score /10</div></div>
+      <div class="card p-4 text-center border-l-4 border-green-400"><div class="text-3xl font-black text-green-600">100%</div><div class="text-gray-400 text-xs mt-1">Buddy matching rate</div></div>
+    </div>
+
+    <!-- At-risk alerts -->
+    <div class="card p-5 border-l-4 border-red-500">
+      <h4 class="font-bold text-gray-800 mb-3">🚨 At-Risk Alerts — Immediate Action</h4>
+      <div class="space-y-3">
+        <div class="bg-red-50 rounded-2xl p-4 flex items-center gap-3">
+          <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-2xl shrink-0">👩‍💼</div>
+          <div class="flex-1">
+            <div class="font-bold text-gray-800">Aisha Al-Rashid</div>
+            <div class="text-gray-400 text-xs">8 weeks · Dubai · Pulse: 3.8/10 · International hire</div>
+            <div class="text-red-500 text-xs font-semibold mt-0.5">⚠️ Isolation flagged · No GP registered · Mentioned missing family</div>
+          </div>
+          <button class="bg-red-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 hover:bg-red-600 transition">Reach Out</button>
+        </div>
+        <div class="bg-red-50 rounded-2xl p-4 flex items-center gap-3">
+          <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-2xl shrink-0">👨‍💼</div>
+          <div class="flex-1">
+            <div class="font-bold text-gray-800">Marcus Osei</div>
+            <div class="text-gray-400 text-xs">4 weeks · Brisbane · Pulse: 4.2/10</div>
+            <div class="text-red-500 text-xs font-semibold mt-0.5">⚠️ Housing stress · Hasn't used Life Map · No community connections yet</div>
+          </div>
+          <button class="bg-red-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 hover:bg-red-600 transition">Reach Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee table + ROI two columns -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <!-- Table -->
+      <div class="card p-5">
+        <h4 class="font-bold text-gray-800 mb-4">Active Relocators</h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="text-gray-400 text-xs uppercase border-b border-gray-100">
+              <th class="text-left pb-2 font-semibold">Employee</th>
+              <th class="text-left pb-2 font-semibold">Wks</th>
+              <th class="text-left pb-2 font-semibold">Buddy</th>
+              <th class="text-left pb-2 font-semibold">Pulse</th>
+              <th class="text-left pb-2 font-semibold">Risk</th>
+            </tr></thead>
+            <tbody>
+              <template x-for="e in hrEmps" :key="e.id">
+                <tr class="border-b border-gray-50">
+                  <td class="py-2.5"><div class="font-bold text-gray-800 text-sm" x-text="e.name"></div><div class="text-gray-400 text-xs" x-text="e.origin"></div></td>
+                  <td class="py-2.5 text-gray-500 text-sm" x-text="e.weeks+'w'"></td>
+                  <td class="py-2.5"><span :class="e.buddy?'text-green-600':'text-red-400'" class="font-bold" x-text="e.buddy?'✓':'✗'"></span></td>
+                  <td class="py-2.5"><span :class="e.pulse>=7?'text-green-600':e.pulse>=5?'text-amber-600':'text-red-500'" class="font-bold" x-text="e.pulse?e.pulse+'/10':'—'"></span></td>
+                  <td class="py-2.5"><span :class="e.risk==='low'?'rlo':e.risk==='mid'?'rmi':'rhi'" class="text-xs font-bold px-2 py-1 rounded-full" x-text="e.risk==='low'?'🟢 Low':e.risk==='mid'?'🟡 Med':'🔴 High'"></span></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ROI -->
+      <div class="grad rounded-2xl p-5 text-white">
+        <h4 class="font-black text-xl mb-1">📊 Real Cost per Early Exit</h4>
+        <p class="text-white/60 text-xs mb-4">From TasNetworks actual recruitment data</p>
+        <div class="space-y-2 bg-white/10 rounded-xl p-4 mb-4 text-sm">
+          <div class="flex justify-between"><span class="text-white/80">Relocation assistance</span><span class="font-bold text-yellow-300">$5K–$40K</span></div>
+          <div class="flex justify-between"><span class="text-white/80">Visa sponsorship</span><span class="font-bold text-yellow-300">$15K–$21K</span></div>
+          <div class="flex justify-between"><span class="text-white/80">Recruitment process</span><span class="font-bold text-yellow-300">~$5K</span></div>
+          <div class="flex justify-between"><span class="text-white/80">10-week vacancy @ $187.5K/yr</span><span class="font-bold text-yellow-300">~$36K</span></div>
+          <div class="border-t border-white/20 pt-2 flex justify-between font-black"><span>Per early relocator exit</span><span class="text-yellow-300">$61K–$122K</span></div>
+        </div>
+        <div class="bg-yellow-400/20 border border-yellow-400/40 rounded-xl p-4 text-center">
+          <p class="font-black text-lg">Prevent 5 exits = <span class="text-yellow-300">$405K saved</span></p>
+          <p class="text-white/70 text-sm">Anchor cost ~$22K/yr → <strong class="text-yellow-300">18× ROI</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- AWS Architecture -->
+    <div class="card p-5">
+      <h4 class="font-bold text-gray-800 mb-4">☁️ AWS Architecture</h4>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <template x-for="a in awsArch" :key="a.s">
+          <div :class="a.bg" class="flex items-center gap-3 p-3 rounded-xl">
+            <span class="font-black text-xs w-28 shrink-0" :class="a.tc" x-text="a.s"></span>
+            <span class="text-gray-600 text-xs leading-tight" x-text="a.d"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ SCRIPT ═══════════════════════════════════ -->
+<script>
+function app() { return {
+  screen: 'login',
+  activeTab: 'home',
+  onboardStep: 1,
+  matchStep: 0,
+  aiTyping: false,
+  showTxt: false,
+  pulseVal: 7,
+  txtInput: '',
+  chatMsgs: [],
+  lmCat: 'essentials',
+  loginName: 'Sarah Mitchell',
+  loginEmail: 'sarah.mitchell@tasnetworks.com.au',
+
+  form: { name:'Sarah', origin:'Melbourne', family:'family', hobbies:['hiking','food'], needs:['gp','schools','community'] },
+
+  hobbies: [
+    {id:'hiking',e:'🥾',l:'Hiking'},{id:'food',e:'🍜',l:'Food'},
+    {id:'photo',e:'📸',l:'Photography'},{id:'sports',e:'⚽',l:'Sports'},
+    {id:'arts',e:'🎨',l:'Arts'},{id:'music',e:'🎵',l:'Music'},
+    {id:'fitness',e:'🏋️',l:'Fitness'},{id:'outdoors',e:'🌲',l:'Outdoors'},
+  ],
+  needs: [
+    {id:'gp',e:'🏥',l:'Finding a GP',d:'Register with a local doctor'},
+    {id:'licence',e:'🚗',l:"Driver's licence",d:'Get your Tasmanian licence'},
+    {id:'community',e:'🤝',l:'Meeting people',d:'Social groups & activities'},
+    {id:'schools',e:'🏫',l:'Schools & childcare',d:'For your children'},
+    {id:'housing',e:'🏠',l:'Finding housing',d:'Long-term suburb & rental info'},
+    {id:'safety',e:'🔒',l:'Feeling safe & secure',d:'Emergency contacts, peer support'},
+  ],
+
+  lifeMapCats: [
+    {id:'essentials',e:'✅',l:'Essentials'},
+    {id:'community',e:'🤝',l:'Community'},
+    {id:'food',e:'🍜',l:'Food & Fun'},
+    {id:'family',e:'👨‍👩‍👧',l:'Family'},
+    {id:'transport',e:'🚌',l:'Getting Around'},
+  ],
+
+  lifeMapData: {
+    essentials: [
+      {id:1,e:'🏥',t:'Sonic Health Plus — TasNetworks preferred GP',d:'200 Elizabeth St, Hobart. (03) 6281 4000. Show employee card — TasNetworks covers skin checks here.',r:4.8,v:134},
+      {id:2,e:'💚',t:'Your $250 Wellbeing Rebate',d:'Spend on gym, yoga at The Studio, hiking gear — your choice every year. Claim via Concur in SAP. Most people forget this exists!',r:4.9,v:198},
+      {id:3,e:'🧘',t:'Free EAP Counselling — AccessEAP',d:'Up to 3 confidential sessions. Call 1800 818 728. Covers you AND your family. Zero cost. Zero judgment.',r:4.9,v:156},
+      {id:4,e:'🚗',t:'Convert your interstate licence',d:'Service Tasmania, 134 Macquarie St. Book online — 45 min. Bring ID + current licence. Do this by Week 3.',r:4.5,v:89},
+      {id:5,e:'🏋️',t:'Onsite Gym — Maria St HQ',d:'Free at Maria St, Cambridge & Rocherlea. Family 18+ in your household also get access. Fill the Gym Induction Form.',r:4.7,v:112},
+      {id:6,e:'🏦',t:'MyState Bank — No-fee account',d:'Open a Glide account with no monthly fees + lower home loan rates. Call Roseann McIntee: 0428 172 589.',r:4.3,v:67},
+      {id:7,e:'💉',t:'Free flu vax for the whole family',d:"TasNetworks covers flu vaccinations for you AND your immediate family. Contact be@tasnetworks.com.au — great for kids' first Tassie winter.",r:4.8,v:89},
+    ],
+    community: [
+      {id:8,e:'🥾',t:'Hobart Walking Club',d:'Sunday mornings at kunanyi/Mt Wellington. 12 TasNetworks members. Uber-welcoming. Ask James to introduce you.',r:4.9,v:203},
+      {id:9,e:'🌏',t:'New to Hobart Facebook Group',d:'8,500+ members. Join the day you arrive — gold for local tips, buy/sell, event invites.',r:4.7,v:156},
+      {id:10,e:'⚽',t:'Southern Football League',d:'Multiple skill levels, register for the season. Great way to make real friends fast.',r:4.4,v:78},
+    ],
+    food: [
+      {id:11,e:'🍔',t:'Pub Banc Group — 20% OFF with your lanyard',d:"Show TasNetworks lanyard at Cargo Bar Pizza, Franklin Wharf, Jack Greene Bar, Post Street Social, Republic Bar & Cafe. 20% off food & drinks.",r:4.9,v:187},
+      {id:12,e:'🧘',t:'The Studio — $10/class first month',d:'Yoga, Pilates, Barrecode, Cycle. 17 Gladstone St. TasNetworks exclusive: $30 orientation then $10/class. Call 03 6223 7553.',r:4.7,v:143},
+      {id:13,e:'🍜',t:'Ramen Yuki',d:'"Best ramen south of Melbourne" per 5 TasNetworks staff. 74 Liverpool St. Get the tonkotsu.',r:4.9,v:187},
+      {id:14,e:'🛒',t:'Farm Gate Market',d:'Sunday 9am–1pm, Bathurst St. Incredible local produce. Bring cash and a bag.',r:4.8,v:245},
+      {id:15,e:'☕',t:'Pilgrim Coffee',d:'5 min walk from office. Best flat white in Hobart — "the unofficial second office".',r:4.7,v:198},
+      {id:16,e:'🍕',t:'Cuppa Cafeteria — Maria Street HQ',d:'Admin 1. 7:30am–2:30pm Mon–Fri. Hot food ends 2pm. Your canteen from Day 1.',r:4.5,v:134},
+    ],
+    family: [
+      {id:17,e:'🏫',t:'School enrolment — start NOW',d:'Apply via education.tas.gov.au. Popular schools have waitlists — start the day you arrive. James can recommend suburbs.',r:4.3,v:45},
+      {id:18,e:'🧸',t:'MacKillop Childcare Centre',d:'10 min from office. CCS-subsidised. Call to join waitlist immediately.',r:4.6,v:62},
+      {id:19,e:'🌳',t:'Queens Domain Playground',d:'Huge free playground, 5 min from CBD. TasNetworks families meet here every Sunday morning.',r:4.9,v:134},
+    ],
+    transport: [
+      {id:20,e:'🚌',t:'Metro Tasmania App',d:"Download 'Metro Tasmania'. Get a greenCard for discounts. CBD to suburbs ~30 min.",r:4.1,v:89},
+      {id:21,e:'🚗',t:'TasNetworks Carpooling',d:'Check #carpool on Slack. 8 colleagues share rides from Northern suburbs to office daily.',r:4.5,v:112},
+      {id:22,e:'🚲',t:'Hobart City Bikes',d:'Share bikes across CBD. $5/day. Great for first few weeks before your car arrives.',r:4.2,v:67},
+    ],
+  },
+
+  services: [
+    {id:1,e:'💳',t:'Employee Card',d:'Digital ID active Day 1 — unlocks all services'},
+    {id:2,e:'🏥',t:'Medical Services',d:'GP finder + EAP counselling (1800 818 728)'},
+    {id:3,e:'🚗',t:'Licence & Driving',d:'Convert licence, book driving lessons'},
+    {id:4,e:'💚',t:'$250 Wellbeing Rebate',d:'Gym, yoga, hiking gear — your choice'},
+    {id:5,e:'🏋️',t:'Onsite Gym Access',d:'Maria St, Cambridge & Rocherlea · free'},
+    {id:6,e:'🏠',t:'Housing Guide',d:'Suburb info & rental market crowdsourced'},
+    {id:7,e:'🚌',t:'Carpooling',d:'Match with TasNetworks colleagues near you'},
+    {id:8,e:'🍔',t:'Dining Discounts',d:'20% off at 5 Pub Banc Group venues'},
+    {id:9,e:'🏫',t:'Schools & Childcare',d:'Enrolment guides, waitlist tips'},
+    {id:10,e:'📋',t:'Paperwork Support',d:'Visa docs, licence conversion, gov forms'},
+    {id:11,e:'🏦',t:'MyState Bank',d:'No-fee accounts, lower home loan rates'},
+    {id:12,e:'🌏',t:'Cultural Programs',d:'Cultural & spiritual community support'},
+    {id:13,e:'💻',t:'IT Support',d:'Tech help for new starters (JIRA portal)'},
+    {id:14,e:'📝',t:'Submit a Form',d:'Complaints, resource requests, feedback'},
+    {id:15,e:'⚖️',t:'Residency Support',d:'PR pathway for 3+ year employees'},
+    {id:16,e:'🧘',t:'Free Counselling',d:'AccessEAP · 3 sessions · 1800 818 728'},
+  ],
+
+  hrEmps: [
+    {id:1,name:'Sarah Mitchell',origin:'Melbourne, VIC',weeks:2,buddy:true,pulse:8.5,risk:'low'},
+    {id:2,name:'Marcus Osei',origin:'Brisbane, QLD',weeks:4,buddy:true,pulse:4.2,risk:'hi'},
+    {id:3,name:'Priya Sharma',origin:'Mumbai, India',weeks:6,buddy:true,pulse:6.1,risk:'mid'},
+    {id:4,name:'Tom Williams',origin:'Auckland, NZ',weeks:1,buddy:true,pulse:null,risk:'mid'},
+    {id:5,name:'Aisha Al-Rashid',origin:'Dubai, UAE',weeks:8,buddy:true,pulse:3.8,risk:'hi'},
+    {id:6,name:'James Park',origin:'Sydney, NSW',weeks:12,buddy:true,pulse:8.9,risk:'low'},
+    {id:7,name:'Emma Kowalski',origin:'Perth, WA',weeks:5,buddy:true,pulse:7.2,risk:'low'},
+    {id:8,name:'David Nguyen',origin:'Ho Chi Minh City',weeks:3,buddy:true,pulse:6.8,risk:'mid'},
+  ],
+
+  awsArch: [
+    {s:'Amazon Bedrock',d:'Claude — AI buddy matching, pulse chatbot, sentiment & at-risk scoring',bg:'bg-orange-50',tc:'text-orange-600'},
+    {s:'AWS Lambda',d:'Serverless API — matching engine, privacy-compliant, HR alerts',bg:'bg-yellow-50',tc:'text-yellow-600'},
+    {s:'DynamoDB',d:'Employee profiles, pulse scores, Life Map entries (consent-gated)',bg:'bg-blue-50',tc:'text-blue-600'},
+    {s:'EventBridge',d:'Fortnightly pulse scheduler — fires 14 days post-arrival per employee',bg:'bg-purple-50',tc:'text-purple-600'},
+    {s:'Amazon SNS',d:'Push notifications + at-risk HR alerts in real time',bg:'bg-pink-50',tc:'text-pink-600'},
+    {s:'SAP Integration',d:'Reads new-starter records from TasNetworks SAP → auto-triggers onboarding',bg:'bg-teal-50',tc:'text-teal-600'},
+    {s:'AWS Amplify',d:'Frontend hosting + CI/CD + Cognito SSO with TasNetworks Active Directory',bg:'bg-green-50',tc:'text-green-600'},
+    {s:'QuickSight',d:'HR retention dashboard — pulse trends, ROI, churn risk',bg:'bg-indigo-50',tc:'text-indigo-600'},
+  ],
+
+  // ── Methods ──────────────────────────────────────────────────────────
+
+  init() {},
+
+  loginAsEmployee() {
+    if (this.loginName) this.form.name = this.loginName.split(' ')[0];
+    this.screen = 'onboarding';
+    this.onboardStep = 1;
+  },
+  loginAsHR() { this.screen = 'hr-portal'; },
+  logout() {
+    this.screen = 'login';
+    this.chatMsgs = [];
+    this.activeTab = 'home';
+  },
+
+  toggleHobby(id) {
+    if (this.form.hobbies.includes(id)) this.form.hobbies = this.form.hobbies.filter(h => h !== id);
+    else this.form.hobbies.push(id);
+  },
+  toggleNeed(id) {
+    if (this.form.needs.includes(id)) this.form.needs = this.form.needs.filter(n => n !== id);
+    else this.form.needs.push(id);
+  },
+
+  familyLabel() {
+    return this.form.family === 'family' ? 'family with children' : this.form.family === 'couple' ? 'couple' : 'solo mover';
+  },
+
+  buddyMessage() {
+    const origin = this.form.origin || 'your city';
+    const isFamily = this.form.family === 'family';
+    const isCouple = this.form.family === 'couple';
+    if (isFamily) return `Moving from ${origin} with the family? I've been there — the school waitlists nearly broke me. But honestly Hobart is incredible once you find your feet. I'll introduce you to the school mums and dads crew 😊`;
+    if (isCouple) return `Moving from ${origin} with your partner? My partner found it tough for the first few weeks but now she loves it more than I do! Happy to share what helped.`;
+    return `Moving solo from ${origin}? The first few weeks can feel quiet but the walking club and the TasNetworks crew made all the difference. DM me anytime 🥾`;
+  },
+
+  buddyLatestMsg() {
+    const needs = this.form.needs;
+    if (needs.includes('gp')) return '"Hey! I found a great GP 5 min from the office — Sonic Health Plus, ask for the bulk-billing receptionist. Should I send you the number? 😊"';
+    if (needs.includes('schools')) return '"The school waitlists here move fast — I can connect you with the Parents Facebook group for the good primary schools near the CBD. When do you need them by?"';
+    return '"Hey! Hope Week 2 is treating you okay. Hobart surprises people — give it a month and you\'ll start to love it. What\'s been the hardest bit so far?"';
+  },
+
+  startMatching() {
+    this.screen = 'matching';
+    this.matchStep = 0;
+    [1,2,3,4,5].forEach((s,i) => {
+      setTimeout(() => {
+        this.matchStep = s;
+        if (s === 5) setTimeout(() => this.screen = 'buddy-reveal', 800);
+      }, (i+1) * 900);
+    });
+  },
+
+  goToApp() { this.screen = 'app'; this.activeTab = 'home'; },
+
+  getLmItems() { return this.lifeMapData[this.lmCat] || []; },
+
+  // ── TAILORED JOURNEY ─────────────────────────────────────────────────
+  getTailoredJourney() {
+    const n = this.form.name || 'you';
+    const items = [
+      {id:1, done:true,  active:false, label:'Transport from Hobart Airport arranged ✓', when:'Before Day 1', tag:'logistics'},
+      {id:2, done:true,  active:false, label:'TasNetworks digital employee card issued ✓', when:'Day 1', tag:'admin'},
+      {id:3, done:true,  active:false, label:'Anchor buddy matched — meet James Chen ✓', when:'Day 1', tag:'people'},
+      {id:4, done:true,  active:false, label:'Office induction & site tour completed ✓', when:'Week 1', tag:'work'},
+    ];
+    if (this.form.needs.includes('gp'))
+      items.push({id:5, done:false, active:true,  label:'Register with a GP — Sonic Health Plus recommended (200 Elizabeth St)', when:'⬅ do this now', tag:'health'});
+    if (this.form.needs.includes('schools'))
+      items.push({id:6, done:false, active:false, label:'School / childcare enrolment — popular schools have waitlists, start ASAP', when:'Week 2', tag:'family'});
+    if (this.form.needs.includes('licence'))
+      items.push({id:7, done:false, active:false, label:"Convert interstate driver's licence — Service Tasmania, 134 Macquarie St", when:'Week 3', tag:'admin'});
+    if (this.form.needs.includes('housing'))
+      items.push({id:8, done:false, active:false, label:'Secure long-term accommodation — colleague housing tips in Life Map', when:'Month 1', tag:'logistics'});
+    if (this.form.needs.includes('community'))
+      items.push({id:9, done:false, active:false, label:'Join Hobart Walking Club — next Sunday 8am, 12 TasNetworks members', when:'Month 1', tag:'community'});
+    if (this.form.needs.includes('safety'))
+      items.push({id:10,done:false, active:false, label:'Connect with peer support network & save emergency contacts', when:'Week 1', tag:'wellbeing'});
+    items.push({id:20,done:false, active:false, label:'Complete first Anchor pulse check', when:'Fortnight 1', tag:'wellbeing'});
+    items.push({id:21,done:false, active:false, label:'Claim your $250 health & wellbeing rebate (via Concur in SAP)', when:'Month 1', tag:'benefits'});
+    items.push({id:22,done:false, active:false, label:'Contribute to the Life Map — share your tips with the next person', when:'Month 3', tag:'community'});
+    return items;
+  },
+
+  // ── PULSE CHECK ───────────────────────────────────────────────────────
+  goToPulse() {
+    this.activeTab = 'pulse';
+    if (this.chatMsgs.length === 0) setTimeout(() => this.startPulse(), 300);
+  },
+
+  startPulse() {
+    this.chatMsgs = []; this.showTxt = false; this.txtInput = '';
+    const n = this.form.name || 'there';
+    const origin = this.form.origin || 'your city';
+    const isFamily = this.form.family === 'family';
+    const isCouple = this.form.family === 'couple';
+
+    let opener = `Hey ${n} 👋 Two weeks since you left ${origin} behind. Before we get into it — this stays between us. Not your leader, not your manager. Just Anchor and you.`;
+    if (isFamily) opener += ` \n\nHow are the kids finding it? Week two is usually when the newness wears off and the real feelings start.`;
+    if (isCouple) opener += ` \n\nHow's your partner settling in too? It's okay if they're finding it tougher than you — that's really common.`;
+
+    this._aiSay(opener, 'text');
+
+    setTimeout(() => {
+      this._aiSay(`Real talk: how are you going right now?\n\nNot "fine". Actually going. Slide to where you're at — and be honest with us ❤️`, 'slider');
+    }, 2500);
+  },
+
+  _aiSay(text, type = 'text') {
+    this.aiTyping = true;
+    setTimeout(() => {
+      this.aiTyping = false;
+      this.chatMsgs.push({ id: Date.now(), role:'ai', text, type, done:false });
+      this._scroll();
+    }, 900);
+  },
+  _scroll() {
+    setTimeout(() => {
+      const el = document.getElementById('chat-box');
+      if (el) el.scrollIntoView({ behavior:'smooth', block:'end' });
+    }, 100);
+  },
+
+  submitScore() {
+    const score = parseInt(this.pulseVal);
+    const slider = this.chatMsgs.find(m => m.type === 'slider');
+    if (slider) slider.done = true;
+
+    const isFamily = this.form.family === 'family';
+    const label = score >= 8 ? 'honestly, really well!' : score >= 6 ? 'up and down, if I\'m honest.' : score >= 4 ? 'finding it pretty tough.' : 'really struggling right now.';
+    this._userSay(`${score} out of 10. ${label}`);
+
+    setTimeout(() => {
+      let resp = '';
+      if (score >= 8) {
+        resp = `A ${score}/10 — that's genuinely great for week two. Either you're landing really well, or you're being very brave 😄\n\nEither way, I'm noting it. You're ahead of the curve.`;
+      } else if (score >= 6) {
+        resp = `A ${score}/10 — honest and real. You're finding your feet and that's exactly where you should be at two weeks.\n\nThe bit that usually clicks first is finding your person — someone who's been you. Sounds like James might already be that person 😊`;
+      } else if (score >= 4) {
+        resp = `${score} out of 10. That's hard to say and it matters that you did.\n\nYou've uprooted your whole life and you're supposed to just be fine? That's not how people work${isFamily ? ' — especially with kids adjusting too' : ''}.\n\nI'm flagging this for your People Partner. Not to get you in trouble — the opposite. They'll reach out this week to ask what YOU need. Not your work output. Just you.`;
+      } else {
+        resp = `${score} out of 10. Thank you for being honest — that takes real courage.\n\nSomething needs to change this week. I'm reaching out to your People Partner today. You're going to have a human call from the team — not a form, a real call.\n\nAnd James? He went through a rough patch too. Check your messages right now.`;
+      }
+      this._aiSay(resp);
+      setTimeout(() => {
+        const n = this.form.name || 'there';
+        this._aiSay(`One more question — and this one's important.\n\nWhat's the ONE thing that would make next week even slightly better? Could be tiny ("knowing where to get a decent coffee") or huge ("feeling less alone"). Just be honest with me.`, 'text');
+        this.showTxt = true;
+      }, 2200);
+    }, 800);
+  },
+
+  _userSay(text) {
+    this.chatMsgs.push({ id: Date.now(), role:'user', text, type:'text', done:true });
+    this._scroll();
+  },
+
+  submitTxt() {
+    if (!this.txtInput.trim()) return;
+    const resp = this.txtInput;
+    this.txtInput = ''; this.showTxt = false;
+    this._userSay(resp);
+    const n = this.form.name || 'friend';
+    setTimeout(() => {
+      this._aiSay(`Got it — "${resp.slice(0,60)}${resp.length>60?'…':''}".\n\nI've saved that and matched it to tips in your Life Map. I've also let James know — he's probably already typing something. That's what Anchor is for.`);
+      setTimeout(() => {
+        this._aiSay(`Check-in done 😈\n\nSee you in a fortnight, ${n}. You're doing better than you think. And if anything comes up before then — your buddy James, the Services hub, or just come back here. We're not going anywhere.`);
+      }, 2200);
+    }, 1000);
+  },
+}}
+</script>
+
+<style>
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+</style>
+</body>
+</html>
