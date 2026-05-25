@@ -451,28 +451,137 @@
     transition: width .5s var(--ease);
   }
 
+  /* Outlook-style: icon rail + sub-pane */
+  .outlook-frame { display: flex; min-height: 100vh; max-height: 100vh; overflow: hidden; }
+  .icon-rail {
+    width: 52px;
+    flex-shrink: 0;
+    background: #F3F2F1;
+    border-right: 1px solid #E1DFDD;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: .5rem 0;
+    gap: 2px;
+  }
+  .rail-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: background .15s;
+  }
+  .rail-btn:hover { background: rgba(0,0,0,.06); }
+  .rail-btn.active { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+  .rail-btn.active::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+    background: var(--rail-accent, var(--blue));
+  }
+  .rail-connected::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22C55E;
+    border: 2px solid #F3F2F1;
+  }
+  .rail-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff; }
+  .sub-pane {
+    width: 240px;
+    flex-shrink: 0;
+    background: #FAF9F8;
+    border-right: 1px solid #EDEBE9;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sub-pane-head { padding: 1rem 1rem .75rem; border-bottom: 1px solid #EDEBE9; }
+  .sub-pane-title { font-family: Syne, sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--ink); }
+  .sub-new-btn {
+    width: 100%;
+    margin-top: .75rem;
+    padding: .6rem 1rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: .875rem;
+    color: #fff;
+    cursor: pointer;
+    background: var(--sub-accent, var(--navy));
+  }
+  .sub-item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    width: 100%;
+    padding: .55rem 1rem;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-size: .8125rem;
+    font-weight: 500;
+    color: #323130;
+    cursor: pointer;
+    transition: background .12s;
+  }
+  .sub-item:hover { background: #F3F2F1; }
+  .sub-item.on { background: #EDE9FE; font-weight: 600; }
+  .sub-item .badge-count {
+    margin-left: auto;
+    background: #C50F1F;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .listing-card {
+    border: 1px solid #EDEBE9;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .listing-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); }
   @media (max-width: 1023px) {
-    .app-frame { flex-direction: column; max-height: none; }
-    .dock {
+    .app-frame, .outlook-frame { flex-direction: row; max-height: none; min-height: 100vh; }
+    .sub-pane {
       position: fixed;
-      inset: 0 auto 0 0;
-      z-index: 50;
-      width: 17rem;
+      left: 52px;
+      top: 0;
+      bottom: 0;
+      z-index: 45;
       transform: translateX(-100%);
-      transition: transform .3s var(--ease);
-      box-shadow: 16px 0 48px rgba(0,0,0,.25);
+      transition: transform .28s var(--ease);
+      box-shadow: 8px 0 24px rgba(0,0,0,.1);
     }
-    .dock.open { transform: translateX(0); }
-    .dock-backdrop {
+    .sub-pane.open { transform: translateX(0); }
+    .dock-backdrop, .outlook-backdrop {
       position: fixed;
       inset: 0;
       z-index: 40;
-      background: rgba(10, 22, 40, .5);
-      backdrop-filter: blur(6px);
+      background: rgba(10, 22, 40, .4);
+      backdrop-filter: blur(4px);
     }
-    .main-stage { min-height: 100vh; }
+    .main-stage { min-height: 100vh; width: 100%; }
   }
 </style>
+<script src="https://alcdn.msauth.net/browser/2.38.4/js/msal-browser.min.js"></script>
+<script src="social-config.js"></script>
 </head>
 <body x-data="app()" x-cloak class="min-h-screen overflow-x-hidden w-full"
       @keydown.window="if($event.shiftKey && $event.key==='H') screen='hr-portal'">
@@ -806,49 +915,61 @@
 </div>
 
 <!-- ═══════════════════════════ MAIN APP ══════════════════════════════════ -->
-<div x-show="screen==='app'" class="app-frame w-full overflow-x-hidden">
-  <div x-show="sidebarOpen" @click="sidebarOpen=false" class="dock-backdrop lg:hidden" x-transition></div>
+<div x-show="screen==='app'" class="outlook-frame w-full overflow-x-hidden" x-init="initApp()">
+  <div x-show="subPaneOpen" @click="subPaneOpen=false" class="outlook-backdrop lg:hidden" x-transition></div>
 
-  <aside :class="sidebarOpen?'open':''" class="dock">
-    <div class="dock-brand flex items-center gap-3">
-      <div class="dock-logo shrink-0">
-        <svg viewBox="0 0 130 115" class="w-7 h-6 text-white" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg>
-      </div>
-      <div class="min-w-0">
-        <div class="font-display font-bold text-white text-lg leading-none">Anchor</div>
-        <div class="text-[10px] text-slate-500 mt-0.5 truncate">TasNetworks</div>
-      </div>
-    </div>
-    <nav class="flex-1 py-3 overflow-y-auto scr">
-      <template x-for="t in navTabs" :key="t.id">
-        <button @click="selectTab(t.id)" :class="activeTab===t.id?'on':''" class="dock-link">
-          <span class="dock-svg" x-html="t.icon"></span>
-          <span class="flex-1" x-text="t.label"></span>
-          <span x-show="t.badge" class="dock-badge"></span>
-        </button>
-      </template>
-    </nav>
-    <div class="p-3 mx-2 mb-2 rounded-2xl bg-white/5 border border-white/10">
-      <p class="text-[10px] uppercase tracking-widest text-slate-500 mb-2 px-1">Buddy</p>
-      <div class="flex items-center gap-2 mb-2">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00B4D8] to-[#0077B6] flex items-center justify-center text-lg" x-text="getBestBuddy().avatar"></div>
-        <div class="min-w-0">
-          <div class="text-white text-xs font-bold truncate" x-text="getBestBuddy().name"></div>
-          <div class="text-emerald-400 text-[10px] font-semibold">Online</div>
-        </div>
-      </div>
-      <button class="w-full btn-primary !py-2 !text-xs !rounded-lg">Message</button>
-    </div>
-    <button @click="logout()" class="dock-link !text-slate-500 hover:!text-rose-400 mb-3">
-      <svg class="dock-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-      <span>Sign out</span>
+  <!-- Icon rail (Outlook app launcher) -->
+  <nav class="icon-rail shrink-0" aria-label="Apps">
+    <button @click="selectRail('anchor')" :class="activeRail==='anchor'?'active':''" class="rail-btn" style="--rail-accent:#002E5D" title="Anchor">
+      <span class="rail-icon" style="background:linear-gradient(135deg,#002E5D,#00B4D8)">⚓</span>
     </button>
+    <template x-for="app in railApps" :key="app.id">
+      <button @click="selectRail(app.id)" :class="[activeRail===app.id?'active':'', isConnected(app.id)?'rail-connected':'']" class="rail-btn" :style="'--rail-accent:'+app.color" :title="app.label">
+        <span class="rail-icon" :style="'background:'+app.color" x-text="app.short"></span>
+      </button>
+    </template>
+    <div class="flex-1"></div>
+    <button @click="logout()" class="rail-btn" title="Sign out">
+      <svg class="w-5 h-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    </button>
+  </nav>
+
+  <!-- Sub-navigation pane -->
+  <aside :class="subPaneOpen?'open':''" class="sub-pane">
+    <div class="sub-pane-head">
+      <div class="sub-pane-title" x-text="subPaneTitle()"></div>
+      <button x-show="activeRail==='marketplace'" @click="runMarketplaceSearch()" class="sub-new-btn" style="--sub-accent:#1877F2">Search listings</button>
+      <button x-show="activeRail==='teams' && !connections.microsoft" @click="connectMicrosoft()" class="sub-new-btn" style="--sub-accent:#6264A7">Connect Microsoft</button>
+      <button x-show="activeRail==='facebook' && !connections.facebook" @click="connectFacebook()" class="sub-new-btn" style="--sub-accent:#1877F2">Connect Facebook</button>
+    </div>
+    <div class="flex-1 overflow-y-auto scr py-1">
+      <template x-if="activeRail==='anchor'">
+        <template x-for="t in navTabs" :key="t.id">
+          <button @click="selectAnchorTab(t.id)" :class="activeTab===t.id?'on':''" class="sub-item">
+            <span x-html="t.icon" class="w-4 h-4 opacity-60"></span>
+            <span x-text="t.label"></span>
+            <span x-show="t.badge" class="badge-count">!</span>
+          </button>
+        </template>
+      </template>
+      <template x-if="activeRail!=='anchor'">
+        <template x-for="item in currentSubItems()" :key="item.id">
+          <button @click="selectSocialSub(item.id)" :class="socialSubView===item.id?'on':''" class="sub-item">
+            <span x-text="item.icon||'•'"></span>
+            <span x-text="item.label"></span>
+          </button>
+        </template>
+      </template>
+    </div>
+    <div x-show="connectedCount()>0" class="p-3 border-t border-[#EDEBE9] text-xs text-[var(--muted)]">
+      <span x-text="connectedCount()"></span> account(s) connected
+    </div>
   </aside>
 
-  <div class="main-stage">
+  <div class="main-stage flex-1 min-w-0">
     <header class="page-head">
       <div class="flex items-center gap-3 min-w-0">
-        <button @click="sidebarOpen=!sidebarOpen" class="lg:hidden w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-600 shrink-0" aria-label="Menu">☰</button>
+        <button @click="subPaneOpen=!subPaneOpen" class="lg:hidden w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-600 shrink-0">☰</button>
         <div class="min-w-0">
           <h1 class="font-display text-xl sm:text-2xl font-bold text-[var(--ink)] truncate" x-text="pageTitle()"></h1>
           <p class="text-[var(--muted)] text-sm truncate" x-text="pageSubtitle()"></p>
@@ -863,8 +984,8 @@
     </header>
 
     <div class="main-scroll scr shell-bg">
-      <!-- ===== DASHBOARD (bento) ===== -->
-      <div x-show="activeTab==='home'" class="fi bento">
+      <!-- ===== ANCHOR: DASHBOARD ===== -->
+      <div x-show="activeRail==='anchor' && activeTab==='home'" class="fi bento">
         <div class="span-12 hero-panel p-6 sm:p-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-0">
           <div class="relative z-10">
             <span class="stat-pill !bg-white/15 !text-[#48CAE4] !border-white/20 mb-3">Week 2 · lutruwita</span>
@@ -916,9 +1037,10 @@
           <p class="text-sm text-[var(--muted)] italic leading-relaxed bg-slate-50 rounded-xl p-3 border border-slate-100" x-text="buddyLatestMsg()"></p>
         </div>
 
-        <div class="span-6 card p-5 border-l-4 border-[#00B4D8]">
-          <p class="text-xs font-bold text-[var(--navy)] uppercase tracking-wide mb-2">First 90 days</p>
-          <p class="text-[var(--muted)] text-sm leading-relaxed">Weeks 2–12 are the risk window. AI pulse + buddy community scale support; HR steps in only when flagged.</p>
+        <div class="span-6 card card-interactive p-5 border-l-4 border-[#00B4D8] cursor-pointer" @click="selectRail('events')">
+          <p class="text-xs font-bold text-[var(--navy)] uppercase tracking-wide mb-2">Stay connected</p>
+          <p class="text-[var(--muted)] text-sm leading-relaxed"><span x-text="connectedCount()"></span> apps linked · <span x-text="filteredEvents().length"></span> events match your hobbies</p>
+          <p class="text-[#00B4D8] text-xs font-bold mt-2">Open social hub →</p>
         </div>
 
         <div class="span-12 card p-5 sm:p-6">
@@ -956,7 +1078,7 @@
       </div>
 
       <!-- ===== LIFE MAP ===== -->
-      <div x-show="activeTab==='lifemap'" class="fi max-w-5xl mx-auto w-full space-y-4">
+      <div x-show="activeRail==='anchor' && activeTab==='lifemap'" class="fi max-w-5xl mx-auto w-full space-y-4">
         <div class="card p-5 mb-4">
           <h4 class="font-bold text-gray-800 mb-1">🗺️ Tasmania Life Map — 3 to 6 month journey</h4>
           <p class="text-gray-400 text-sm">The human, personal side of settling in · Crowdsourced by 847 employees · Personalised for
@@ -1010,7 +1132,7 @@
       </div>
 
       <!-- ===== PULSE CHECK ===== -->
-      <div x-show="activeTab==='pulse'" class="fi max-w-2xl mx-auto w-full">
+      <div x-show="activeRail==='anchor' && activeTab==='pulse'" class="fi max-w-2xl mx-auto w-full">
         <div class="chat-shell">
           <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
             <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0077B6] to-[#00B4D8] flex items-center justify-center shadow-lg overflow-hidden">
@@ -1075,7 +1197,7 @@
       </div>
 
       <!-- ===== SERVICES ===== -->
-      <div x-show="activeTab==='services'" class="fi max-w-6xl mx-auto w-full space-y-4">
+      <div x-show="activeRail==='anchor' && activeTab==='services'" class="fi max-w-6xl mx-auto w-full space-y-4">
         <div class="card p-5 mb-4">
           <h4 class="font-bold text-gray-800">🛎️ All Your Support Services — Centralised</h4>
           <p class="text-gray-400 text-sm mt-1">Everything you need to settle into Tasmania, in one place. Active from Day 1.</p>
@@ -1149,7 +1271,7 @@
       </div>
 
       <!-- ===== COMMUNITY ===== -->
-      <div x-show="activeTab==='community'" class="fi max-w-5xl mx-auto w-full space-y-4">
+      <div x-show="activeRail==='anchor' && activeTab==='community'" class="fi max-w-5xl mx-auto w-full space-y-4">
         <div class="card p-5">
           <h4 class="font-bold text-gray-800">💬 Community Chat</h4>
           <p class="text-gray-400 text-sm">#relocators-hobart · New starters &amp; buddies · Not monitored by managers</p>
@@ -1193,6 +1315,197 @@
             <div class="flex justify-between bg-[#F0F6FB] rounded-xl px-3 py-2"><span class="font-semibold">Induction · Maria St</span><span class="text-gray-500">Mon 9:00</span></div>
             <div class="flex justify-between bg-[#F0F6FB] rounded-xl px-3 py-2"><span class="font-semibold">Buddy coffee · <span x-text="getBestBuddy().name.split(' ')[0]"></span></span><span class="text-gray-500">Wed 12:30</span></div>
             <div class="flex justify-between bg-[#F0F6FB] rounded-xl px-3 py-2"><span class="font-semibold">Pulse check · Anchor AI</span><span class="text-amber-600 font-semibold">Due today</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SOCIAL: TEAMS ===== -->
+      <div x-show="activeRail==='teams'" class="fi max-w-3xl mx-auto w-full space-y-4">
+        <div class="card p-6" x-show="!connections.microsoft">
+          <h3 class="font-display font-bold text-lg mb-2">Microsoft Teams</h3>
+          <p class="text-sm text-[var(--muted)] mb-4">Connect your Microsoft account. Work Teams (TasNetworks tenant) unlocks full chats when SSO is enabled.</p>
+          <button @click="connectMicrosoft()" class="btn-primary" style="background:#6264A7">Connect Microsoft account</button>
+        </div>
+        <div x-show="connections.microsoft" class="space-y-4">
+          <div class="card p-5 flex items-center gap-4">
+            <img x-show="msProfile.photo" :src="msProfile.photo" class="w-14 h-14 rounded-full" alt="">
+            <div x-show="!msProfile.photo" class="w-14 h-14 rounded-full bg-[#6264A7] text-white flex items-center justify-center text-xl font-bold" x-text="(msProfile.name||'?').charAt(0)"></div>
+            <div class="flex-1">
+              <h4 class="font-bold" x-text="msProfile.name"></h4>
+              <p class="text-sm text-[var(--muted)]" x-text="msProfile.email"></p>
+              <button @click="disconnectMicrosoft()" class="text-xs text-rose-500 mt-1 font-semibold">Disconnect</button>
+            </div>
+          </div>
+          <div class="card p-5 border-l-4 border-amber-400 bg-amber-50/50">
+            <p class="text-sm text-amber-900"><strong>Personal account:</strong> Teams work chats need TasNetworks Azure AD. Your profile is connected — channels appear when HR enables SSO.</p>
+          </div>
+          <div class="card p-5">
+            <h5 class="font-bold mb-3">Suggested channels</h5>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between py-2 border-b border-slate-100"><span>#relocators-hobart</span><span class="text-[var(--muted)]">TasNetworks</span></div>
+              <div class="flex justify-between py-2 border-b border-slate-100"><span>#new-starters-2026</span><span class="text-[var(--muted)]">HR</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SOCIAL: WHATSAPP ===== -->
+      <div x-show="activeRail==='whatsapp'" class="fi max-w-3xl mx-auto w-full space-y-4">
+        <div class="card p-6">
+          <h3 class="font-display font-bold text-lg mb-2">WhatsApp</h3>
+          <p class="text-sm text-[var(--muted)] mb-4">Personal WhatsApp cannot be linked via API. Message your buddy or join community groups via invite links.</p>
+          <a :href="'https://wa.me/61400000000?text=Hi%20'+encodeURIComponent(getBestBuddy().name.split(' ')[0])" target="_blank" rel="noopener" class="btn-primary inline-block text-center" style="background:#25D366">Message <span x-text="getBestBuddy().name.split(' ')[0]"></span></a>
+        </div>
+        <div class="card p-5">
+          <h5 class="font-bold mb-3">Community groups</h5>
+          <template x-for="g in getHobbyGroups().whatsapp" :key="g.name">
+            <a :href="g.url" target="_blank" rel="noopener" class="flex items-center justify-between py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 px-2 -mx-2 rounded-lg">
+              <span class="font-semibold text-sm" x-text="g.name"></span>
+              <span class="text-xs text-[#25D366]">Open →</span>
+            </a>
+          </template>
+        </div>
+      </div>
+
+      <!-- ===== SOCIAL: FACEBOOK ===== -->
+      <div x-show="activeRail==='facebook'" class="fi max-w-3xl mx-auto w-full space-y-4">
+        <div class="card p-5 flex items-center justify-between">
+          <div>
+            <h3 class="font-display font-bold text-lg">Facebook groups</h3>
+            <p class="text-sm text-[var(--muted)]">Matched to your hobbies from onboarding</p>
+          </div>
+          <span x-show="connections.facebook" class="stat-pill">Connected</span>
+        </div>
+        <template x-for="g in getHobbyGroups().facebook" :key="g.name">
+          <a :href="g.url" target="_blank" rel="noopener" class="card card-interactive p-4 flex gap-3 block">
+            <span class="text-2xl">📘</span>
+            <div>
+              <div class="font-bold text-sm" x-text="g.name"></div>
+              <div class="text-xs text-[var(--muted)]" x-text="g.desc"></div>
+              <div class="text-xs text-[#1877F2] mt-1" x-text="g.members"></div>
+            </div>
+          </a>
+        </template>
+        <p x-show="getHobbyGroups().facebook.length===0" class="text-sm text-[var(--muted)]">Add hobbies in onboarding to see group suggestions.</p>
+      </div>
+
+      <!-- ===== SOCIAL: INSTAGRAM ===== -->
+      <div x-show="activeRail==='instagram'" class="fi max-w-3xl mx-auto w-full space-y-4">
+        <div class="card p-5">
+          <h3 class="font-display font-bold text-lg mb-2">Instagram</h3>
+          <p class="text-sm text-[var(--muted)] mb-4">Follow local accounts and hobby communities in Hobart.</p>
+        </div>
+        <template x-for="g in getHobbyGroups().instagram" :key="g.name">
+          <a :href="g.url" target="_blank" rel="noopener" class="card card-interactive p-4 flex gap-3 block">
+            <span class="text-2xl">📷</span>
+            <div>
+              <div class="font-bold text-sm" x-text="g.name"></div>
+              <div class="text-xs text-[var(--muted)]" x-text="g.desc"></div>
+            </div>
+          </a>
+        </template>
+      </div>
+
+      <!-- ===== SOCIAL: EVENTS ===== -->
+      <div x-show="activeRail==='events'" class="fi max-w-4xl mx-auto w-full space-y-4">
+        <div class="card p-5">
+          <p class="text-xs text-[var(--muted)] mb-2" x-text="eventsSource"></p>
+          <div class="flex flex-wrap gap-2">
+            <template x-for="tag in hobbyEventTags()" :key="tag">
+              <span class="chip chip-on text-xs" x-text="tag"></span>
+            </template>
+          </div>
+        </div>
+        <template x-for="ev in filteredEvents()" :key="ev.id">
+          <div class="card p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div class="flex-1">
+              <h5 class="font-bold text-sm" x-text="ev.title"></h5>
+              <p class="text-xs text-[var(--muted)]" x-text="ev.when"></p>
+              <p class="text-xs text-[#00B4D8] mt-1" x-text="ev.venue"></p>
+            </div>
+            <a x-show="ev.url" :href="ev.url" target="_blank" rel="noopener" class="btn-ghost text-sm shrink-0">View →</a>
+          </div>
+        </template>
+        <p x-show="filteredEvents().length===0" class="text-sm text-center text-[var(--muted)] py-8">No events found — try adding more hobbies.</p>
+      </div>
+
+      <!-- ===== SOCIAL: SPIRITUAL ===== -->
+      <div x-show="activeRail==='spiritual'" class="fi max-w-3xl mx-auto w-full space-y-4">
+        <div class="card p-5">
+          <h3 class="font-display font-bold text-lg mb-1">Spiritual &amp; cultural places</h3>
+          <p class="text-sm text-[var(--muted)]">Near Hobart — crowdsourced for newcomers</p>
+        </div>
+        <template x-for="p in filteredSpiritual()" :key="p.id">
+          <div class="card p-4">
+            <div class="flex gap-3">
+              <span class="text-2xl" x-text="p.e"></span>
+              <div>
+                <h5 class="font-bold text-sm" x-text="p.name"></h5>
+                <p class="text-xs text-[var(--muted)]" x-text="p.type+' · '+p.address"></p>
+                <p class="text-xs mt-1" x-text="p.note"></p>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- ===== SOCIAL: MARKETPLACE ===== -->
+      <div x-show="activeRail==='marketplace'" class="fi max-w-5xl mx-auto w-full space-y-4">
+        <div class="card p-5">
+          <div class="flex flex-wrap gap-2 mb-4">
+            <button @click="mktCondition='new'" :class="mktCondition==='new'?'chip-on':'chip-off'" class="chip">New</button>
+            <button @click="mktCondition='used'" :class="mktCondition==='used'?'chip-on':'chip-off'" class="chip">Used</button>
+          </div>
+          <div class="flex flex-wrap gap-2 mb-3">
+            <template x-for="cat in ['home','office','clothes','kids']" :key="cat">
+              <button @click="mktCategory=cat" :class="mktCategory===cat?'chip-on':'chip-off'" class="chip capitalize" x-text="cat"></button>
+            </template>
+          </div>
+          <div class="flex gap-2">
+            <input x-model="mktQuery" type="text" placeholder="Search e.g. desk, heater, bike…" class="input-field flex-1" @keydown.enter="runMarketplaceSearch()">
+            <select x-model="mktSort" class="input-field w-auto min-w-[140px]">
+              <option value="price-asc">Price ↑</option>
+              <option value="price-desc">Price ↓</option>
+              <option value="newest">Newest</option>
+              <option value="distance">Nearest</option>
+            </select>
+          </div>
+          <p class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mt-3">Sample listings below. Live search opens Facebook Marketplace &amp; Gumtree (no public API).</p>
+          <div class="flex gap-2 mt-3 flex-wrap">
+            <a :href="marketplaceFbUrl()" target="_blank" rel="noopener" class="btn-ghost text-xs">Search Facebook →</a>
+            <a :href="marketplaceGumtreeUrl()" target="_blank" rel="noopener" class="btn-ghost text-xs">Search Gumtree →</a>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <template x-for="item in sortedMarketplace()" :key="item.id">
+            <div class="listing-card bg-white cursor-pointer" @click="openListing(item)">
+              <div class="h-32 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-4xl" x-text="item.emoji"></div>
+              <div class="p-3">
+                <div class="font-bold text-sm line-clamp-2" x-text="item.title"></div>
+                <div class="text-lg font-black text-[var(--navy)] mt-1" x-text="'$'+item.price"></div>
+                <div class="text-xs text-[var(--muted)]" x-text="item.location+' · '+item.source"></div>
+                <span class="text-[10px] uppercase font-bold text-slate-400" x-text="item.condition"></span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- ===== SOCIAL: CONNECTIONS ===== -->
+      <div x-show="activeRail==='connections'" class="fi max-w-lg mx-auto w-full space-y-3">
+        <div class="card p-5">
+          <h3 class="font-display font-bold text-lg mb-4">Connected accounts</h3>
+          <div class="flex items-center justify-between py-3 border-b border-slate-100">
+            <span>Microsoft</span>
+            <span :class="connections.microsoft?'text-emerald-600':'text-slate-400'" class="text-sm font-semibold" x-text="connections.microsoft?'Connected':'Not connected'"></span>
+          </div>
+          <div class="flex items-center justify-between py-3 border-b border-slate-100">
+            <span>Facebook</span>
+            <span :class="connections.facebook?'text-emerald-600':'text-slate-400'" class="text-sm font-semibold" x-text="connections.facebook?'Connected':'Not connected'"></span>
+          </div>
+          <div class="flex items-center justify-between py-3">
+            <span>WhatsApp</span>
+            <span class="text-slate-400 text-sm font-semibold">Via invite links</span>
           </div>
         </div>
       </div>
@@ -1432,7 +1745,10 @@
 <script>
 function app() { return {
   screen: 'login',
+  activeRail: 'anchor',
   activeTab: 'home',
+  socialSubView: 'main',
+  subPaneOpen: false,
   sidebarOpen: false,
   onboardStep: 1,
   matchStep: 0,
@@ -1446,6 +1762,152 @@ function app() { return {
   communityInput: '',
   loginName: 'Sarah Mitchell',
   loginEmail: 'sarah.mitchell@tasnetworks.com.au',
+
+  connections: { microsoft: false, facebook: false },
+  msProfile: { name: '', email: '', photo: '' },
+  msalInstance: null,
+
+  mktQuery: '',
+  mktCondition: 'used',
+  mktCategory: 'home',
+  mktSort: 'price-asc',
+  eventsSource: 'Tasmania events · filtered by your hobbies',
+  tasmaniaEvents: [],
+  spiritualFilter: 'all',
+
+  railApps: [
+    { id:'teams', label:'Teams', short:'T', color:'#6264A7' },
+    { id:'whatsapp', label:'WhatsApp', short:'W', color:'#25D366' },
+    { id:'facebook', label:'Facebook', short:'f', color:'#1877F2' },
+    { id:'instagram', label:'Instagram', short:'I', color:'#E4405F' },
+    { id:'events', label:'Events', short:'E', color:'#0077B6' },
+    { id:'spiritual', label:'Spiritual', short:'S', color:'#7C3AED' },
+    { id:'marketplace', label:'Marketplace', short:'M', color:'#F59E0B' },
+    { id:'connections', label:'Accounts', short:'⚙', color:'#64748B' },
+  ],
+
+  socialSubItems: {
+    teams: [
+      { id:'profile', label:'My profile', icon:'👤' },
+      { id:'channels', label:'Suggested channels', icon:'#' },
+      { id:'tips', label:'TasNetworks tips', icon:'💡' },
+    ],
+    whatsapp: [
+      { id:'buddy', label:'Message buddy', icon:'💬' },
+      { id:'groups', label:'Community groups', icon:'👥' },
+    ],
+    facebook: [
+      { id:'groups', label:'Hobby groups', icon:'📘' },
+      { id:'connect', label:'Manage connection', icon:'🔗' },
+    ],
+    instagram: [
+      { id:'follows', label:'Suggested follows', icon:'📷' },
+    ],
+    events: [
+      { id:'week', label:'This week', icon:'📅' },
+      { id:'month', label:'This month', icon:'🗓' },
+      { id:'hobby', label:'By hobby', icon:'✨' },
+    ],
+    spiritual: [
+      { id:'all', label:'All places', icon:'🕊' },
+      { id:'worship', label:'Places of worship', icon:'⛪' },
+      { id:'community', label:'Cultural centres', icon:'🌏' },
+    ],
+    marketplace: [
+      { id:'search', label:'Search', icon:'🔍' },
+      { id:'home', label:'Home & furniture', icon:'🏠' },
+      { id:'office', label:'Office', icon:'💼' },
+      { id:'clothes', label:'Clothes', icon:'👕' },
+    ],
+    connections: [
+      { id:'manage', label:'Manage accounts', icon:'⚙' },
+    ],
+  },
+
+  hobbySocialMap: {
+    hiking: {
+      facebook: [{ name:'Hobart Walking Club', desc:'Sunday hikes on kunanyi', members:'2.4k members', url:'https://www.facebook.com/search/groups/?q=hobart%20walking' }],
+      instagram: [{ name:'@hobartwalking', desc:'Trail photos & meetups', url:'https://www.instagram.com/explore/tags/hobarthiking/' }],
+      whatsapp: [{ name:'HWC newcomers chat', url:'https://chat.whatsapp.com' }],
+      eventTags: ['outdoor','hiking','nature'],
+      marketplaceTerms: ['hiking boots','backpack'],
+    },
+    food: {
+      facebook: [{ name:'Tasmanian Foodies', desc:'Restaurants & markets', members:'8k members', url:'https://www.facebook.com/search/groups/?q=tasmanian%20foodies' }],
+      instagram: [{ name:'@hobartfood', desc:'Best eats in Hobart', url:'https://www.instagram.com/explore/tags/hobartfood/' }],
+      whatsapp: [{ name:'New in Hobart — food', url:'https://chat.whatsapp.com' }],
+      eventTags: ['food','market','wine'],
+      marketplaceTerms: ['kitchen','dining table'],
+    },
+    sports: {
+      facebook: [{ name:'Southern Football League', desc:'Local footy', members:'1.2k members', url:'https://www.facebook.com/search/groups/?q=hobart%20football' }],
+      instagram: [{ name:'@hobartsport', desc:'Local leagues', url:'https://www.instagram.com/explore/tags/hobartsport/' }],
+      eventTags: ['sport','fitness'],
+      marketplaceTerms: ['bike','gym equipment'],
+    },
+    photo: {
+      facebook: [{ name:'Tasmania Photography', desc:'Landscape & wildlife', members:'5k members', url:'https://www.facebook.com/search/groups/?q=tasmania%20photography' }],
+      eventTags: ['art','photography'],
+      marketplaceTerms: ['camera','tripod'],
+    },
+    arts: {
+      facebook: [{ name:'Hobart Arts Collective', desc:'Galleries & workshops', members:'3k members', url:'https://www.facebook.com/search/groups/?q=hobart%20arts' }],
+      eventTags: ['art','culture'],
+      marketplaceTerms: ['desk','office chair'],
+    },
+    music: {
+      facebook: [{ name:'Hobart Live Music', desc:'Gigs & open mics', members:'4k members', url:'https://www.facebook.com/search/groups/?q=hobart%20music' }],
+      eventTags: ['music','live'],
+      marketplaceTerms: ['guitar','keyboard'],
+    },
+    fitness: {
+      facebook: [{ name:'Hobart Fitness Community', desc:'Gyms & park workouts', members:'2k members', url:'https://www.facebook.com/search/groups/?q=hobart%20fitness' }],
+      eventTags: ['fitness','health'],
+      marketplaceTerms: ['weights','yoga mat'],
+    },
+    outdoors: {
+      facebook: [{ name:'Tasmania Outdoors', desc:'Camping & adventures', members:'6k members', url:'https://www.facebook.com/search/groups/?q=tasmania%20outdoors' }],
+      eventTags: ['outdoor','camping'],
+      marketplaceTerms: ['tent','camping stove'],
+    },
+  },
+
+  marketplaceSeed: [
+    { id:1, title:'IKEA desk — barely used', price:120, location:'Sandy Bay, TAS', source:'Facebook', condition:'used', emoji:'🪑', category:'office', distance:3 },
+    { id:2, title:'Queen bed frame + mattress', price:350, location:'North Hobart', source:'Gumtree', condition:'used', emoji:'🛏', category:'home', distance:5 },
+    { id:3, title:'Winter jacket mens L', price:45, location:'CBD Hobart', source:'Facebook', condition:'used', emoji:'🧥', category:'clothes', distance:1 },
+    { id:4, title:'Office monitor 27"', price:180, location:'Kingston', source:'Gumtree', condition:'used', emoji:'🖥', category:'office', distance:12 },
+    { id:5, title:'Kids bike 20"', price:80, location:'Lenah Valley', source:'Facebook', condition:'used', emoji:'🚲', category:'kids', distance:8 },
+    { id:6, title:'New kettle + toaster set', price:65, location:'Moonah', source:'Gumtree', condition:'new', emoji:'☕', category:'home', distance:6 },
+    { id:7, title:'Standing desk electric', price:420, location:'Hobart CBD', source:'Facebook', condition:'used', emoji:'🪑', category:'office', distance:2 },
+    { id:8, title:'Hiking boots size 42', price:55, location:'South Hobart', source:'Gumtree', condition:'used', emoji:'🥾', category:'clothes', distance:4 },
+    { id:9, title:'Sofa 3-seater grey', price:280, location:'Glenorchy', source:'Facebook', condition:'used', emoji:'🛋', category:'home', distance:10 },
+    { id:10, title:'Desk lamp LED new', price:25, location:'Battery Point', source:'Gumtree', condition:'new', emoji:'💡', category:'office', distance:3 },
+    { id:11, title:'Baby cot + mattress', price:150, location:'Claremont', source:'Facebook', condition:'used', emoji:'👶', category:'kids', distance:14 },
+    { id:12, title:'Dining table seats 6', price:200, location:'New Town', source:'Gumtree', condition:'used', emoji:'🍽', category:'home', distance:5 },
+  ],
+
+  spiritualPlaces: [
+    { id:1, e:'⛪', name:'St David\'s Cathedral', type:'Church', address:'23 Murray St, Hobart', note:'Anglican · welcoming to newcomers', filter:'worship' },
+    { id:2, e:'🕌', name:'Hobart Mosque', type:'Mosque', address:'166 Warwick St, Hobart', note:'Islamic community · Friday prayers', filter:'worship' },
+    { id:3, e:'🛕', name:'Hindu Society of Tasmania', type:'Temple', address:'Barrack St area', note:'Cultural events & festivals', filter:'community' },
+    { id:4, e:'☸️', name:'Tasmanian Buddhist Meditation Centre', type:'Buddhist centre', address:'North Hobart', note:'Meditation sessions open to all', filter:'worship' },
+    { id:5, e:'✡️', name:'Hobart Hebrew Congregation', type:'Synagogue', address:'9-11 Argyle St', note:'Jewish community Hobart', filter:'worship' },
+    { id:6, e:'🌏', name:'Multicultural Council of Tasmania', type:'Cultural centre', address:'Hobart', note:'Settlement support & events', filter:'community' },
+  ],
+
+  tasmaniaEventsSeed: [
+    { id:1, title:'Farm Gate Market', when:'Sun 9am–1pm', venue:'Bathurst St, Hobart', tags:['food','market'], url:'https://www.eventbrite.com/d/australia--tasmania/events/' },
+    { id:2, title:'Hobart Walking Club — intro hike', when:'Sun 8:00am', venue:'kunanyi / Mt Wellington', tags:['hiking','outdoor'], url:'https://www.eventbrite.com/d/australia--tasmania/events/' },
+    { id:3, title:'Welcome BBQ — TasNetworks', when:'Fri 5:30pm', venue:'Maria St lawn', tags:['community'], url:'#' },
+    { id:4, title:'Dark Mofo (winter program)', when:'Jun–Jul', venue:'Hobart', tags:['art','culture','music'], url:'https://darkmofo.net.au' },
+    { id:5, title:'Salamanca Market', when:'Sat 8:30am–3pm', venue:'Salamanca Place', tags:['food','market'], url:'https://www.hobartcity.com.au/community/events/salamanca-market' },
+    { id:6, title:'Southern Football League — reg day', when:'Next Sat 10am', venue:'Various grounds', tags:['sport'], url:'#' },
+    { id:7, title:'International families morning tea', when:'Wed 10:00am', venue:'Maria St HQ', tags:['community','family'], url:'#' },
+    { id:8, title:'Live at the Republic Bar', when:'Fri 8pm', venue:'North Hobart', tags:['music','live'], url:'#' },
+    { id:9, title:'Parkrun Hobart', when:'Sat 7:30am', venue:'Domain Athletic Centre', tags:['fitness','outdoor'], url:'https://www.parkrun.com.au' },
+    { id:10, title:'MONA — new exhibition', when:'Ongoing', venue:'Berriedale', tags:['art','culture'], url:'https://mona.net.au' },
+  ],
 
   navTabs: [
     { id:'home', label:'Home', badge:false, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>' },
@@ -1613,19 +2075,95 @@ function app() { return {
   // ── Methods ──────────────────────────────────────────────────────────
 
   init() {},
+  initApp() {
+    try {
+      const c = JSON.parse(sessionStorage.getItem('anchor_connections') || '{}');
+      this.connections = { ...this.connections, ...c };
+      const mp = JSON.parse(sessionStorage.getItem('anchor_ms_profile') || 'null');
+      if (mp) this.msProfile = mp;
+    } catch (e) {}
+    this.tasmaniaEvents = [...this.tasmaniaEventsSeed];
+    this.loadEventbriteEvents();
+    if (this.connections.microsoft) this.initMsalSilent();
+  },
 
-  selectTab(id) {
-    this.sidebarOpen = false;
+  saveConnections() {
+    sessionStorage.setItem('anchor_connections', JSON.stringify(this.connections));
+  },
+
+  selectRail(id) {
+    this.activeRail = id;
+    this.subPaneOpen = window.innerWidth < 1024;
+    const subs = this.socialSubItems[id];
+    if (subs && subs.length) this.socialSubView = subs[0].id;
+    if (id === 'marketplace') this.mktCategory = 'home';
+    if (id === 'events') this.loadEventbriteEvents();
+  },
+
+  selectAnchorTab(id) {
+    this.activeRail = 'anchor';
+    this.subPaneOpen = false;
     if (id === 'pulse') { this.goToPulse(); return; }
     this.activeTab = id;
   },
 
+  selectTab(id) { this.selectAnchorTab(id); },
+
+  selectSocialSub(id) {
+    this.socialSubView = id;
+    if (this.activeRail === 'marketplace') {
+      if (['home','office','clothes','kids'].includes(id)) this.mktCategory = id;
+      if (id === 'search') this.runMarketplaceSearch();
+    }
+    if (this.activeRail === 'spiritual') {
+      if (id === 'worship') this.spiritualFilter = 'worship';
+      else if (id === 'community') this.spiritualFilter = 'community';
+      else this.spiritualFilter = 'all';
+    }
+  },
+
+  subPaneTitle() {
+    if (this.activeRail === 'anchor') return 'Anchor';
+    const app = this.railApps.find(a => a.id === this.activeRail);
+    return app ? app.label : 'Connect';
+  },
+
+  currentSubItems() {
+    if (this.activeRail === 'anchor') return this.navTabs.map(t => ({ id: t.id, label: t.label, icon: '•' }));
+    return this.socialSubItems[this.activeRail] || [];
+  },
+
+  isConnected(appId) {
+    if (appId === 'teams') return this.connections.microsoft;
+    if (appId === 'facebook') return this.connections.facebook;
+    return false;
+  },
+
+  connectedCount() {
+    let n = 0;
+    if (this.connections.microsoft) n++;
+    if (this.connections.facebook) n++;
+    return n;
+  },
+
   pageTitle() {
+    if (this.activeRail !== 'anchor') {
+      const app = this.railApps.find(a => a.id === this.activeRail);
+      return app ? app.label : 'Connect';
+    }
     const t = { home:'Dashboard', lifemap:'Life Map', pulse:'Pulse Check', services:'Services', community:'Community' };
     return t[this.activeTab] || 'Anchor';
   },
 
   pageSubtitle() {
+    if (this.activeRail === 'teams') return 'Microsoft profile & Teams (work SSO for full access)';
+    if (this.activeRail === 'whatsapp') return 'Message buddy & community invite links';
+    if (this.activeRail === 'facebook') return 'Hobby-matched Facebook groups';
+    if (this.activeRail === 'instagram') return 'Local accounts for your interests';
+    if (this.activeRail === 'events') return 'Tasmania events · ' + this.filteredEvents().length + ' matches';
+    if (this.activeRail === 'spiritual') return 'Worship & cultural centres near Hobart';
+    if (this.activeRail === 'marketplace') return 'Search new & used · Facebook & Gumtree';
+    if (this.activeRail === 'connections') return 'Manage linked accounts';
     const s = {
       home: 'Your 90-day relocation journey',
       lifemap: 'Local tips · 3–6 month settling plan',
@@ -1634,6 +2172,192 @@ function app() { return {
       community: 'Chat, events & schedule',
     };
     return s[this.activeTab] || '';
+  },
+
+  getHobbyGroups() {
+    const fb = [], ig = [], wa = [];
+    const seen = { fb: new Set(), ig: new Set(), wa: new Set() };
+    (this.form.hobbies || []).forEach(h => {
+      const m = this.hobbySocialMap[h];
+      if (!m) return;
+      (m.facebook || []).forEach(g => { if (!seen.fb.has(g.name)) { seen.fb.add(g.name); fb.push(g); } });
+      (m.instagram || []).forEach(g => { if (!seen.ig.has(g.name)) { seen.ig.add(g.name); ig.push(g); } });
+      (m.whatsapp || []).forEach(g => { if (!seen.wa.has(g.name)) { seen.wa.add(g.name); wa.push(g); } });
+    });
+    if (!fb.length) fb.push({ name:'New to Hobart', desc:'8,500+ members', members:'Facebook group', url:'https://www.facebook.com/search/groups/?q=new%20to%20hobart' });
+    return { facebook: fb, instagram: ig, whatsapp: wa };
+  },
+
+  hobbyEventTags() {
+    const tags = new Set();
+    (this.form.hobbies || []).forEach(h => {
+      const m = this.hobbySocialMap[h];
+      if (m && m.eventTags) m.eventTags.forEach(t => tags.add(t));
+    });
+    return [...tags];
+  },
+
+  filteredEvents() {
+    const tags = this.hobbyEventTags();
+    const list = this.tasmaniaEvents.length ? this.tasmaniaEvents : this.tasmaniaEventsSeed;
+    if (!tags.length) return list;
+    const matched = list.filter(ev => (ev.tags || []).some(t => tags.includes(t)));
+    return matched.length ? matched : list.slice(0, 6);
+  },
+
+  filteredSpiritual() {
+    if (this.spiritualFilter === 'all') return this.spiritualPlaces;
+    return this.spiritualPlaces.filter(p => p.filter === this.spiritualFilter);
+  },
+
+  sortedMarketplace() {
+    let list = this.marketplaceSeed.filter(i => {
+      if (this.mktCondition && i.condition !== this.mktCondition) return false;
+      if (this.mktCategory && i.category !== this.mktCategory) return false;
+      if (this.mktQuery.trim()) {
+        const q = this.mktQuery.toLowerCase();
+        if (!i.title.toLowerCase().includes(q)) return false;
+      }
+      return true;
+    });
+    const sort = this.mktSort;
+    list = [...list].sort((a, b) => {
+      if (sort === 'price-asc') return a.price - b.price;
+      if (sort === 'price-desc') return b.price - a.price;
+      if (sort === 'distance') return a.distance - b.distance;
+      return b.id - a.id;
+    });
+    return list;
+  },
+
+  marketplaceFbUrl() {
+    const q = encodeURIComponent((this.mktQuery || 'furniture') + ' hobart');
+    return 'https://www.facebook.com/marketplace/hobart/search?query=' + q;
+  },
+
+  marketplaceGumtreeUrl() {
+    const q = encodeURIComponent((this.mktQuery || 'furniture') + ' hobart tasmania');
+    return 'https://www.gumtree.com.au/s-search.html?search_category=all&query=' + q;
+  },
+
+  runMarketplaceSearch() {
+    this.sortedMarketplace();
+    this.showToast('Showing sample listings · use links for live Facebook/Gumtree search');
+  },
+
+  openListing(item) {
+    const url = item.source === 'Gumtree' ? this.marketplaceGumtreeUrl() : this.marketplaceFbUrl();
+    window.open(url, '_blank', 'noopener');
+  },
+
+  getSocialConfig() {
+    return window.SOCIAL_CONFIG || { azureClientId: '', facebookAppId: '', eventbriteToken: '' };
+  },
+
+  async initMsalSilent() {
+    const cfg = this.getSocialConfig();
+    if (!cfg.azureClientId || typeof msal === 'undefined') return;
+    try {
+      const msalConfig = {
+        auth: { clientId: cfg.azureClientId, authority: 'https://login.microsoftonline.com/common', redirectUri: window.location.origin + window.location.pathname },
+        cache: { cacheLocation: 'sessionStorage' },
+      };
+      this.msalInstance = new msal.PublicClientApplication(msalConfig);
+      await this.msalInstance.initialize();
+      const accounts = this.msalInstance.getAllAccounts();
+      if (accounts.length) await this.fetchMsGraphProfile(accounts[0]);
+    } catch (e) { console.warn('MSAL silent', e); }
+  },
+
+  async connectMicrosoft() {
+    const cfg = this.getSocialConfig();
+    if (!cfg.azureClientId || typeof msal === 'undefined') {
+      this.connections.microsoft = true;
+      this.msProfile = { name: this.loginName || 'Demo User', email: this.loginEmail || 'demo@outlook.com', photo: '' };
+      this.saveConnections();
+      sessionStorage.setItem('anchor_ms_profile', JSON.stringify(this.msProfile));
+      this.showToast('Microsoft connected (demo — add azureClientId in social-config.js for real login)');
+      return;
+    }
+    try {
+      const msalConfig = {
+        auth: { clientId: cfg.azureClientId, authority: 'https://login.microsoftonline.com/common', redirectUri: window.location.origin + window.location.pathname },
+        cache: { cacheLocation: 'sessionStorage' },
+      };
+      this.msalInstance = new msal.PublicClientApplication(msalConfig);
+      await this.msalInstance.initialize();
+      const resp = await this.msalInstance.loginPopup({ scopes: ['User.Read'] });
+      await this.fetchMsGraphProfile(resp.account);
+      this.connections.microsoft = true;
+      this.saveConnections();
+      this.showToast('Microsoft account connected');
+    } catch (e) {
+      this.showToast('Microsoft login cancelled or failed');
+    }
+  },
+
+  async fetchMsGraphProfile(account) {
+    if (!this.msalInstance || !account) return;
+    try {
+      const token = await this.msalInstance.acquireTokenSilent({ scopes: ['User.Read'], account });
+      const r = await fetch('https://graph.microsoft.com/v1.0/me', { headers: { Authorization: 'Bearer ' + token.accessToken } });
+      const data = await r.json();
+      this.msProfile = { name: data.displayName || '', email: data.mail || data.userPrincipalName || '', photo: '' };
+      sessionStorage.setItem('anchor_ms_profile', JSON.stringify(this.msProfile));
+    } catch (e) { console.warn('Graph', e); }
+  },
+
+  disconnectMicrosoft() {
+    this.connections.microsoft = false;
+    this.msProfile = { name: '', email: '', photo: '' };
+    this.saveConnections();
+    sessionStorage.removeItem('anchor_ms_profile');
+    if (this.msalInstance) {
+      const accounts = this.msalInstance.getAllAccounts();
+      accounts.forEach(a => this.msalInstance.logoutPopup({ account: a }).catch(() => {}));
+    }
+    this.showToast('Microsoft disconnected');
+  },
+
+  connectFacebook() {
+    const cfg = this.getSocialConfig();
+    this.connections.facebook = true;
+    this.saveConnections();
+    if (cfg.facebookAppId) {
+      this.showToast('Facebook connected — add FB SDK login for production');
+    } else {
+      this.showToast('Facebook connected (demo — hobby groups unlocked)');
+    }
+  },
+
+  async loadEventbriteEvents() {
+    const cfg = this.getSocialConfig();
+    if (!cfg.eventbriteToken) {
+      this.eventsSource = 'Curated Tasmania events · filtered by your hobbies';
+      this.tasmaniaEvents = [...this.tasmaniaEventsSeed];
+      return;
+    }
+    try {
+      const q = encodeURIComponent('Hobart OR Tasmania');
+      const url = 'https://www.eventbriteapi.com/v3/events/search/?location.address=Hobart,Tasmania&expand=venue&token=' + cfg.eventbriteToken;
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('Eventbrite error');
+      const data = await r.json();
+      if (data.events && data.events.length) {
+        this.tasmaniaEvents = data.events.slice(0, 15).map((ev, i) => ({
+          id: 'eb' + i,
+          title: ev.name?.text || 'Event',
+          when: ev.start?.local ? new Date(ev.start.local).toLocaleDateString('en-AU', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'TBA',
+          venue: ev.venue?.name || 'Tasmania',
+          tags: this.hobbyEventTags(),
+          url: ev.url,
+        }));
+        this.eventsSource = 'Live from Eventbrite · Tasmania';
+      }
+    } catch (e) {
+      this.eventsSource = 'Curated events (Eventbrite token invalid or CORS — use Lambda proxy)';
+      this.tasmaniaEvents = [...this.tasmaniaEventsSeed];
+    }
   },
 
   showToast(msg) {
@@ -1657,8 +2381,9 @@ function app() { return {
       20: 'Opening Events…',
       21: 'Opening Schedule…',
     };
-    if (id === 19) { this.activeTab = 'community'; return; }
-    if (id === 20 || id === 21) { this.activeTab = 'community'; }
+    if (id === 19) { this.selectAnchorTab('community'); return; }
+    if (id === 20) { this.selectRail('events'); return; }
+    if (id === 21) { this.selectAnchorTab('community'); return; }
     this.showToast(msgs[id] || 'Request submitted — Anchor team notified (demo)');
   },
 
@@ -1682,6 +2407,9 @@ function app() { return {
     this.screen = 'login';
     this.chatMsgs = [];
     this.activeTab = 'home';
+    this.activeRail = 'anchor';
+    this.connections = { microsoft: false, facebook: false };
+    sessionStorage.removeItem('anchor_connections');
   },
 
   toggleHobby(id) {
@@ -1774,6 +2502,7 @@ function app() { return {
 
   // ── PULSE CHECK ───────────────────────────────────────────────────────
   goToPulse() {
+    this.activeRail = 'anchor';
     this.activeTab = 'pulse';
     if (this.chatMsgs.length === 0) setTimeout(() => this.startPulse(), 300);
   },
