@@ -74,9 +74,21 @@
   .tag-wellbeing{ background:#ECFDF5; color:#065F46 }
   .tag-benefits{ background:#FFF7ED; color:#9A3412 }
   .tag-logistics{ background:#E0F2FE; color:#0369A1 }
+
+  /* ---- responsive ---- */
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  .day-badge { background: #fff; color: #002E5D; font-weight: 700; box-shadow: 0 1px 4px rgba(0,46,93,.15); }
+  @media (max-width: 767px) {
+    .sidebar-panel { position: fixed; inset: 0 auto 0 0; z-index: 40; transform: translateX(-100%); transition: transform .25s ease; }
+    .sidebar-panel.open { transform: translateX(0); }
+    .sidebar-backdrop { position: fixed; inset: 0; z-index: 30; background: rgba(0,46,93,.4); }
+  }
+  .toast { animation: fadeUp .35s ease both; }
+  .life-phase { border-left: 3px solid #0099CC; }
 </style>
 </head>
-<body x-data="app()" x-cloak class="min-h-screen">
+<body x-data="app()" x-cloak class="min-h-screen overflow-x-hidden w-full"
+      @keydown.window="if($event.shiftKey && $event.key==='H') screen='hr-portal'">
 
 <!-- ══ Tassie Devil SVG Symbol Library ══ -->
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
@@ -193,16 +205,12 @@
             class="w-full grad text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-all shadow-md mb-3">
       Sign in with TasNetworks SSO →
     </button>
-    <p class="text-center text-gray-300 text-xs mb-3">— or —</p>
-    <button @click="loginAsHR()"
-            class="w-full bg-gray-50 text-gray-600 font-semibold py-3 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all text-sm">
-      👔 Sign in as HR / People Partner
-    </button>
+    <p class="text-center text-gray-400 text-xs">New employee experience only · HR analytics: Shift+H on any screen</p>
   </div>
 
   <!-- Demo hint -->
   <div class="mt-6 bg-white/10 rounded-2xl px-5 py-3 text-white/70 text-xs text-center fu max-w-xs">
-    <strong class="text-white">Demo tip:</strong> Leave fields as-is and click SSO to enter the new employee onboarding experience
+    <strong class="text-white">Demo tip:</strong> Click SSO to walk through onboarding → buddy community → your personalised dashboard
   </div>
   <p class="text-white/30 text-xs mt-6">Powered by Amazon Bedrock · TasNetworks × UTAS × AWS 2026</p>
 </div>
@@ -419,18 +427,19 @@
 </div>
 
 <!-- ═══════════════════════════ MAIN APP ══════════════════════════════════ -->
-<div x-show="screen==='app'" class="min-h-screen flex flex-col w-full">
+<div x-show="screen==='app'" class="min-h-screen flex flex-col w-full max-w-[100vw] overflow-x-hidden">
 
   <!-- Top bar -->
-  <div class="grad px-6 py-3 flex items-center justify-between shrink-0 shadow-md">
-    <div class="flex items-center gap-3">
-      <svg viewBox="0 0 130 115" class="w-9 h-9" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg>
+  <div class="grad px-4 sm:px-6 py-3 flex items-center justify-between shrink-0 shadow-md">
+    <div class="flex items-center gap-2 sm:gap-3">
+      <button @click="sidebarOpen=!sidebarOpen" class="md:hidden text-white text-xl mr-1" aria-label="Menu">☰</button>
+      <svg viewBox="0 0 130 115" class="w-9 h-9 shrink-0" xmlns="http://www.w3.org/2000/svg"><use href="#td-head"/></svg>
       <span class="text-white font-black text-lg tracking-tight">Anchor</span>
-      <span class="hidden sm:block text-white/30 text-sm">·</span>
-      <span class="hidden sm:block text-white/50 text-xs">TasNetworks Relocation Companion</span>
+      <span class="hidden lg:block text-white/30 text-sm">·</span>
+      <span class="hidden lg:block text-white/50 text-xs">TasNetworks Relocation Companion</span>
     </div>
-    <div class="flex items-center gap-3">
-      <span class="text-white text-sm hidden md:block bg-white/20 px-3 py-1 rounded-full font-semibold">🌿 Day 14 in Tasmania</span>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <span class="day-badge text-xs sm:text-sm hidden sm:inline-block px-3 py-1 rounded-full">🌿 Day 14 in lutruwita</span>
       <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm border border-white/30">
         <span x-text="(form.name||'SA').substring(0,2).toUpperCase()"></span>
       </div>
@@ -439,10 +448,11 @@
   </div>
 
   <!-- Body: sidebar + content -->
-  <div class="flex flex-1 overflow-hidden">
+  <div class="flex flex-1 overflow-hidden relative">
+    <div x-show="sidebarOpen" @click="sidebarOpen=false" class="sidebar-backdrop md:hidden" x-transition></div>
 
     <!-- ── Sidebar ── -->
-    <div class="w-64 bg-white border-r border-gray-100 flex flex-col shrink-0 shadow-sm">
+    <div :class="sidebarOpen?'open':''" class="sidebar-panel w-64 bg-white border-r border-gray-100 flex flex-col shrink-0 shadow-sm md:relative md:translate-x-0 md:!transform-none">
 
       <!-- User card -->
       <div class="px-4 pt-5 pb-4 border-b border-gray-100">
@@ -460,7 +470,7 @@
       <!-- Nav -->
       <nav class="px-3 py-4 space-y-1 flex-1">
         <p class="text-xs font-black text-gray-400 uppercase tracking-widest px-3 mb-2">Navigation</p>
-        <button @click="activeTab='home'"
+        <button @click="activeTab='home'; sidebarOpen=false"
                 :class="activeTab==='home'?'nav-on':'nav-off'"
                 class="nav-item group">
           <span class="text-xl">🏠</span>
@@ -469,7 +479,7 @@
             <div class="text-xs opacity-60 group-hover:opacity-80">90-day journey &amp; buddy</div>
           </div>
         </button>
-        <button @click="activeTab='lifemap'"
+        <button @click="activeTab='lifemap'; sidebarOpen=false"
                 :class="activeTab==='lifemap'?'nav-on':'nav-off'"
                 class="nav-item group">
           <span class="text-xl">🗺️</span>
@@ -478,7 +488,7 @@
             <div class="text-xs opacity-60 group-hover:opacity-80">Local tips &amp; TAS benefits</div>
           </div>
         </button>
-        <button @click="goToPulse()"
+        <button @click="goToPulse(); sidebarOpen=false"
                 :class="activeTab==='pulse'?'nav-on':'nav-off'"
                 class="nav-item group">
           <span class="text-xl">💚</span>
@@ -490,13 +500,22 @@
             <div class="text-xs opacity-60 group-hover:opacity-80">AI fortnightly check-in</div>
           </div>
         </button>
-        <button @click="activeTab='services'"
+        <button @click="activeTab='services'; sidebarOpen=false"
                 :class="activeTab==='services'?'nav-on':'nav-off'"
                 class="nav-item group">
           <span class="text-xl">🛎️</span>
           <div class="flex-1 text-left">
             <div class="text-sm font-bold">Services</div>
             <div class="text-xs opacity-60 group-hover:opacity-80">All support in one place</div>
+          </div>
+        </button>
+        <button @click="activeTab='community'; sidebarOpen=false"
+                :class="activeTab==='community'?'nav-on':'nav-off'"
+                class="nav-item group">
+          <span class="text-xl">💬</span>
+          <div class="flex-1 text-left">
+            <div class="text-sm font-bold">Community</div>
+            <div class="text-xs opacity-60 group-hover:opacity-80">Chat, groups &amp; events</div>
           </div>
         </button>
       </nav>
@@ -539,11 +558,34 @@
           <div>
             <p class="text-white font-semibold text-sm">🌿 Day 14 in lutruwita (Tasmania)</p>
             <h2 class="text-3xl font-black mt-0.5">Good morning, <span x-text="form.name||'Sarah'"></span> 👋</h2>
-            <p class="text-white/70 text-sm mt-1">Your buddy James is online · Pulse check is due today</p>
+            <p class="text-white/90 text-sm mt-1">Your buddy <span x-text="getBestBuddy().name.split(' ')[0]"></span> is online · Pulse check due today</p>
           </div>
           <div class="hidden md:block opacity-50">
             <svg viewBox="0 0 200 185" class="w-24 h-24" xmlns="http://www.w3.org/2000/svg"><use href="#td-full"/></svg>
           </div>
+        </div>
+
+        <!-- Digital employee card (Day 1) -->
+        <div class="card p-5 border-2 border-[#0099CC]/25 bg-gradient-to-r from-white to-[#E6F4FA]">
+          <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div class="grad rounded-2xl p-4 text-white min-w-[200px] shadow-lg">
+              <p class="text-xs text-white/70 uppercase tracking-widest">TasNetworks</p>
+              <p class="font-black text-lg" x-text="form.name||'New Starter'"></p>
+              <p class="text-xs text-white/80 mt-1">Relocator · Day 14</p>
+              <p class="text-[10px] text-white/60 mt-2">ID: TN-<span x-text="(form.name||'SA').substring(0,3).toUpperCase()"></span>-2026</p>
+            </div>
+            <div class="flex-1 text-sm text-gray-600">
+              <p class="font-bold text-gray-800 mb-1">💳 Your digital employee card — active from Day 1</p>
+              <p>Show at Sonic Health Plus, Pub Banc venues, gym induction &amp; partner services. Tap to add to wallet (demo).</p>
+              <button @click="showToast('Employee card added to Apple Wallet (demo)')" class="mt-2 text-xs grad text-white font-bold px-4 py-2 rounded-xl hover:opacity-90">Add to Wallet</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- First 90 days — mentor lens -->
+        <div class="card p-4 border-l-4 border-[#002E5D]">
+          <p class="text-xs font-black text-[#002E5D] uppercase tracking-wide mb-1">Your first 90 days without a support network</p>
+          <p class="text-gray-600 text-sm leading-relaxed">Week 1 feels exciting; weeks 2–12 are when isolation and admin pile up. Anchor scales the <strong>human</strong> program with AI matching + fortnightly pulse — HR only steps in when someone flags at-risk. <strong>Success</strong> = fewer exits under 12 months, higher Month-3 engagement, GP &amp; buddy milestones hit.</p>
         </div>
 
         <!-- Two-column layout -->
@@ -615,11 +657,23 @@
       </div>
 
       <!-- ===== LIFE MAP ===== -->
-      <div x-show="activeTab==='lifemap'" class="fi max-w-4xl mx-auto">
+      <div x-show="activeTab==='lifemap'" class="fi max-w-4xl mx-auto w-full">
         <div class="card p-5 mb-4">
-          <h4 class="font-bold text-gray-800 mb-1">🗺️ Tasmania Life Map</h4>
-          <p class="text-gray-400 text-sm">Crowdsourced by 847 TasNetworks employees · Personalised for
+          <h4 class="font-bold text-gray-800 mb-1">🗺️ Tasmania Life Map — 3 to 6 month journey</h4>
+          <p class="text-gray-400 text-sm">The human, personal side of settling in · Crowdsourced by 847 employees · Personalised for
             <span class="text-[#0099CC] font-semibold" x-text="form.name||'you'"></span></p>
+          <div class="mt-4 space-y-3">
+            <template x-for="ph in lifePhases" :key="ph.id">
+              <div class="life-phase pl-4 py-2 rounded-r-xl" :class="ph.current?'bg-[#E6F4FA]':'bg-gray-50'">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg" x-text="ph.e"></span>
+                  <span class="font-bold text-sm text-gray-800" x-text="ph.title"></span>
+                  <span x-show="ph.current" class="text-xs bg-[#0099CC] text-white px-2 py-0.5 rounded-full font-bold">You are here</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1" x-text="ph.desc"></p>
+              </div>
+            </template>
+          </div>
           <div class="flex gap-2 mt-2 flex-wrap">
             <span class="bg-[#E6F4FA] text-[#002E5D] text-xs font-semibold px-3 py-1 rounded-full">✨ Tailored to your needs</span>
             <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full" x-text="(form.family==='family'?'👨‍👩‍👧 Family':form.family==='couple'?'👫 Couple':'🧑 Solo')+' · '+(form.origin||'Your city')"></span>
@@ -699,11 +753,18 @@
           </div>
         </div>
 
-        <div x-show="showTxt" class="card p-3 flex gap-2 mb-4">
-          <input x-model="txtInput" type="text" placeholder="Tell me honestly…"
-                 class="flex-1 text-sm text-gray-800 focus:outline-none"
-                 @keydown.enter="submitTxt()">
-          <button @click="submitTxt()" class="grad text-white rounded-xl px-4 py-2 text-sm font-bold hover:opacity-90 transition">Send</button>
+        <div x-show="showTxt" class="space-y-2 mb-4">
+          <div class="flex flex-wrap gap-2">
+            <template x-for="chip in pulseChips" :key="chip">
+              <button @click="txtInput=chip; submitTxt()" class="text-xs bg-white border border-[#B3DFF0] text-[#002E5D] px-3 py-1.5 rounded-full hover:bg-[#E6F4FA] font-medium" x-text="chip"></button>
+            </template>
+          </div>
+          <div class="card p-3 flex gap-2">
+            <input x-model="txtInput" type="text" placeholder="Tell me honestly — or tap a suggestion above…"
+                   class="flex-1 text-sm text-gray-800 focus:outline-none"
+                   @keydown.enter="submitTxt()">
+            <button @click="submitTxt()" class="grad text-white rounded-xl px-4 py-2 text-sm font-bold hover:opacity-90 transition">Send</button>
+          </div>
         </div>
 
         <div x-show="chatMsgs.length===0" class="text-center py-12">
@@ -742,10 +803,25 @@
           </div>
         </div>
 
+        <!-- Office & airport automation -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div class="card p-4 border border-[#B3DFF0]">
+            <h5 class="font-bold text-gray-800 text-sm mb-1">🏢 First office drop-off</h5>
+            <p class="text-gray-500 text-xs mb-3">Auto-request to TasNetworks transport partner — Maria St HQ induction day.</p>
+            <button @click="bookService('office')" class="grad text-white text-xs font-bold px-4 py-2 rounded-xl">Request drop-off</button>
+          </div>
+          <div class="card p-4 border border-[#B3DFF0]">
+            <h5 class="font-bold text-gray-800 text-sm mb-1">♿ Accessibility services</h5>
+            <p class="text-gray-500 text-xs mb-3">Workplace adjustments, accessible transport, building access support.</p>
+            <button @click="bookService('accessibility')" class="bg-[#002E5D] text-white text-xs font-bold px-4 py-2 rounded-xl">Get support</button>
+          </div>
+        </div>
+
         <!-- Services grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
           <template x-for="s in services" :key="s.id">
-            <button class="card p-4 text-left hover:shadow-md transition border border-transparent hover:border-[#B3DFF0] cursor-pointer">
+            <button @click="bookService(s.id)"
+                    class="card p-4 text-left hover:shadow-md transition border border-transparent hover:border-[#B3DFF0] cursor-pointer active:scale-[.98]">
               <span class="text-3xl block mb-2" x-text="s.e"></span>
               <h5 class="font-bold text-gray-800 text-sm" x-text="s.t"></h5>
               <p class="text-gray-400 text-xs mt-1 leading-tight" x-text="s.d"></p>
@@ -775,8 +851,62 @@
         </div>
       </div>
 
+      <!-- ===== COMMUNITY ===== -->
+      <div x-show="activeTab==='community'" class="fi max-w-4xl mx-auto w-full space-y-4">
+        <div class="card p-5">
+          <h4 class="font-bold text-gray-800">💬 Community Chat</h4>
+          <p class="text-gray-400 text-sm">#relocators-hobart · New starters &amp; buddies · Not monitored by managers</p>
+          <div class="mt-4 space-y-2 max-h-48 overflow-y-auto scr">
+            <template x-for="c in communityChat" :key="c.id">
+              <div class="flex gap-2 text-sm">
+                <span class="font-bold text-[#002E5D] shrink-0" x-text="c.who+':'"></span>
+                <span class="text-gray-600" x-text="c.msg"></span>
+              </div>
+            </template>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <input x-model="communityInput" type="text" placeholder="Say hi to your community…" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" @keydown.enter="postCommunity()">
+            <button @click="postCommunity()" class="grad text-white font-bold px-4 py-2 rounded-xl text-sm">Send</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="card p-5">
+            <h5 class="font-bold text-gray-800 mb-3">👥 Groups &amp; social</h5>
+            <template x-for="g in socialGroups" :key="g.n">
+              <a :href="g.url" target="_blank" rel="noopener" class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0 hover:bg-[#F0F6FB] rounded-lg px-2 -mx-2">
+                <span x-text="g.e"></span>
+                <span class="text-sm font-semibold text-[#0099CC]" x-text="g.n"></span>
+              </a>
+            </template>
+          </div>
+          <div class="card p-5">
+            <h5 class="font-bold text-gray-800 mb-3">📅 Events</h5>
+            <template x-for="ev in events" :key="ev.id">
+              <div class="py-2 border-b border-gray-50 last:border-0">
+                <div class="font-semibold text-sm text-gray-800" x-text="ev.title"></div>
+                <div class="text-xs text-[#0099CC]" x-text="ev.when"></div>
+                <button @click="showToast('Registered for '+ev.title+' (demo)')" class="text-xs text-[#002E5D] font-bold mt-1 hover:underline">Register →</button>
+              </div>
+            </template>
+          </div>
+        </div>
+        <div class="card p-5">
+          <h5 class="font-bold text-gray-800 mb-2">📆 Your schedule</h5>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between bg-[#F0F6FB] rounded-xl px-3 py-2"><span class="font-semibold">Induction · Maria St</span><span class="text-gray-500">Mon 9:00</span></div>
+            <div class="flex justify-between bg-[#F0F6FB] rounded-xl px-3 py-2"><span class="font-semibold">Buddy coffee · <span x-text="getBestBuddy().name.split(' ')[0]"></span></span><span class="text-gray-500">Wed 12:30</span></div>
+            <div class="flex justify-between bg-[#F0F6FB] rounded-xl px-3 py-2"><span class="font-semibold">Pulse check · Anchor AI</span><span class="text-amber-600 font-semibold">Due today</span></div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- end main content -->
   </div><!-- end flex body -->
+
+  <!-- Global toast -->
+  <div x-show="toastMsg" x-transition class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 toast max-w-sm pointer-events-none">
+    <div class="grad text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-xl text-center" x-text="toastMsg"></div>
+  </div>
 </div><!-- end app -->
 
 <!-- ═══════════════════════════ HR PORTAL ═════════════════════════════════ -->
@@ -1006,6 +1136,7 @@
 function app() { return {
   screen: 'login',
   activeTab: 'home',
+  sidebarOpen: false,
   onboardStep: 1,
   matchStep: 0,
   aiTyping: false,
@@ -1014,8 +1145,44 @@ function app() { return {
   txtInput: '',
   chatMsgs: [],
   lmCat: 'essentials',
+  toastMsg: '',
+  communityInput: '',
   loginName: 'Sarah Mitchell',
   loginEmail: 'sarah.mitchell@tasnetworks.com.au',
+
+  pulseChips: [
+    'Finding a GP is stressing me out',
+    'I feel pretty lonely this week',
+    'Kids are struggling at school',
+    'Just need someone to grab coffee with',
+    'Housing search is overwhelming',
+  ],
+
+  lifePhases: [
+    {id:1,e:'🌱',title:'Month 1 — Survive & connect',desc:'Airport/transport, employee card, buddy community, GP & licence basics.',current:true},
+    {id:2,e:'🌿',title:'Month 2–3 — Belong',desc:'Schools, housing, walking club, pulse checks, Life Map contributions.',current:false},
+    {id:3,e:'🌳',title:'Month 4–6 — Thrive',desc:'Deep community ties, wellbeing rebate, cultural programs, confidence at work.',current:false},
+    {id:4,e:'🏔️',title:'Year 3+ — Long-term',desc:'Residency pathway support, paperwork, mentoring the next relocator.',current:false},
+  ],
+
+  communityChat: [
+    {id:1,who:'Priya',msg:'Anyone know a good GP near Sandy Bay?'},
+    {id:2,who:'Kofi',msg:'Sonic Health Plus on Elizabeth St — bulk billing with employee card 👍'},
+    {id:3,who:'Mei-Lin',msg:'Walking club this Sunday 8am — newcomers welcome!'},
+  ],
+
+  socialGroups: [
+    {e:'📘',n:'New to Hobart (Facebook)',url:'https://www.facebook.com'},
+    {e:'💼',n:'#relocators-hobart (Slack)',url:'#'},
+    {e:'🥾',n:'Hobart Walking Club',url:'#'},
+    {e:'🌏',n:'International newcomers circle',url:'#'},
+  ],
+
+  events: [
+    {id:1,title:'Welcome BBQ — Maria St lawn',when:'Fri 5:30pm · TasNetworks social'},
+    {id:2,title:'Hobart Walking Club intro hike',when:'Sun 8:00am · kunanyi trail'},
+    {id:3,title:'International families morning tea',when:'Next Wed 10:00am · HR hosted'},
+  ],
 
   form: { name:'Sarah', origin:'Melbourne', country:'', family:'family', hobbies:['hiking','food'], needs:['gp','schools','community'] },
 
@@ -1060,13 +1227,13 @@ function app() { return {
       {id:1,e:'🏥',t:'Sonic Health Plus — TasNetworks preferred GP',d:'200 Elizabeth St, Hobart. (03) 6281 4000. Show employee card — TasNetworks covers skin checks here.',r:4.8,v:134},
       {id:2,e:'💚',t:'Your $250 Wellbeing Rebate',d:'Spend on gym, yoga at The Studio, hiking gear — your choice every year. Claim via Concur in SAP. Most people forget this exists!',r:4.9,v:198},
       {id:3,e:'🧘',t:'Free EAP Counselling — AccessEAP',d:'Up to 3 confidential sessions. Call 1800 818 728. Covers you AND your family. Zero cost. Zero judgment.',r:4.9,v:156},
-      {id:4,e:'🚗',t:'Convert your interstate licence',d:'Service Tasmania, 134 Macquarie St. Book online — 45 min. Bring ID + current licence. Do this by Week 3.',r:4.5,v:89},
+      {id:4,e:'🚗',t:'Get your Tasmanian licence',d:'Service Tasmania, 134 Macquarie St. Book online — 45 min. Bring ID + current licence. Do this by Week 3.',r:4.5,v:89},
       {id:5,e:'🏋️',t:'Onsite Gym — Maria St HQ',d:'Free at Maria St, Cambridge & Rocherlea. Family 18+ in your household also get access. Fill the Gym Induction Form.',r:4.7,v:112},
       {id:6,e:'🏦',t:'MyState Bank — No-fee account',d:'Open a Glide account with no monthly fees + lower home loan rates. Call Roseann McIntee: 0428 172 589.',r:4.3,v:67},
       {id:7,e:'💉',t:'Free flu vax for the whole family',d:"TasNetworks covers flu vaccinations for you AND your immediate family. Contact be@tasnetworks.com.au — great for kids' first Tassie winter.",r:4.8,v:89},
     ],
     community: [
-      {id:8,e:'🥾',t:'Hobart Walking Club',d:'Sunday mornings at kunanyi/Mt Wellington. 12 TasNetworks members. Uber-welcoming. Ask James to introduce you.',r:4.9,v:203},
+      {id:8,e:'🥾',t:'Hobart Walking Club',d:'Sunday mornings at kunanyi/Mt Wellington. 12 TasNetworks members. Uber-welcoming — your buddy can intro you.',r:4.9,v:203},
       {id:9,e:'🌏',t:'New to Hobart Facebook Group',d:'8,500+ members. Join the day you arrive — gold for local tips, buy/sell, event invites.',r:4.7,v:156},
       {id:10,e:'⚽',t:'Southern Football League',d:'Multiple skill levels, register for the season. Great way to make real friends fast.',r:4.4,v:78},
     ],
@@ -1079,7 +1246,7 @@ function app() { return {
       {id:16,e:'🍕',t:'Cuppa Cafeteria — Maria Street HQ',d:'Admin 1. 7:30am–2:30pm Mon–Fri. Hot food ends 2pm. Your canteen from Day 1.',r:4.5,v:134},
     ],
     family: [
-      {id:17,e:'🏫',t:'School enrolment — start NOW',d:'Apply via education.tas.gov.au. Popular schools have waitlists — start the day you arrive. James can recommend suburbs.',r:4.3,v:45},
+      {id:17,e:'🏫',t:'School enrolment — start NOW',d:'Apply via education.tas.gov.au. Popular schools have waitlists — start the day you arrive. Ask your buddy group for suburb tips.',r:4.3,v:45},
       {id:18,e:'🧸',t:'MacKillop Childcare Centre',d:'10 min from office. CCS-subsidised. Call to join waitlist immediately.',r:4.6,v:62},
       {id:19,e:'🌳',t:'Queens Domain Playground',d:'Huge free playground, 5 min from CBD. TasNetworks families meet here every Sunday morning.',r:4.9,v:134},
     ],
@@ -1092,21 +1259,28 @@ function app() { return {
 
   services: [
     {id:1,e:'💳',t:'Employee Card',d:'Digital ID active Day 1 — unlocks all services'},
-    {id:2,e:'🏥',t:'Medical Services',d:'GP finder + EAP counselling (1800 818 728)'},
-    {id:3,e:'🚗',t:'Licence & Driving',d:'Convert licence, book driving lessons'},
+    {id:2,e:'🏥',t:'Medical Services',d:'Book GP · bulk billing · clinic finder'},
+    {id:3,e:'🚗',t:'Licence & Driving',d:'Get your Tasmanian licence · book lessons'},
     {id:4,e:'💚',t:'$250 Wellbeing Rebate',d:'Gym, yoga, hiking gear — your choice'},
     {id:5,e:'🏋️',t:'Onsite Gym Access',d:'Maria St, Cambridge & Rocherlea · free'},
     {id:6,e:'🏠',t:'Housing Guide',d:'Suburb info & rental market crowdsourced'},
     {id:7,e:'🚌',t:'Carpooling',d:'Match with TasNetworks colleagues near you'},
     {id:8,e:'🍔',t:'Dining Discounts',d:'20% off at 5 Pub Banc Group venues'},
     {id:9,e:'🏫',t:'Schools & Childcare',d:'Enrolment guides, waitlist tips'},
-    {id:10,e:'📋',t:'Paperwork Support',d:'Visa docs, licence conversion, gov forms'},
+    {id:10,e:'📋',t:'Paperwork Support',d:'Visa docs, gov forms, HR paperwork'},
     {id:11,e:'🏦',t:'MyState Bank',d:'No-fee accounts, lower home loan rates'},
     {id:12,e:'🌏',t:'Cultural Programs',d:'Cultural & spiritual community support'},
-    {id:13,e:'💻',t:'IT Support',d:'Tech help for new starters (JIRA portal)'},
-    {id:14,e:'📝',t:'Submit a Form',d:'Complaints, resource requests, feedback'},
-    {id:15,e:'⚖️',t:'Residency Support',d:'PR pathway for 3+ year employees'},
-    {id:16,e:'🧘',t:'Free Counselling',d:'AccessEAP · 3 sessions · 1800 818 728'},
+    {id:13,e:'💻',t:'IT Support',d:'Laptop, VPN, JIRA — new starter tech help'},
+    {id:14,e:'📝',t:'Submit a Form',d:'Complaints, resources, feedback forms'},
+    {id:15,e:'⚖️',t:'Residency Support',d:'PR pathway after 3+ years with TasNetworks'},
+    {id:16,e:'🧘',t:'Counselling',d:'AccessEAP booking · 1800 818 728'},
+    {id:17,e:'🔒',t:'Security Services',d:'Site access, safety contacts, after-hours'},
+    {id:18,e:'📚',t:'Learning Resources',d:'Policies, induction docs, how-to guides'},
+    {id:19,e:'💬',t:'Community Chat',d:'#relocators-hobart · peers & buddies'},
+    {id:20,e:'📅',t:'Events',d:'Browse & register for TasNetworks socials'},
+    {id:21,e:'📆',t:'Schedule',d:'Shifts, meetings, induction timetable'},
+    {id:22,e:'✈️',t:'Airport Pickup',d:'Ongoing — family arrivals, medical, any trip'},
+    {id:23,e:'♿',t:'Accessibility',d:'Workplace adjustments & accessible transport'},
   ],
 
   hrEmps: [
@@ -1134,6 +1308,42 @@ function app() { return {
   // ── Methods ──────────────────────────────────────────────────────────
 
   init() {},
+
+  showToast(msg) {
+    this.toastMsg = msg;
+    setTimeout(() => { this.toastMsg = ''; }, 3200);
+  },
+
+  bookService(id) {
+    const msgs = {
+      office: 'Office drop-off requested — partner notified (demo)',
+      accessibility: 'Accessibility team will contact you within 1 business day',
+      1: 'Employee card ready in your dashboard wallet',
+      2: 'Medical booking — Sonic Health Plus slots sent to your email',
+      3: 'Licence hub opened — book Service Tasmania + driving lessons',
+      7: 'Carpool matches found — check #carpool on Slack',
+      14: 'Form portal opened — complaint or resource request',
+      16: 'Counselling — call AccessEAP 1800 818 728 or we book for you',
+      17: 'Security desk notified — Maria St reception',
+      22: 'Transport partner notified — pickup window in 24h (ongoing service)',
+      19: 'Opening Community chat…',
+      20: 'Opening Events…',
+      21: 'Opening Schedule…',
+    };
+    if (id === 19) { this.activeTab = 'community'; return; }
+    if (id === 20 || id === 21) { this.activeTab = 'community'; }
+    this.showToast(msgs[id] || 'Request submitted — Anchor team notified (demo)');
+  },
+
+  postCommunity() {
+    if (!this.communityInput.trim()) return;
+    const n = (this.form.name || 'You').split(' ')[0];
+    this.communityChat.push({ id: Date.now(), who: n, msg: this.communityInput.trim() });
+    this.communityInput = '';
+    setTimeout(() => {
+      this.communityChat.push({ id: Date.now()+1, who: 'Anchor', msg: 'Welcome to the community — someone from your buddy group will say hi soon 🤝' });
+    }, 1200);
+  },
 
   loginAsEmployee() {
     if (this.loginName) this.form.name = this.loginName.split(' ')[0];
@@ -1222,7 +1432,7 @@ function app() { return {
     if (this.form.needs.includes('schools'))
       items.push({id:6, done:false, active:false, label:'School / childcare enrolment — popular schools have waitlists, start ASAP', when:'Week 2', tag:'family'});
     if (this.form.needs.includes('licence'))
-      items.push({id:7, done:false, active:false, label:"Convert interstate driver's licence — Service Tasmania, 134 Macquarie St", when:'Week 3', tag:'admin'});
+      items.push({id:7, done:false, active:false, label:"Get your Tasmanian licence — Service Tasmania, 134 Macquarie St", when:'Week 3', tag:'admin'});
     if (this.form.needs.includes('housing'))
       items.push({id:8, done:false, active:false, label:'Secure long-term accommodation — colleague housing tips in Life Map', when:'Month 1', tag:'logistics'});
     if (this.form.needs.includes('community'))
@@ -1288,11 +1498,13 @@ function app() { return {
       if (score >= 8) {
         resp = `A ${score}/10 — that's genuinely great for week two. Either you're landing really well, or you're being very brave 😄\n\nEither way, I'm noting it. You're ahead of the curve.`;
       } else if (score >= 6) {
-        resp = `A ${score}/10 — honest and real. You're finding your feet and that's exactly where you should be at two weeks.\n\nThe bit that usually clicks first is finding your person — someone who's been you. Sounds like James might already be that person 😊`;
+        const bn = this.getBestBuddy().name.split(' ')[0];
+        resp = `A ${score}/10 — honest and real. You're finding your feet and that's exactly where you should be at two weeks.\n\nThe bit that usually clicks first is finding your people — ${bn} and your Anchor community have been exactly where you are.`;
       } else if (score >= 4) {
         resp = `${score} out of 10. That's hard to say and it matters that you did.\n\nYou've uprooted your whole life and you're supposed to just be fine? That's not how people work${isFamily ? ' — especially with kids adjusting too' : ''}.\n\nI'm flagging this for your People Partner. Not to get you in trouble — the opposite. They'll reach out this week to ask what YOU need. Not your work output. Just you.`;
       } else {
-        resp = `${score} out of 10. Thank you for being honest — that takes real courage.\n\nSomething needs to change this week. I'm reaching out to your People Partner today. You're going to have a human call from the team — not a form, a real call.\n\nAnd James? He went through a rough patch too. Check your messages right now.`;
+        const bn = this.getBestBuddy().name.split(' ')[0];
+        resp = `${score} out of 10. Thank you for being honest — that takes real courage.\n\nSomething needs to change this week. I'm reaching out to your People Partner today. You're going to have a human call from the team — not a form, a real call.\n\n${bn} went through a rough patch too — check your messages. Or call the Anchor helpline anytime.`;
       }
       this._aiSay(resp);
       setTimeout(() => {
@@ -1338,7 +1550,7 @@ function app() { return {
     setTimeout(() => {
       this._aiSay(aiResp);
       setTimeout(() => {
-        this._aiSay(`Check-in done 😈\n\nSee you in a fortnight, ${n}. You're doing better than you think. And if anything comes up before then — your Anchor community, the Services hub, or just come back here. We're not going anywhere. 🫂`);
+        this._aiSay(`Check-in complete 🤝\n\nSee you in a fortnight, ${n}. You're doing better than you think. If anything comes up sooner — your Anchor community, Services, or call Samin / the team on the helpline. We're not going anywhere. 🫂`);
       }, 2400);
     }, 1000);
   },
