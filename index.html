@@ -734,8 +734,8 @@
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <div class="card p-4 text-center"><div class="text-3xl font-black text-[#002E5D]">37</div><div class="text-gray-400 text-xs mt-1">Interstate/int'l hires since Mar 2025</div></div>
       <div class="card p-4 text-center border-l-4 border-red-400"><div class="text-3xl font-black text-red-500">3</div><div class="text-gray-400 text-xs mt-1">At-risk this fortnight 🔴</div></div>
-      <div class="card p-4 text-center"><div class="text-3xl font-black text-[#002E5D]">7.8</div><div class="text-gray-400 text-xs mt-1">Avg pulse score /10</div></div>
-      <div class="card p-4 text-center border-l-4 border-green-400"><div class="text-3xl font-black text-green-600">100%</div><div class="text-gray-400 text-xs mt-1">Buddy matching rate</div></div>
+      <div class="card p-4 text-center border-l-4 border-amber-400"><div class="text-3xl font-black text-amber-500">71%</div><div class="text-gray-400 text-xs mt-1">Got a buddy under current system ⚠️</div></div>
+      <div class="card p-4 text-center border-l-4 border-green-400"><div class="text-3xl font-black text-green-600">100%</div><div class="text-gray-400 text-xs mt-1">Anchor buddy match rate ✓</div></div>
     </div>
 
     <!-- At-risk alerts -->
@@ -760,6 +760,73 @@
           </div>
           <button class="bg-red-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 hover:bg-red-600 transition">Reach Out</button>
         </div>
+      </div>
+    </div>
+
+    <!-- CultureAmp Survey Insights -->
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h4 class="font-bold text-gray-800">📊 CultureAmp Survey Data — The Engagement Cliff</h4>
+          <p class="text-gray-400 text-xs mt-0.5">Real TasNetworks data · 155 Week 1 surveys · 133 Month 3 surveys · 53 exit surveys</p>
+        </div>
+        <span class="bg-[#E6F4FA] text-[#002E5D] text-xs font-bold px-3 py-1 rounded-full">Anchor's evidence base</span>
+      </div>
+
+      <!-- Week 1 → Month 3 cliff -->
+      <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-4 items-center">
+        <div class="sm:col-span-2 bg-green-50 rounded-2xl p-4 border border-green-200">
+          <div class="text-xs font-black text-green-700 uppercase tracking-wide mb-3">😊 Week 1 (n=155, 80% response)</div>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">Feeling welcome</span><span class="font-black text-green-600 text-sm">97%</span></div>
+            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">Right decision to join</span><span class="font-black text-green-600 text-sm">95%</span></div>
+            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">Pre-arrival comms</span><span class="font-black text-green-600 text-sm">97%</span></div>
+            <div class="flex justify-between items-center border-t border-green-200 pt-2"><span class="text-gray-700 text-xs font-bold">Buddy assigned</span><span class="font-black text-amber-600 text-sm">71% ⚠️</span></div>
+          </div>
+        </div>
+        <div class="hidden sm:flex flex-col items-center gap-1 text-gray-300">
+          <div class="text-2xl">→</div>
+          <div class="text-xs text-gray-400 text-center font-semibold">Weeks 2–12</div>
+          <div class="text-xs text-red-400 text-center">The silent drift</div>
+        </div>
+        <div class="sm:col-span-2 bg-amber-50 rounded-2xl p-4 border border-amber-200">
+          <div class="text-xs font-black text-amber-700 uppercase tracking-wide mb-3">😐 Month 3 (n=133, 73% response)</div>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">Overall engagement</span><span class="font-black text-amber-600 text-sm">82% ↓</span></div>
+            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">Systems confidence</span><span class="font-black text-red-500 text-sm">68% ↓</span></div>
+            <div class="flex justify-between items-center"><span class="text-gray-600 text-xs">A+D process clarity</span><span class="font-black text-red-500 text-sm">53% ↓</span></div>
+            <div class="flex justify-between items-center border-t border-amber-200 pt-2"><span class="text-gray-700 text-xs font-bold">Onboarding quality</span><span class="font-black text-amber-600 text-sm">74% ↓</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exit survey insights row -->
+      <div class="bg-red-50 rounded-2xl p-4 border border-red-100 mb-3">
+        <div class="text-xs font-black text-red-700 uppercase tracking-wide mb-3">🚪 Exit Survey (n=53, 65% participation) — What the data says about why people leave</div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="bg-white rounded-xl p-3 border border-red-100">
+            <div class="text-2xl font-black text-red-500">29%</div>
+            <div class="text-gray-500 text-xs mt-1 leading-tight">had been considering leaving <strong>3–6 months</strong> — Anchor's exact window</div>
+          </div>
+          <div class="bg-white rounded-xl p-3 border border-red-100">
+            <div class="text-2xl font-black text-red-500">43%</div>
+            <div class="text-gray-500 text-xs mt-1 leading-tight">felt motivated to go beyond their role — <strong>18pts below</strong> industry benchmark</div>
+          </div>
+          <div class="bg-white rounded-xl p-3 border border-red-100">
+            <div class="text-2xl font-black text-amber-500">21%</div>
+            <div class="text-gray-500 text-xs mt-1 leading-tight">left for <strong>personal reasons</strong> unrelated to job — proxy for relocation hardship</div>
+          </div>
+          <div class="bg-white rounded-xl p-3 border border-red-100">
+            <div class="text-2xl font-black text-amber-500">45%</div>
+            <div class="text-gray-500 text-xs mt-1 leading-tight">felt leaders communicated a motivating vision — <strong>14pts below</strong> benchmark</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New starters asked for this -->
+      <div class="bg-[#E6F4FA] rounded-xl p-3 flex items-center gap-3 border border-[#B3DFF0]">
+        <span class="text-xl shrink-0">💬</span>
+        <p class="text-[#002E5D] text-xs leading-relaxed"><strong>New starters asked for it themselves.</strong> Month 3 open-text comments specifically request "buddies or mentors to ease their transition." The demand exists. Anchor delivers it — before Day 1, not at Month 3.</p>
       </div>
     </div>
 
